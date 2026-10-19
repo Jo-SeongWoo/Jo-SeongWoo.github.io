@@ -1,0 +1,6 @@
+_도구/
+_백업/
+*.bak
+*.tmp
+Thumbs.db
+desktop.ini

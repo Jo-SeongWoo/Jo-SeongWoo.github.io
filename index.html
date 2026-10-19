@@ -1,0 +1,776 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>조성우 포트폴리오</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="일을 먼저 파악하고, 되풀이되는 부분은 AI로 만든 도구에 맡깁니다. 직접 만든 프로그램을 탭마다 체험판으로 써 볼 수 있습니다.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@500;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* 레이아웃: 맨 위 탭 줄. 프로그램 탭 = 위에 가로로 긴 설명(머리 · 불편/만든 것/결과 세 칸 · 써 볼 것) → 아래에 큰 체험판.
+   체험판 크기는 화면 크기에 따라 정해진 범위 안에서만 커지고 줄어든다(아래 fitAll). */
+:root {
+  --bg: #f3f5f8;
+  --surface: #ffffff;
+  --ink: #141b2b;
+  --muted: #5a6476;
+  --line: #dbe1e9;
+  --accent: #1d63c9;
+  --accent-soft: #e4edfa;
+  --bezel: #1b2230;
+  --chrome: #e6eaf0;
+  --chrome-ink: #6b7588;
+  --font-display: "Hahmlet", "Noto Serif KR", "Apple SD Gothic Neo", serif;
+  --font-body: "IBM Plex Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Consolas", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e131b; --surface: #161d29; --ink: #e6ebf2; --muted: #9ca7b8; --line: #283345;
+    --accent: #6aa6f8; --accent-soft: #1a2a42; --bezel: #05080d; --chrome: #222b39; --chrome-ink: #9ca7b8;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e131b; --surface: #161d29; --ink: #e6ebf2; --muted: #9ca7b8; --line: #283345;
+  --accent: #6aa6f8; --accent-soft: #1a2a42; --bezel: #05080d; --chrome: #222b39; --chrome-ink: #9ca7b8;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 400 16px/1.75 var(--font-body);
+  -webkit-font-smoothing: antialiased; word-break: keep-all; overflow-wrap: anywhere;
+}
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+.wrap {
+  max-width: 1760px; margin: 0 auto;
+  padding-left: max(20px, env(safe-area-inset-left, 0px));
+  padding-right: max(20px, env(safe-area-inset-right, 0px));
+}
+
+/* 맨 위: 이름 + 탭 */
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line); }
+.top .wrap { display: flex; align-items: center; gap: 8px 28px; flex-wrap: wrap; padding-top: 12px; }
+.brand { font: 700 18px/1 var(--font-display); letter-spacing: .02em; padding-bottom: 12px; }
+.brand small { font: 500 12px/1 var(--font-mono); color: var(--muted); margin-left: 8px; letter-spacing: .08em; }
+.tabs { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; flex: 1; min-width: 0; }
+.tabs::-webkit-scrollbar { display: none; }
+.tabs button {
+  appearance: none; border: 0; background: none; cursor: pointer; white-space: nowrap;
+  font: 600 15px/1 var(--font-body); color: var(--muted);
+  padding: 12px 14px 14px; border-bottom: 3px solid transparent;
+}
+.tabs button:hover { color: var(--ink); }
+.tabs button[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+
+main { padding-block: 28px 64px; }
+.panel { animation: in .25s ease-out; }
+@keyframes in { from { opacity: .4; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .panel { animation: none; } }
+
+/* 소개 탭 */
+#panel-home { max-width: 1240px; margin: 0 auto; padding-top: 8px; }
+.hero { padding-block: 32px 28px; }
+.eyebrow { font: 600 13px/1.4 var(--font-body); letter-spacing: .04em; color: var(--muted); margin: 0 0 16px; }
+.eyebrow .en { font: 500 13px/1.4 var(--font-mono); letter-spacing: .1em; }
+.hero h1 { font: 700 clamp(30px, 5vw, 50px)/1.25 var(--font-display); margin: 0 0 20px; max-width: 20ch; text-wrap: balance; }
+.lead { font-size: 18px; color: var(--muted); max-width: 62ch; margin: 0; }
+.cards { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; margin: 36px 0 8px; }
+.card {
+  text-align: left; cursor: pointer; font: inherit; color: inherit;
+  display: grid; gap: 8px; align-content: start;
+  padding: 18px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface);
+  transition: border-color .15s, transform .15s;
+}
+.card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.card .kind { font-size: 12px; font-weight: 700; color: var(--accent); }
+.card b { font: 700 19px/1.3 var(--font-display); }
+.card .num { font-size: 15px; }
+.card .go { font-size: 14px; font-weight: 600; color: var(--accent); margin-top: 4px; }
+.section-title { font: 700 24px/1.3 var(--font-display); margin: 48px 0 14px; }
+.mail { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; font: 500 20px/1.4 var(--font-mono); }
+.mail span { user-select: all; }
+.btn2 { font: 600 14px/1 var(--font-body); padding: 9px 14px; border-radius: 9px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.foot { color: var(--muted); font-size: 13px; margin-top: 28px; }
+
+/* 프로그램 탭: 위 설명(가로) → 아래 체험판 */
+.intro { display: grid; gap: 16px; margin-bottom: 22px; }
+.i-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; }
+.i-head h2 { font: 700 30px/1.25 var(--font-display); margin: 0; }
+.where { font-size: 14px; color: var(--muted); margin: 0; }
+.line { font-size: 16px; color: var(--muted); margin: 0; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.tags li { font-size: 12.5px; padding: 2px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.i-head .links { margin-left: auto; display: flex; gap: 10px 16px; flex-wrap: wrap; align-items: center; font-size: 14px; font-weight: 600; }
+.story { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 28px; margin: 0; font-size: 15.5px; line-height: 1.7; }
+.story.two { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); }
+.story > div { padding: 14px 16px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); }
+.story dt { font-weight: 700; font-size: 13px; color: var(--accent); margin-bottom: 4px; }
+.story dd { margin: 0; }
+.i-extra { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; font-size: 14px; }
+.pair { margin: 0; padding: 8px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); display: inline-flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; }
+.pair .from { color: var(--muted); text-decoration: line-through; }
+.pair .arrow { color: var(--accent); font-weight: 700; }
+.pair .to { font-weight: 700; }
+.try { margin: 0; display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; color: var(--muted); }
+.try b { color: var(--ink); font-size: 13px; }
+.try span { padding: 4px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-weight: 600; font-size: 13px; }
+.cta { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 10px; background: var(--accent); color: #fff; text-decoration: none; font-weight: 600; font-size: 14px; }
+
+.stage { display: grid; justify-items: center; gap: 10px; min-width: 0; }
+.cap { font-size: 13px; color: var(--muted); text-align: center; margin: 0; }
+.ctrl { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.fit { position: relative; overflow: hidden; flex: 0 0 auto; }
+.fit iframe { position: absolute; top: 0; left: 0; border: 0; transform-origin: 0 0; background: #fff; }
+
+/* 브라우저 창 틀 */
+.browser { width: 100%; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); background: var(--surface); box-shadow: 0 18px 40px -24px rgba(15, 25, 45, .45); }
+.browser .bar { display: flex; align-items: center; gap: 10px; padding: 9px 12px; background: var(--chrome); }
+.browser .dots { display: flex; gap: 6px; }
+.browser .dots i { width: 10px; height: 10px; border-radius: 50%; background: color-mix(in srgb, var(--chrome-ink) 45%, transparent); }
+.browser .addr { flex: 1; min-width: 0; font: 400 12px/1 var(--font-mono); color: var(--chrome-ink); background: var(--surface); border-radius: 6px; padding: 6px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.browser img { display: block; width: 100%; height: auto; }
+/* 실제 주소 표시(자물쇠 + 주소) — 창 안에서 옮겨 가면 «사이트/…» 로만(바깥에서 그 주소를 읽을 수 없음) */
+.browser .addr.url { display: flex; align-items: center; gap: 7px; color: var(--ink); }
+.browser .addr.url::before { content: ""; flex: 0 0 10px; height: 11px; background: currentColor; opacity: .55;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 11'%3E%3Cpath d='M2 5V3.5a3 3 0 0 1 6 0V5h.5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5v-5a.5.5 0 0 1 .5-.5zm1.3 0h3.4V3.5a1.7 1.7 0 0 0-3.4 0z'/%3E%3C/svg%3E") center / contain no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 11'%3E%3Cpath d='M2 5V3.5a3 3 0 0 1 6 0V5h.5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5v-5a.5.5 0 0 1 .5-.5zm1.3 0h3.4V3.5a1.7 1.7 0 0 0-3.4 0z'/%3E%3C/svg%3E") center / contain no-repeat; }
+.browser .addr.url .u { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.browser .addr.url .sc { color: var(--muted); }
+.split { display: flex; position: relative; }
+.ghost { flex: 1 1 auto; min-width: 0; overflow: hidden; padding: 18px 20px; display: grid; align-content: start; gap: 14px; background: color-mix(in srgb, var(--chrome) 40%, var(--surface)); }
+.ghost i { display: block; height: 10px; border-radius: 4px; background: color-mix(in srgb, var(--chrome-ink) 22%, transparent); }
+.g-bar { height: 34px; border-radius: 6px; background: color-mix(in srgb, var(--chrome-ink) 16%, transparent); }
+.g-row { display: flex; gap: 10px; } .g-row i { height: 28px; flex: 1; border-radius: 6px; } .g-row i:last-child { flex: 0 0 90px; background: color-mix(in srgb, var(--accent) 30%, transparent); }
+.g-table { display: grid; border: 1px solid color-mix(in srgb, var(--chrome-ink) 20%, transparent); border-radius: 6px; overflow: hidden; }
+.g-table i { height: 30px; border-radius: 0; background: none; border-bottom: 1px solid color-mix(in srgb, var(--chrome-ink) 14%, transparent); position: relative; }
+.g-table i::before { content: ""; position: absolute; left: 12px; right: 45%; top: 10px; height: 9px; border-radius: 4px; background: color-mix(in srgb, var(--chrome-ink) 18%, transparent); }
+.g-table i:first-child { background: color-mix(in srgb, var(--chrome-ink) 12%, transparent); }
+.ghost p { margin: 4px 0 0; font-size: 13px; line-height: 1.5; color: var(--muted); }
+.ghost.live { display: block; position: relative; padding: 0; background: #fff; }
+.ghost.live iframe { position: absolute; top: 0; left: 0; border: 0; transform-origin: 0 0; background: #fff; }
+/* 사이드패널 폭 조절 손잡이(크롬 사이드패널처럼 왼쪽 가장자리를 끌어 폭을 바꾼다) */
+.grip { flex: 0 0 10px; cursor: col-resize; position: relative; background: var(--line); touch-action: none; }
+.grip::after { content: ""; position: absolute; left: 3px; right: 3px; top: 50%; height: 44px; margin-top: -22px; border-radius: 3px; background: color-mix(in srgb, var(--chrome-ink) 55%, transparent); }
+.grip:hover, .grip.on { background: color-mix(in srgb, var(--accent) 35%, var(--line)); }
+.grip-tip { position: absolute; top: 10px; z-index: 2; transform: translateX(-100%); margin-left: -16px; padding: 6px 10px; border-radius: 8px; font-size: 12px; background: var(--ink); color: var(--bg); pointer-events: none; white-space: nowrap; transition: opacity .3s; }
+.split.dragging iframe { pointer-events: none; }
+.split.dragging { cursor: col-resize; user-select: none; }
+
+/* 고정 크기 체험판 틀(NightDimmer) — 체험판 크기만큼만 */
+.desk { border-radius: 12px; overflow: hidden; border: 1px solid var(--line); box-shadow: 0 18px 40px -24px rgba(15, 25, 45, .45); }
+
+/* 폰 틀 */
+.phone { padding: 11px; border-radius: 46px; background: var(--bezel); box-shadow: 0 24px 50px -24px rgba(10, 18, 32, .6); }
+.phone .fit { border-radius: 36px; }
+
+/* 구직 도우미 — 실제 페이지 창 */
+.sites { display: inline-flex; gap: 4px; flex: 0 0 auto; }
+.site { appearance: none; border: 1px solid transparent; background: transparent; font: 600 13px/1 var(--font-body); color: var(--chrome-ink); padding: 6px 12px; border-radius: 7px; cursor: pointer; }
+.site.on { background: var(--surface); color: var(--ink); border-color: var(--line); }
+.btn2.sm { padding: 6px 10px; font-size: 12.5px; flex: 0 0 auto; }
+.btn2:disabled { opacity: .4; cursor: default; }
+.loading-msg { display: none; position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); padding: 10px 16px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); color: var(--muted); font-size: 14px; }
+.fit.loading .loading-msg { display: block; }
+/* 구직 도우미 — 왼쪽 실제 공고 + 오른쪽 체험판 사이드바(2026-10-19) */
+.gjwrap { display: flex; position: relative; }
+.gjwrap.narrow { flex-direction: column; }
+.gjside { position: relative; flex: 0 0 440px; width: 440px; border-left: 1px solid var(--line); background: #f1f5f9; }
+.gjwrap.narrow .gjside { flex-basis: auto; width: 100%; border-left: 0; border-top: 1px solid var(--line); }
+.gjside iframe { display: block; width: 100%; height: 100%; border: 0; background: #f1f5f9; }
+.gjnote { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 24px;
+          background: color-mix(in srgb, #f1f5f9 92%, transparent); text-align: center; font-size: 14px; color: var(--muted); line-height: 1.6; }
+.gjnote[hidden] { display: none; }
+.gjnote b { color: var(--ink); font-size: 15px; display: block; }
+.gjtoast { position: absolute; left: 12px; right: 12px; bottom: 14px; z-index: 4; padding: 10px 14px; border-radius: 10px; background: #1f2937; color: #fff; font-size: 13px; line-height: 1.5; box-shadow: 0 6px 22px rgba(0,0,0,.3); }
+.gjtoast[hidden] { display: none; }
+.gjcal { position: absolute; left: 10px; top: 10px; z-index: 5; border-radius: 14px; box-shadow: 0 10px 36px rgba(15,23,42,.30); background: #fff; }
+.gjcal[hidden] { display: none; }
+.gjcal iframe { display: block; width: 100%; height: 100%; border: 0; border-radius: 14px; }
+.gjwrap.drag iframe { pointer-events: none; }   /* 끄는 동안 — 마우스가 실제 공고 창(다른 사이트) 위를 지나면 그 창이 이동 신호를 가져간다(실측) */
+.gjwrap.drag { user-select: none; }
+/* 테두리 띠 — 네 변·네 모서리 어디를 끌어도 크기 조절(바깥 5px · 안쪽 3px) · 2026-10-19 사용자 «드래그 포인트가 아니라 경계선 어떤 부분을 끌어당겨도» */
+.gjedge { position: absolute; z-index: 2; background: transparent; touch-action: none; }
+.gjedge[data-dir=n], .gjedge[data-dir=s] { left: 11px; right: 11px; height: 8px; cursor: ns-resize; }
+.gjedge[data-dir=n] { top: -5px; } .gjedge[data-dir=s] { bottom: -5px; }
+.gjedge[data-dir=w], .gjedge[data-dir=e] { top: 11px; bottom: 11px; width: 8px; cursor: ew-resize; }
+.gjedge[data-dir=w] { left: -5px; } .gjedge[data-dir=e] { right: -5px; }
+.gjedge[data-dir=nw], .gjedge[data-dir=ne], .gjedge[data-dir=sw], .gjedge[data-dir=se] { width: 16px; height: 16px; z-index: 3; }
+.gjedge[data-dir=nw] { left: -5px; top: -5px; cursor: nwse-resize; } .gjedge[data-dir=se] { right: -5px; bottom: -5px; cursor: nwse-resize; }
+.gjedge[data-dir=ne] { right: -5px; top: -5px; cursor: nesw-resize; } .gjedge[data-dir=sw] { left: -5px; bottom: -5px; cursor: nesw-resize; }
+.live-note { max-width: 1000px; text-align: center; font-size: 14.5px; color: var(--muted); }
+.live-note p { margin: 4px 0; }
+.live-note b { color: var(--ink); }
+.installed { margin: 22px 0 0; width: 100%; max-width: 1100px; }
+.installed figcaption { font-size: 13px; color: var(--muted); margin-top: 6px; text-align: center; }
+
+@media (max-width: 1100px) {
+  .story, .story.two { grid-template-columns: minmax(0, 1fr); }
+  .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .cards { grid-template-columns: minmax(0, 1fr); }
+  .brand small { display: none; }
+  .i-head .links { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">조성우<small>PORTFOLIO</small></div>
+    <nav class="tabs" role="tablist" aria-label="포트폴리오 탭">
+      <button role="tab" id="tab-home" aria-controls="panel-home" data-tab="home">소개</button>
+      <button role="tab" id="tab-crosstrack" aria-controls="panel-crosstrack" data-tab="crosstrack">우편물 위치 조회</button>
+      <button role="tab" id="tab-gujik" aria-controls="panel-gujik" data-tab="gujik">구직 도우미</button>
+      <button role="tab" id="tab-calendar" aria-controls="panel-calendar" data-tab="calendar">취업캘린더</button>
+      <button role="tab" id="tab-stock" aria-controls="panel-stock" data-tab="stock">자동매매 앱</button>
+      <button role="tab" id="tab-nightdimmer" aria-controls="panel-nightdimmer" data-tab="nightdimmer">NightDimmer</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- 소개 -->
+  <section class="panel" id="panel-home" role="tabpanel" aria-labelledby="tab-home">
+    <div class="cards">
+      <button class="card" data-go="crosstrack"><span class="kind">업무용</span><b>우편물 위치 자동 조회</b><span class="num">등기번호로 우편물 위치를 한 번에</span><span class="go">써 보기 →</span></button>
+      <button class="card" data-go="gujik"><span class="kind">크롬 확장 프로그램</span><b>구직 도우미</b><span class="num">공고 옆에 평점·리뷰·통근 시간</span><span class="go">써 보기 →</span></button>
+      <button class="card" data-go="calendar"><span class="kind">안드로이드 앱</span><b>취업캘린더</b><span class="num">전형 일정을 달력 하나에</span><span class="go">써 보기 →</span></button>
+      <button class="card" data-go="stock"><span class="kind">안드로이드 앱</span><b>자동매매 앱</b><span class="num">자동 주문을 폰에서 확인</span><span class="go">써 보기 →</span></button>
+      <button class="card" data-go="nightdimmer"><span class="kind">윈도우 프로그램</span><b>NightDimmer</b><span class="num">단축키 하나로 화면을 어둡고 따뜻하게</span><span class="go">써 보기 →</span></button>
+    </div>
+    <h2 class="section-title">연락처</h2>
+    <div class="mail"><span id="mailAddr">tony308@naver.com</span><button type="button" class="btn2" id="copyMail">주소 복사</button></div>
+    <p class="foot">이 사이트와 사이트에 실린 프로그램은 모두 클로드 코드로 만들었습니다. 체험판의 등기번호·회사·종목·금액은 모두 가상입니다.</p>
+  </section>
+
+  <!-- 우편물 위치 자동 조회 -->
+  <section class="panel" id="panel-crosstrack" role="tabpanel" aria-labelledby="tab-crosstrack" hidden>
+    <div class="intro">
+      <div class="i-head">
+        <h2>우편물 위치 자동 조회</h2>
+        <p class="line">등기번호를 넣으면 우편물이 지금 어디 있는지 한 번에 찾아 상태별로 모아 보여 줍니다.</p>
+        <span class="links"><a href="demo/crosstrack/index.html" target="_blank" rel="noopener">새 창에서 열기 ↗</a></span>
+      </div>
+    </div>
+    <div class="stage">
+      <div class="browser">
+        <div class="bar"><span class="dots"><i></i><i></i><i></i></span><button type="button" class="btn2 sm" id="emsBack" disabled title="창 안에서 이전 페이지로">← 뒤로</button><span class="addr url" id="emsAddr"></span><button type="button" class="btn2 sm" id="emsReset">처음 화면으로</button></div>
+        <div class="split" data-resizable>
+          <!-- 왼쪽 = 실제 우체국 EMS 조회 페이지(2026-10-19 사용자 지정 · 창 안 표시를 막지 않음 확인) -->
+          <div class="ghost live">
+            <iframe data-src="https://ems.epost.go.kr/front.Tracking01.postal" title="실제 우체국 EMS 조회 페이지"></iframe>
+          </div>
+          <div class="grip" role="separator" aria-orientation="vertical" aria-label="사이드패널 폭 조절" tabindex="0"></div>
+          <div class="fit" data-kind="panel" data-w="420" data-h="860">
+            <iframe data-src="demo/crosstrack/index.html" title="우편물 위치 자동 조회 체험판" width="420" height="860" allow="clipboard-write"></iframe>
+          </div>
+        </div>
+      </div>
+      <p class="cap">왼쪽은 실제 우체국 페이지 · 오른쪽 체험판의 등기번호는 모두 가상입니다</p>
+    </div>
+  </section>
+
+  <!-- 구직 도우미 -->
+  <section class="panel" id="panel-gujik" role="tabpanel" aria-labelledby="tab-gujik" hidden>
+    <div class="intro">
+      <div class="i-head">
+        <h2>구직 도우미</h2>
+        <p class="line">공고를 열면 옆에 회사 평점·리뷰, 통근 시간, 입사·퇴사 인원이 함께 뜹니다.</p>
+        <span class="links"><a class="cta" href="https://chromewebstore.google.com/detail/ciinnpemamanadfopfgfhhdgmfccdclb" target="_blank" rel="noopener">크롬 웹 스토어 ↗</a></span>
+      </div>
+    </div>
+    <div class="stage">
+      <div class="browser">
+        <div class="bar">
+          <span class="dots"><i></i><i></i><i></i></span>
+          <button type="button" class="btn2 sm" id="liveBack" disabled title="창 안에서 이전 페이지로">← 뒤로</button>
+          <span class="sites" role="group" aria-label="사이트 고르기">
+            <button type="button" class="site on" data-site="jk" aria-pressed="true">잡코리아</button>
+            <button type="button" class="site" data-site="sr" aria-pressed="false">사람인</button>
+          </span>
+          <span class="addr url" id="liveAddr"></span>
+          <button type="button" class="btn2 sm" id="liveReset">처음 화면으로</button>
+        </div>
+        <!-- 2026-10-19 사용자 «설치 없이 모든 기능이» → 왼쪽 실제 공고 + 오른쪽 체험판 사이드바(처음 공고의 실제 자료 녹화 · demo\gujik) · 📅 = 왼쪽 위에 달력 -->
+        <div class="gjwrap">
+          <div class="fit loading" data-kind="web" data-w="1280" data-h="900" data-side="440">
+            <iframe id="liveFrame" data-src="https://www.jobkorea.co.kr/Recruit/GI_Read/50125496" title="실제 잡코리아 페이지" width="1280" height="900"></iframe>
+            <iframe id="liveFrameSR" title="실제 사람인 페이지" width="1280" height="900" hidden></iframe>
+            <span class="loading-msg" aria-hidden="true">실제 페이지를 불러오는 중…</span>
+          </div>
+          <div class="gjside" id="gjSide">
+            <iframe id="gjSideJK" data-src="demo/gujik/side_jk.html" title="구직 도우미 사이드바 체험판(잡코리아 공고)"></iframe>
+            <iframe id="gjSideSR" title="구직 도우미 사이드바 체험판(사람인 공고)" hidden></iframe>
+            <div class="gjnote" id="gjNote" hidden><b>이 공고의 정보는 체험판에 없어요</b>다른 공고에서도 보려면 구직 도우미를 설치하세요<a class="cta" href="https://chromewebstore.google.com/detail/ciinnpemamanadfopfgfhhdgmfccdclb" target="_blank" rel="noopener">크롬 웹 스토어 ↗</a><button type="button" class="btn2 sm" id="gjNoteBack">처음 공고로</button></div>
+            <div class="gjtoast" id="gjToast" role="status" hidden></div>
+          </div>
+          <div class="gjcal" id="gjCalBox" hidden><iframe id="gjCal" title="구직 도우미 달력 체험판"></iframe></div>
+        </div>
+      </div>
+      <p class="cap" id="gjCap">왼쪽은 실제 공고 · 오른쪽 사이드바는 설치 없이 써 보는 체험판입니다</p>
+    </div>
+  </section>
+
+  <!-- 취업캘린더 -->
+  <section class="panel" id="panel-calendar" role="tabpanel" aria-labelledby="tab-calendar" hidden>
+    <div class="intro">
+      <div class="i-head">
+        <h2>취업캘린더</h2>
+        <p class="line">지원한 회사의 발표·검사·면접 날짜를 달력 하나에서 봅니다.</p>
+        <span class="links"><a href="demo/calendar/index.html" target="_blank" rel="noopener">새 창에서 열기 ↗</a></span>
+      </div>
+    </div>
+    <div class="stage">
+      <div class="phone">
+        <div class="fit" data-kind="phone" data-w="390" data-h="844">
+          <iframe data-src="demo/calendar/index.html" title="취업캘린더 체험판" width="390" height="844" allow="clipboard-write"></iframe>
+        </div>
+      </div>
+      <div class="ctrl" role="group" aria-label="달 넘기기"><button type="button" class="btn2" data-cal="-1">◀ 지난달</button><button type="button" class="btn2" data-cal="0">이번 달</button><button type="button" class="btn2" data-cal="1">다음 달 ▶</button></div>
+      <p class="cap">회사 이름·일정·자소서는 모두 가상입니다 · 폰 화면을 옆으로 끌어도 달이 넘어갑니다</p>
+    </div>
+  </section>
+
+  <!-- NightDimmer -->
+  <section class="panel" id="panel-nightdimmer" role="tabpanel" aria-labelledby="tab-nightdimmer" hidden>
+    <div class="intro">
+      <div class="i-head">
+        <h2>NightDimmer</h2>
+        <p class="line">단축키 하나로 화면을 어둡고 따뜻한 색으로 바꿉니다. 마우스 포인터까지 같이 어두워집니다.</p>
+        <span class="links"><a href="demo/nightdimmer/index.html" target="_blank" rel="noopener">새 창에서 열기 ↗</a></span>
+      </div>
+    </div>
+    <div class="stage">
+      <div class="desk">
+        <div class="fit" data-kind="fixed" data-w="1200" data-h="760">
+          <iframe data-src="demo/nightdimmer/index.html" title="NightDimmer 체험판" width="1200" height="760"></iframe>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 주식 앱 -->
+  <section class="panel" id="panel-stock" role="tabpanel" aria-labelledby="tab-stock" hidden>
+    <div class="intro">
+      <div class="i-head">
+        <h2>자동매매 앱</h2>
+        <p class="line">PC에서 도는 자동 주문을 휴대폰에서 보고 조절합니다.</p>
+        <span class="links"><a href="demo/stock/index.html" target="_blank" rel="noopener">새 창에서 열기 ↗</a></span>
+      </div>
+    </div>
+    <div class="stage">
+      <div class="phone">
+        <div class="fit" data-kind="phone" data-w="390" data-h="844">
+          <iframe data-src="demo/stock/index.html" title="자동매매 앱 체험판" width="390" height="844"></iframe>
+        </div>
+      </div>
+      <p class="cap">종목·금액은 모두 가상이며 실제 주문은 나가지 않습니다</p>
+    </div>
+  </section>
+</main>
+
+<script>
+(function () {
+  var TABS = ['home', 'crosstrack', 'gujik', 'calendar', 'stock', 'nightdimmer'];
+  var topBar = document.querySelector('.top');
+  var panelW = null;   // 사이드패널 폭(체험판 기준 px) — 사용자가 끌어 바꾸면 기억
+
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+  // 체험판 크기 규칙 — 모니터가 커지거나 작아져도 정해진 범위 안에서만 바뀐다.
+  //  · 체험판 높이 = 화면 높이의 약 75%(화면을 꽉 채우지 않게 위아래 여유를 남김)
+  //  · 폰: 글자 크기 1배 기준, 큰 모니터에서 최대 1.25배 · 낮은 화면에서는 글자를 줄이지 않고 폰 길이를 줄인다(앱 안에서 스크롤) · 폭이 좁으면 폭에 맞춤
+  //  · 사이드패널: 글자 배율 0.9~1.25배 · 폭은 브라우저 틀의 약 36%로 시작, 손잡이로 바꿀 수 있음
+  //  · 좁은 화면(폰·작은 태블릿)에서는 업무 화면 자리를 숨기고 사이드패널만 폭에 맞춰 보여 줌
+  function fitAll() {
+    var topH = topBar.getBoundingClientRect().height;
+    var vh = window.innerHeight - topH;
+    document.querySelectorAll('.panel:not([hidden]) .fit').forEach(function (box) {
+      var w = +box.dataset.w, h = +box.dataset.h, f = box.querySelector('iframe');
+      var stage = box.closest('.stage');
+      var maxW = stage.clientWidth;
+      var s, frameW = w, frameH = h;
+      if (box.dataset.kind === 'phone') {
+        var targetH = clamp(vh * 0.78, 520, 1150);
+        s = Math.min(clamp(vh / 800, 1.0, 1.25), (maxW - 22) / w);
+        frameH = Math.round(clamp(targetH / s, 520, h));
+      } else if (box.dataset.kind === 'fixed') {
+        // 고정 크기 체험판(NightDimmer 1200×760): 그 크기 그대로, 폭·높이에 맞춰 줄이기만(최대 1배)
+        s = Math.min(1, (maxW - 2) / w, clamp(vh * 0.8, 420, 1200) / h);
+      } else if (box.dataset.kind === 'web') {
+        // 실제 웹페이지(잡코리아·사람인): 폭에 맞추되 1배보다 키우지 않고, 좁으면 1280px 화면을 줄여 보여 준다
+        //  · 오른쪽 체험판 사이드바(data-side px)만큼 뺀 폭 · 좁은 화면(공고가 700px 안 되면)은 사이드바를 아래로 내린다
+        var sideW = +box.dataset.side || 0, wrap = box.parentElement, narrowW = sideW && maxW - sideW < 700;
+        if (sideW) wrap.classList.toggle('narrow', narrowW);
+        var availW = sideW && !narrowW ? maxW - sideW - 1 : maxW;
+        s = clamp(availW / w, 0.55, 1);
+        frameW = Math.round(availW / s);
+        frameH = Math.round(clamp(vh * 0.74, 460, 1080) / s);
+        if (sideW) {
+          var gs = document.getElementById('gjSide');
+          gs.style.height = (narrowW ? Math.round(clamp(vh * 0.74, 460, 900)) : Math.round(frameH * s)) + 'px';
+          placeCal();
+        }
+      } else {
+        var split = box.parentElement, ghost = split.querySelector('.ghost'), grip = split.querySelector('.grip');
+        var narrow = maxW < 760;
+        ghost.hidden = narrow; if (grip) grip.hidden = narrow;
+        var bodyH = clamp(vh * 0.74, 460, 1080);
+        if (narrow) {
+          s = clamp(maxW / w, 0.7, 1.1);
+          frameW = Math.round(maxW / s);
+        } else {
+          s = clamp(maxW / 1500, 0.9, 1.25);
+          var maxPW = Math.round((maxW - 160) / s);
+          if (panelW == null) panelW = Math.round((maxW * 0.36) / s);
+          panelW = clamp(panelW, 340, Math.min(820, maxPW));
+          frameW = panelW;
+        }
+        frameH = Math.round(bodyH / s);
+      }
+      box.querySelectorAll('iframe').forEach(function (fr) {
+        fr.width = frameW; fr.height = frameH;
+        fr.style.width = frameW + 'px'; fr.style.height = frameH + 'px';
+        fr.style.transform = 'scale(' + s + ')';
+      });
+      box.style.width = Math.round(frameW * s) + 'px';
+      box.style.height = Math.round(frameH * s) + 'px';
+      box.dataset.scale = s;
+      // 왼쪽 실제 페이지(우편물 조회의 우체국 EMS 화면): 남은 폭에 맞춰 1200px 화면을 줄여 보여 준다(1배보다 키우지 않음)
+      var live = box.dataset.kind === 'panel' && box.parentElement.querySelector('.ghost.live:not([hidden]) iframe');
+      if (live) {
+        var gw = live.parentElement.clientWidth, gh = Math.round(frameH * s);
+        var ls = clamp(gw / 1200, 0.45, 1);
+        live.style.width = Math.round(gw / ls) + 'px'; live.style.height = Math.round(gh / ls) + 'px';
+        live.style.transform = 'scale(' + ls + ')';
+      }
+    });
+  }
+
+  // 사이드패널 폭 조절 — 손잡이를 끌거나, 손잡이에 초점을 두고 ← → 키
+  document.querySelectorAll('.split[data-resizable]').forEach(function (split) {
+    var grip = split.querySelector('.grip'), box = split.querySelector('.fit');
+    var tip = document.createElement('div'); tip.className = 'grip-tip'; tip.textContent = '← 끌어서 폭 조절 →';
+    split.appendChild(tip);
+    function placeTip() { tip.style.left = (grip.offsetLeft) + 'px'; }
+    function hideTip() { tip.style.opacity = '0'; setTimeout(function () { tip.hidden = true; }, 300); }
+    setTimeout(placeTip, 400);
+    var dragging = false;
+    grip.addEventListener('pointerdown', function (e) {
+      dragging = true; grip.setPointerCapture(e.pointerId); split.classList.add('dragging'); grip.classList.add('on'); hideTip(); e.preventDefault();
+    });
+    grip.addEventListener('pointermove', function (e) {
+      if (!dragging) return;
+      var s = +box.dataset.scale || 1, r = split.getBoundingClientRect();
+      panelW = Math.round((r.right - e.clientX - grip.offsetWidth / 2) / s);
+      fitAll(); placeTip();
+    });
+    function end() { dragging = false; split.classList.remove('dragging'); grip.classList.remove('on'); }
+    grip.addEventListener('pointerup', end); grip.addEventListener('pointercancel', end);
+    grip.addEventListener('keydown', function (e) {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      panelW = (panelW || 420) + (e.key === 'ArrowLeft' ? 20 : -20); fitAll(); hideTip(); e.preventDefault();
+    });
+  });
+
+  function show(id, push) {
+    if (TABS.indexOf(id) < 0) id = 'home';
+    TABS.forEach(function (t) {
+      var p = document.getElementById('panel-' + t), b = document.getElementById('tab-' + t);
+      var on = t === id;
+      p.hidden = !on;
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+      b.tabIndex = on ? 0 : -1;
+    });
+    document.querySelectorAll('#panel-' + id + ' iframe[data-src]').forEach(function (f) {
+      if (!f.getAttribute('src')) f.setAttribute('src', f.dataset.src);
+    });
+    if (push) { try { history.replaceState(null, '', id === 'home' ? location.pathname : '#' + id); } catch (e) {} }
+    window.scrollTo(0, 0);
+    requestAnimationFrame(fitAll);
+  }
+
+  document.querySelectorAll('.tabs button').forEach(function (b) {
+    b.addEventListener('click', function () { show(b.dataset.tab, true); });
+    b.addEventListener('keydown', function (e) {
+      var i = TABS.indexOf(b.dataset.tab);
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        var n = TABS[(i + (e.key === 'ArrowRight' ? 1 : TABS.length - 1)) % TABS.length];
+        show(n, true); document.getElementById('tab-' + n).focus();
+      }
+    });
+  });
+  document.querySelectorAll('[data-go]').forEach(function (c) {
+    c.addEventListener('click', function () { show(c.dataset.go, true); });
+  });
+  var rt; window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(fitAll, 60); });
+  window.addEventListener('hashchange', function () { show(location.hash.slice(1), false); });
+  show(location.hash.slice(1), false);
+
+  // 취업캘린더 달 넘기기 단추 — 체험판 창에 메시지를 보내 앱의 달 넘기기(go)·«오늘» 단추를 부른다.
+  // (파일을 더블클릭해 열면 크롬이 바깥 페이지가 창 안 함수를 직접 부르는 걸 막으므로 메시지로 보낸다)
+  document.querySelectorAll('[data-cal]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var f = document.querySelector('#panel-calendar iframe');
+      if (f && f.contentWindow) f.contentWindow.postMessage({ demoCal: +b.dataset.cal }, '*');
+    });
+  });
+
+  // 구직 도우미 — 실제 잡코리아·사람인 페이지를 창 안에 띄운다.
+  // 사이트마다 창을 하나씩 두고 보이는 창만 바꾼다 → 한 번 뜬 사이트는 다시 불러오지 않아 전환이 바로 된다.
+  // 잡코리아가 다 뜨면 사람인도 뒤에서 미리 불러 둔다(첫 전환도 기다리지 않게).
+  var SITES = {
+    jk: { frame: 'liveFrame',   url: 'https://www.jobkorea.co.kr/Recruit/GI_Read/50125496' },
+    sr: { frame: 'liveFrameSR', url: 'https://www.saramin.co.kr/zf_user/jobs/relay/view?rec_idx=55257280' }
+  };
+  var curSite = 'jk';
+  // 주소창 — 처음 띄운 페이지는 실제 전체 주소, 창 안에서 다른 페이지로 옮겨 가면 «사이트/…»
+  //  (다른 사이트 창 안의 지금 주소는 브라우저 보안상 바깥 페이지가 읽을 수 없다 — 2026-10-19)
+  var at = { jk: 'start', sr: 'start' };   // 사이트별 지금 창이 처음 페이지인지(start) 옮겨 간 페이지인지(moved)
+  function paintAddr(el, url, moved) {
+    var m = url.match(/^(https?:\/\/)([^\/]+)(.*)$/);
+    el.textContent = '';
+    var u = document.createElement('span'); u.className = 'u';
+    var sc = document.createElement('span'); sc.className = 'sc'; sc.textContent = m[1];
+    u.appendChild(sc); u.appendChild(document.createTextNode(m[2] + (moved ? '/…' : m[3])));
+    el.appendChild(u);
+    el.title = moved ? '창 안에서 옮겨 간 페이지의 주소는 브라우저 보안상 바깥에서 읽을 수 없습니다' : url;
+  }
+  function paintLive() { paintAddr(document.getElementById('liveAddr'), SITES[curSite].url, at[curSite] === 'moved'); gjNotePaint(); }
+  paintLive();
+  var emsF = document.querySelector('.ghost.live iframe'), emsAt = 'start';
+  paintAddr(document.getElementById('emsAddr'), emsF.dataset.src, false);
+  function liveLoad(k) {
+    var f = document.getElementById(SITES[k].frame);
+    if (!f.getAttribute('src')) f.setAttribute('src', SITES[k].url);
+    return f;
+  }
+  function setSite(k, reset) {
+    curSite = k;
+    Object.keys(SITES).forEach(function (s) { document.getElementById(SITES[s].frame).hidden = s !== k; });
+    var fresh = !document.getElementById(SITES[k].frame).getAttribute('src');
+    var f = liveLoad(k);
+    var box = f.parentElement;
+    box.classList.toggle('loading', fresh || !!reset || !f.dataset.ready);
+    if (reset) { f.dataset.resetting = '1'; f.setAttribute('src', SITES[k].url); }
+    paintAddr(document.getElementById('liveAddr'), SITES[k].url, !reset && at[k] === 'moved');
+    document.querySelectorAll('.site').forEach(function (b) {
+      var on = b.dataset.site === k;
+      b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    gjSideShow(k, reset);
+    fitAll();
+  }
+  // «← 뒤로» — 창(iframe) 안에서 «페이지가 새로 뜬 횟수» 만큼만 되돌린다. 0이면 단추를 끈다(포트폴리오 밖으로 나가지 않게).
+  //  · 브라우저 기록 길이로 세지 않는다 — 공고 화면 안 광고 창이 혼자 이동하며 기록 칸을 보탠다(2026-10-16 실측).
+  //  · 되돌릴 때는 history.back() 을 한 번 부르고, 우리 창이 다시 뜨지 않으면(광고 창 칸이었으면) 한 번 더 —
+  //    단, 이 페이지를 연 뒤 새로 생긴 기록 칸 수(pos)를 넘지 않는다. pos 가 0이면 더 이상 부르지 않는다.
+  //  · 칸마다 어느 사이트 창이었는지 기억해 두고, 되돌릴 칸이 지금 안 보이는 사이트면 그 사이트로 먼저 바꿔 보여 준다.
+  var back = [], backSt = [], baseLen = history.length, pos = 0, going = null, backBtn = document.getElementById('liveBack');   // backSt = 그 칸으로 되돌아가면 주소창이 처음/옮겨 감 중 무엇이었나
+  // 2026-10-19 — 우편물 조회 창(우체국 EMS · 'ems')도 같은 장부를 쓴다(창이 몇 개든 페이지 기록은 하나로 쌓인다).
+  //  각 탭의 «← 뒤로» 는 «맨 마지막 이동이 자기 창» 일 때만 켜진다 — 다른 탭 창을 몰래 되돌리지 않게.
+  var emsBackBtn = document.getElementById('emsBack');
+  function backTop() { return back.length ? back[back.length - 1] : ''; }
+  function backPaint() {
+    backBtn.disabled = !!going || !SITES.hasOwnProperty(backTop());
+    emsBackBtn.disabled = !!going || backTop() !== 'ems';
+  }
+  var lastLen = history.length;   // 기록에 새 칸이 생기면(우리 창이든 광고 창이든) 그 칸이 맨 끝이고 지금 위치도 맨 끝이다
+  setInterval(function () { if (!going && history.length !== lastLen) { lastLen = history.length; pos = history.length - baseLen; } }, 400);
+  function goBack(k, tries, st) {
+    if (pos <= 0 || tries > 12) { going = null; backPaint(); return; }
+    pos--; history.back();
+    going = { k: k, st: st, t: setTimeout(function () { goBack(k, tries + 1, st); }, 900) };
+    backPaint();
+  }
+  backBtn.addEventListener('click', function () {
+    if (!back.length || going || !SITES.hasOwnProperty(backTop())) return;
+    var k = back.pop(), st = backSt.pop();
+    if (k !== curSite) setSite(k, false);
+    goBack(k, 0, st);
+  });
+  emsBackBtn.addEventListener('click', function () {
+    if (going || backTop() !== 'ems') return;
+    back.pop();
+    goBack('ems', 0, backSt.pop());
+  });
+  emsF.addEventListener('load', function () {
+    if (!emsF.getAttribute('src')) return;
+    if (going && going.k === 'ems') { clearTimeout(going.t); emsAt = going.st || 'start'; going = null; }   // 되돌린 결과로 다시 뜬 것
+    else if (emsF.dataset.ready) {                                                     // 창 안에서 새로 옮겨 간 것
+      back.push('ems'); backSt.push(emsAt); pos = history.length - baseLen;
+      emsAt = emsF.dataset.resetting ? 'start' : 'moved';
+    }
+    delete emsF.dataset.resetting;
+    emsF.dataset.ready = '1';
+    paintAddr(document.getElementById('emsAddr'), emsF.dataset.src, emsAt === 'moved');
+    backPaint();
+  });
+  document.getElementById('emsReset').addEventListener('click', function () {
+    emsF.dataset.resetting = '1';
+    emsF.setAttribute('src', emsF.dataset.src);
+  });
+  Object.keys(SITES).forEach(function (k) {
+    var f = document.getElementById(SITES[k].frame);
+    f.addEventListener('load', function () {
+      if (!f.getAttribute('src')) return;
+      if (going && going.k === k) { clearTimeout(going.t); at[k] = going.st || 'start'; going = null; }   // 되돌린 결과로 다시 뜬 것
+      else if (f.dataset.ready) {                                                      // 창 안에서 새로 옮겨 간 것 — 지금은 기록 맨 끝
+        back.push(k); backSt.push(at[k]); pos = history.length - baseLen;
+        at[k] = f.dataset.resetting ? 'start' : 'moved';
+      }
+      delete f.dataset.resetting;
+      if (k === curSite) paintLive();
+      backPaint();
+      f.dataset.ready = '1';
+      if (!f.hidden) f.parentElement.classList.remove('loading');
+      if (k === 'jk') setTimeout(function () { liveLoad('sr'); }, 600);
+    });
+  });
+  document.querySelectorAll('.site').forEach(function (b) {
+    b.addEventListener('click', function () { setSite(b.dataset.site, false); });
+  });
+  /* ── 오른쪽 체험판 사이드바(2026-10-19 사용자 «설치 없이 모든 기능이») ──
+     · 사이트마다 체험판 하나(demo/gujik/side_jk.html · side_sr.html — 처음 공고의 실제 자료 녹화). 사이트를 바꾸면 같이 바뀐다.
+     · 왼쪽 창 안에서 다른 공고로 옮겨 가면(at = moved) 사이드바 위에 «이 공고의 정보는 체험판에 없어요 — 설치» 안내 · [처음 공고로]
+     · 사이드바의 📅 → 체험판이 «calView» 를 알려 오면 왼쪽 위에 달력(demo/gujik/cal-demo.html) — 한 번 더 누르면 닫힘 · ✕ · Esc
+     · 체험판이 «note» 를 보내면(설정 등 체험판에서 못 하는 것) 사이드바 아래 작은 알림 */
+  var GJ = { jk: { side: 'gjSideJK', src: 'demo/gujik/side_jk.html' }, sr: { side: 'gjSideSR', src: 'demo/gujik/side_sr.html' } };
+  function gjSideShow(k) {
+    Object.keys(GJ).forEach(function (s) { var f = document.getElementById(GJ[s].side); if (f) f.hidden = s !== k; });
+    var f = document.getElementById(GJ[k].side);
+    if (f && !f.getAttribute('src')) f.setAttribute('src', GJ[k].src);
+    gjCalClose();
+    gjNotePaint();
+  }
+  function gjNotePaint() { var n = document.getElementById('gjNote'); if (n) n.hidden = at[curSite] !== 'moved'; }
+  document.getElementById('gjNoteBack').addEventListener('click', function () { setSite(curSite, true); });
+  // 달력 — 기본 680×540 · 테두리 어디를 끌어도 크기 · 머리 줄 빈 곳을 끌면 옮기기 · 크기·자리를 이 브라우저에 기억(다시 열면 그 자리)
+  //   2026-10-19 사용자 «크기조절은 드래그 포인트가 아니라 경계선 어떤 부분을 끌어당겨도 … 위치이동도 … 마지막 위치 기억해서 다시 킬 때 그 위치에서» (확장 v1.74 와 같은 동작)
+  var calSize = { w: 680, h: 540 }, calPos = null;
+  try { var _cs = JSON.parse(localStorage.getItem('gjCalSize') || 'null'); if (_cs && _cs.w > 0 && _cs.h > 0) calSize = _cs; } catch (e) {}
+  try { var _cp = JSON.parse(localStorage.getItem('gjCalPos') || 'null'); if (_cp && isFinite(_cp.l) && isFinite(_cp.t)) calPos = _cp; } catch (e) {}
+  function clampN(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  function placeCal() {
+    var box = document.getElementById('gjCalBox'), wrap = box && box.parentElement;
+    if (!box || !wrap) return;
+    var W = wrap.offsetWidth, H = wrap.offsetHeight;
+    var w = clampN(calSize.w, Math.min(320, W - 20), W - 20), h = clampN(calSize.h, Math.min(320, H - 20), H - 20);
+    var l = calPos ? clampN(calPos.l, 0, W - w) : 10, t = calPos ? clampN(calPos.t, 0, H - h) : 10;
+    box.style.width = w + 'px'; box.style.height = h + 'px'; box.style.left = l + 'px'; box.style.top = t + 'px';
+  }
+  function calSave() {
+    var box = document.getElementById('gjCalBox');
+    calSize = { w: box.offsetWidth, h: box.offsetHeight };
+    try { localStorage.setItem('gjCalSize', JSON.stringify(calSize)); } catch (x) {}
+    if (calPos) { calPos = { l: box.offsetLeft, t: box.offsetTop }; try { localStorage.setItem('gjCalPos', JSON.stringify(calPos)); } catch (x) {} }
+  }
+  (function () {
+    var box = document.getElementById('gjCalBox'), wrap = box.parentElement;
+    ['n', 's', 'w', 'e', 'nw', 'ne', 'sw', 'se'].forEach(function (dir) {
+      var g = document.createElement('div'), st = null;
+      g.className = 'gjedge'; g.setAttribute('data-dir', dir); g.title = '끌어서 달력 크기 조절';
+      g.addEventListener('pointerdown', function (e) {
+        if (e.button !== 0) return;
+        st = { x: e.clientX, y: e.clientY, l: box.offsetLeft, t: box.offsetTop, w: box.offsetWidth, h: box.offsetHeight };
+        calPos = { l: st.l, t: st.t };
+        try { g.setPointerCapture(e.pointerId); } catch (x) {}
+        wrap.classList.add('drag'); e.preventDefault();
+      });
+      g.addEventListener('pointermove', function (e) {
+        if (!st) return;
+        var dx = e.clientX - st.x, dy = e.clientY - st.y, W = wrap.offsetWidth, H = wrap.offsetHeight, w = st.w, h = st.h, l = st.l, t = st.t;
+        if (dir.indexOf('e') >= 0) w = clampN(st.w + dx, 420, W - st.l);
+        if (dir.indexOf('w') >= 0) { w = clampN(st.w - dx, 420, st.l + st.w); l = st.l + st.w - w; }
+        if (dir.indexOf('s') >= 0) h = clampN(st.h + dy, 360, H - st.t);
+        if (dir.indexOf('n') >= 0) { h = clampN(st.h - dy, 360, st.t + st.h); t = st.t + st.h - h; }
+        calSize = { w: w, h: h }; calPos = { l: l, t: t };
+        placeCal();
+      });
+      function end() { if (!st) return; st = null; wrap.classList.remove('drag'); calSave(); }
+      g.addEventListener('pointerup', end); g.addEventListener('pointercancel', end);
+      box.appendChild(g);
+    });
+  })();
+  // 옮기기 — 달력 머리 줄에서 누르면 달력이 «start»(화면 좌표)를 보낸다 → 그 뒤엔 창들을 마우스에서 빼고(drag) 이 페이지가 직접 받는다(빨리 휙 움직여도 따라오게)
+  var calMv = null;
+  function calMoveTo(sx, sy) { if (calMv) { calPos = { l: calMv.l + (sx - calMv.sx), t: calMv.t + (sy - calMv.sy) }; placeCal(); } }
+  function calMoveEnd(sx, sy) { if (!calMv) return; calMoveTo(sx, sy); calMv = null; document.getElementById('gjCalBox').parentElement.classList.remove('drag'); calSave(); }
+  function calDrag(d) {
+    if (!isFinite(d.sx) || !isFinite(d.sy)) return;
+    var box = document.getElementById('gjCalBox');
+    if (d.ph === 'start') { calMv = { sx: d.sx, sy: d.sy, l: box.offsetLeft, t: box.offsetTop }; calPos = { l: box.offsetLeft, t: box.offsetTop }; box.parentElement.classList.add('drag'); return; }
+    if (d.ph === 'end') calMoveEnd(d.sx, d.sy); else calMoveTo(d.sx, d.sy);
+  }
+  document.addEventListener('pointermove', function (e) { if (calMv) { if (e.buttons & 1) calMoveTo(e.screenX, e.screenY); else calMoveEnd(e.screenX, e.screenY); } });
+  document.addEventListener('pointerup', function (e) { if (calMv) calMoveEnd(e.screenX, e.screenY); });
+  function gjCalClose() { var b = document.getElementById('gjCalBox'); if (b) b.hidden = true; }
+  function gjCalToggle() {
+    var b = document.getElementById('gjCalBox'), f = document.getElementById('gjCal');
+    if (!b.hidden) { b.hidden = true; return; }
+    if (!f.getAttribute('src')) f.setAttribute('src', 'demo/gujik/cal-demo.html#' + encodeURIComponent('{}'));
+    placeCal(); b.hidden = false;
+  }
+  var gjTT = null;
+  function gjToast(t) {
+    var n = document.getElementById('gjToast');
+    n.textContent = t; n.hidden = false;
+    clearTimeout(gjTT); gjTT = setTimeout(function () { n.hidden = true; }, 4200);
+  }
+  window.addEventListener('message', function (ev) {
+    var d = ev.data || {}, cal = document.getElementById('gjCal');
+    // 확장(v1.71~)이 깔린 크롬이면 왼쪽 실제 공고 창 안에 진짜 사이드바가 뜬다 → 체험판 사이드바를 접는다(두 개가 되지 않게)
+    if (d.__jkExt === 'here' && Object.keys(SITES).some(function (s) { var f = document.getElementById(SITES[s].frame); return f && ev.source === f.contentWindow; })) {
+      var bx = document.querySelector('#panel-gujik .fit');
+      if (bx && bx.dataset.side !== '0') {
+        bx.dataset.side = '0'; document.getElementById('gjSide').hidden = true; gjCalClose(); fitAll();
+        document.getElementById('gjCap').textContent = '구직 도우미가 설치된 브라우저라 공고 창 안에 실제 사이드바가 떠요';
+      }
+      return;
+    }
+    var fromSide = Object.keys(GJ).some(function (s) { var f = document.getElementById(GJ[s].side); return f && ev.source === f.contentWindow; });
+    if (fromSide && d.gjDemo === 1) {
+      if (d.t === 'calView') gjCalToggle();
+      else if (d.t === 'note' && d.text) gjToast(String(d.text).slice(0, 200));
+      return;
+    }
+    if (cal && ev.source === cal.contentWindow) {
+      if (d.__jkCalView === 1 && d.t === 'close') gjCalClose();
+      else if (d.__jkCalView === 1 && d.t === 'drag') calDrag(d);
+      else if (d.gjDemo === 1 && d.t === 'note' && d.text) gjToast(String(d.text).slice(0, 200));
+    }
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') gjCalClose(); });
+
+  var lr = document.getElementById('liveReset');
+  if (lr) lr.addEventListener('click', function () { setSite(curSite, true); });
+
+  var btn = document.getElementById('copyMail');
+  btn.addEventListener('click', function () {
+    var addr = document.getElementById('mailAddr').textContent;
+    var done = function () { btn.textContent = '복사됨'; setTimeout(function () { btn.textContent = '주소 복사'; }, 1600); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(addr).then(done, selectText);
+    } else { selectText(); }
+  });
+  function selectText() {
+    var r = document.createRange(); r.selectNodeContents(document.getElementById('mailAddr'));
+    var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+    btn.textContent = '선택됨 — Ctrl+C';
+  }
+})();
+</script>
+</body>
+</html>

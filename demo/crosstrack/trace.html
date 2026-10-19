@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>가상 종적 상세</title>
+<link rel="icon" href="icon48.png">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #f7fafc; color: #2d3748; font-family: -apple-system, "Noto Sans KR", "맑은 고딕", sans-serif; font-size: 14px; }
+  .bar { background: #fffbe6; border-bottom: 1px solid #f6e05e; color: #744210; font-size: 12px; font-weight: bold; text-align: center; padding: 5px 12px; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 18px 16px 40px; }
+  .head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .src { background: #2196F3; color: #fff; font-size: 12px; font-weight: bold; padding: 3px 9px; border-radius: 4px; }
+  .num { font-family: monospace; font-size: 18px; font-weight: bold; background: #edf2f7; padding: 2px 8px; border-radius: 4px; }
+  .sub { color: #718096; font-size: 12px; margin: 6px 0 14px; }
+  .tbl-wrap { overflow-x: auto; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; }
+  table { width: 100%; border-collapse: collapse; min-width: 520px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #edf2f7; vertical-align: top; font-size: 13px; }
+  th { background: #edf2f7; color: #4a5568; font-weight: 600; white-space: nowrap; }
+  td.t { white-space: nowrap; color: #4a5568; font-variant-numeric: tabular-nums; }
+  td.c { font-family: monospace; font-weight: bold; white-space: nowrap; }
+  td.d { font-family: monospace; font-size: 12px; color: #4a5568; word-break: break-all; }
+  tr.last td { background: #ebf8ff; font-weight: 600; }
+  .empty { padding: 28px 12px; text-align: center; color: #a0aec0; }
+</style>
+</head>
+<body>
+<div class="bar">체험판 · 가상 데이터 — 실제 전산 화면이 아니라 체험판이 만든 가상 종적입니다</div>
+<div class="wrap">
+  <div class="head"><span class="src" id="src"></span><span class="num" id="num"></span></div>
+  <div class="sub" id="sub"></div>
+  <div class="tbl-wrap" id="box"></div>
+</div>
+<script>
+(function () {
+  var data = { src: '', num: '', rows: [] };
+  try { data = JSON.parse(decodeURIComponent(location.hash.slice(1))) || data; } catch (e) {}
+  var rows = Array.isArray(data.rows) ? data.rows : [];
+  document.getElementById('src').textContent = (data.src || '종적') + ' (가상)';
+  document.getElementById('num').textContent = data.num || '';
+  document.title = (data.num || '') + ' 가상 종적 상세';
+  document.getElementById('sub').textContent = rows.length ? ('종적 ' + rows.length + '건 · 오래된 것부터 · 맨 아래 줄이 가장 최근') : '';
+  var box = document.getElementById('box');
+  if (!rows.length) {
+    var em = document.createElement('div');
+    em.className = 'empty';
+    em.textContent = '조회 결과가 없습니다.';
+    box.appendChild(em);
+    return;
+  }
+  var showCode = rows.some(function (r) { return r.code; });
+  var table = document.createElement('table');
+  var head = ['일시'].concat(showCode ? ['코드'] : []).concat(['처리 내용', '위치', '상세']);
+  var tr = document.createElement('tr');
+  head.forEach(function (h) { var th = document.createElement('th'); th.textContent = h; tr.appendChild(th); });
+  table.appendChild(tr);
+  rows.forEach(function (r, i) {
+    var row = document.createElement('tr');
+    if (i === rows.length - 1) row.className = 'last';
+    var cells = [['t', r.time]].concat(showCode ? [['c', r.code]] : []).concat([['', r.status], ['', r.loc], ['d', r.detail]]);
+    cells.forEach(function (c) { var td = document.createElement('td'); if (c[0]) td.className = c[0]; td.textContent = c[1] || ''; row.appendChild(td); });
+    table.appendChild(row);
+  });
+  box.appendChild(table);
+})();
+</script>
+</body>
+</html>

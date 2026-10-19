@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="color-scheme" content="light">
+<title>달력 — 구직 도우미</title>
+<style>
+  
+  :root { --ink:#0f172a; --sub:#64748b; --line:#e2e8f0; --blue:#2563eb; --warn:#dc2626; --soft:#f8fafc;
+          --scrap:#0f766e; --scrap-bg:#ecfdf5; --scrap-bd:#a7f3d0; --job:#6d28d9; --job-bg:#f5f3ff; --job-bd:#ddd6fe; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #fff; }
+  body { font: 13px/1.4 "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; color: var(--ink); display: flex; flex-direction: column; overflow: hidden; }
+  button { font-family: inherit; }
+  .hd { flex: 0 0 auto; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; row-gap: 6px; padding: 10px 12px 8px; border-bottom: 1px solid var(--line); }
+  .hd { cursor: move; user-select: none; touch-action: none; }   
+  .hd.moving { cursor: grabbing; }
+  .hd button { cursor: pointer; }
+  @media (max-width: 560px) { .hd .ttl { display: none; } .hd .month { min-width: 96px; font-size: 15px; } }   
+  .hd .ttl { font-weight: 800; font-size: 15px; white-space: nowrap; }
+  .hd .month { font-weight: 800; font-size: 17px; min-width: 116px; text-align: center; white-space: nowrap; }
+  .hd .sp { flex: 1; }
+  .nav { border: 1.5px solid #cbd5e1; background: #fff; color: var(--ink); border-radius: 8px; padding: 4px 10px; font-weight: 800; font-size: 13px; cursor: pointer; white-space: nowrap; }
+  .nav:hover { background: var(--soft); }
+  .lnk { border: none; background: none; color: var(--sub); font: 700 13px "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; cursor: pointer; padding: 4px 7px; border-radius: 6px; white-space: nowrap; }
+  .lnk:hover { background: var(--soft); color: var(--ink); }
+  .leg { display: inline-flex; gap: 4px; }
+  .leg button { border: 1.5px solid var(--line); background: #fff; border-radius: 999px; padding: 3px 9px; font-size: 12px; font-weight: 800; cursor: pointer; white-space: nowrap; }
+  .leg button[data-src=scrap] { color: var(--scrap); border-color: var(--scrap-bd); background: var(--scrap-bg); }
+  .leg button[data-src=job] { color: var(--job); border-color: var(--job-bd); background: var(--job-bg); }
+  .leg button[aria-pressed=false] { background: #fff; color: #94a3b8; border-color: var(--line); text-decoration: line-through; }
+  .st { flex: 0 0 auto; padding: 5px 12px; font-size: 12px; color: var(--sub); background: var(--soft); border-bottom: 1px solid var(--line); }
+  .st:empty { display: none; }
+  .st .err { color: var(--warn); }
+  .st button { border: none; background: none; color: var(--blue); font: 800 12px "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; cursor: pointer; padding: 0 2px; }
+  .dow, .grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+  .dow { flex: 0 0 auto; border-bottom: 1px solid var(--line); }
+  .dow div { padding: 5px 7px; font-size: 12px; font-weight: 800; color: var(--sub); }
+  .dow div:first-child, .day.sun .num { color: #dc2626; }
+  .dow div:last-child, .day.sat .num { color: #2563eb; }
+  .grid { flex: 1 1 auto; min-height: 0; }
+  .day { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 3px 4px 2px; min-width: 0; overflow: hidden; cursor: pointer; position: relative; }
+  .day:nth-child(7n) { border-right: none; }
+  .day:hover { background: #fafcff; }
+  .day.out { background: #fbfbfc; }
+  .day.out .num { opacity: .45; }
+  .num { font-size: 12px; font-weight: 800; padding: 1px 3px; display: inline-block; border-radius: 6px; }
+  .day.today .num { background: var(--blue); color: #fff !important; }
+  .chip { display: flex; align-items: center; gap: 4px; margin-top: 2px; padding: 1px 5px; border-radius: 5px; font-size: 12px; line-height: 17px; height: 19px;
+          border: 1px solid transparent; cursor: pointer; min-width: 0; white-space: nowrap; overflow: hidden; }
+  .chip.scrap { background: var(--scrap-bg); color: #064e3b; border-color: var(--scrap-bd); }
+  .chip.job { background: var(--job-bg); color: #4c1d95; border-color: var(--job-bd); }
+  .chip:hover { filter: brightness(.96); }
+  .chip img { width: 14px; height: 14px; flex: 0 0 14px; border-radius: 3px; }
+  .chip .dot { width: 7px; height: 7px; flex: 0 0 7px; border-radius: 50%; background: currentColor; opacity: .55; }
+  .chip .tm { font-weight: 800; flex: 0 0 auto; }
+  .chip .tx { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .chip.nolink { cursor: default; }
+  .more { margin-top: 2px; font-size: 11.5px; font-weight: 800; color: var(--sub); padding: 0 4px; }
+  .more:hover { color: var(--ink); text-decoration: underline; }
+  .loading { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; color: var(--sub); font-weight: 700; background: rgba(255,255,255,.6); }
+  body.busy .loading { display: flex; }
+  
+  .pop { position: fixed; z-index: 5; width: 330px; max-height: calc(100% - 20px); overflow: auto; background: #fff; border: 1px solid #cbd5e1; border-radius: 12px;
+         box-shadow: 0 8px 28px rgba(15,23,42,.25); padding: 10px 12px 12px; }
+  .pop h3 { margin: 0 0 6px; font-size: 14px; display: flex; align-items: center; gap: 6px; }
+  .pop h3 .sp { flex: 1; }
+  .pop .row { display: grid; grid-template-columns: 44px 1fr; gap: 6px; align-items: center; margin-top: 7px; }
+  .pop .row > span { color: var(--sub); font-weight: 800; font-size: 12px; }
+  .pop input[type=text], .pop textarea { width: 100%; padding: 6px 8px; border: 1.5px solid #cbd5e1; border-radius: 8px; font: 13px "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; color: var(--ink); }
+  .pop textarea { resize: vertical; min-height: 44px; }
+  .pop input:focus, .pop textarea:focus { outline: none; border-color: var(--blue); }
+  .pop .mode { margin-top: 7px; color: #94a3b8; font-size: 11.5px; }
+  .pop .err { margin-top: 6px; color: var(--warn); font-size: 12px; }
+  .pop .err:empty { display: none; }
+  .pop .act { display: flex; justify-content: flex-end; gap: 6px; margin-top: 10px; }
+  .pop .list .chip { height: auto; white-space: normal; line-height: 1.4; padding: 4px 7px; }
+  .pop .memo { white-space: pre-wrap; font-size: 12.5px; color: #334155; background: var(--soft); border-radius: 8px; padding: 7px 9px; margin-top: 6px; overflow-wrap: anywhere; }
+  button.go { border: none; border-radius: 8px; padding: 7px 16px; background: var(--blue); color: #fff; font-weight: 800; font-size: 13px; cursor: pointer; }
+  button.go:disabled { opacity: .6; cursor: default; }
+  button.no { border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 6px 12px; background: #fff; color: var(--sub); font-weight: 700; font-size: 13px; cursor: pointer; }
+  
+  .pop.menu { width: 236px; padding: 6px; }
+  .menu .mh { font-weight: 800; font-size: 12.5px; padding: 4px 8px 6px; border-bottom: 1px solid var(--line); margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .menu .mi { display: block; width: 100%; text-align: left; border: none; background: none; border-radius: 7px; padding: 7px 9px; font-size: 13px; font-weight: 700; color: var(--ink); cursor: pointer; }
+  .menu .mi:hover, .menu .mi:focus { background: #eff6ff; outline: none; }
+  .menu .mi.warn { color: var(--warn); }
+  .menu .mi.warn:hover { background: #fef2f2; }
+  .menu .mn { font-size: 11.5px; color: #94a3b8; padding: 4px 9px 2px; }
+  .pop .dlw { display: flex; align-items: center; gap: 10px; }
+  .pop input[type=date] { padding: 5px 7px; border: 1.5px solid #cbd5e1; border-radius: 8px; font: 13px "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; color: var(--ink); }
+  .pop .dlw .al { font-size: 12.5px; font-weight: 700; color: var(--sub); white-space: nowrap; cursor: pointer; }
+  .toast { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); z-index: 9; display: none; align-items: center; gap: 8px; max-width: 90%;
+           background: #1f2937; color: #fff; border-radius: 10px; padding: 8px 8px 8px 14px; font-weight: 600; box-shadow: 0 6px 22px rgba(0,0,0,.3); }
+  .toast.on { display: flex; }
+  .toast button { border: none; background: none; color: #93c5fd; font-weight: 800; cursor: pointer; padding: 3px 6px; white-space: nowrap; }
+</style>
+</head>
+<body>
+<div class="hd">
+  <span class="ttl">📅 달력</span>
+  <button class="nav" id="prev" type="button" title="지난달">‹</button>
+  <span class="month" id="month"></span>
+  <button class="nav" id="next" type="button" title="다음 달">›</button>
+  <button class="nav" id="today" type="button">오늘</button>
+  <span class="leg" role="group" aria-label="보일 일정">
+    <button type="button" data-src="scrap" aria-pressed="true" title="눌러서 숨기기·보이기">📌 스크랩 공고</button>
+    <button type="button" data-src="job" aria-pressed="true" title="눌러서 숨기기·보이기">📅 취업캘린더</button>
+  </span>
+  <span class="sp"></span>
+  <button class="lnk" id="reload" type="button" title="다시 불러오기">⟳</button>
+  <button class="lnk" id="openSet" type="button" title="설정(구글 계정 연결 · 취업캘린더 주소)을 새 탭으로">⚙</button>
+  <button class="lnk" id="x" type="button" title="닫기 (Esc)">✕</button>
+</div>
+<div class="st" id="st"></div>
+<div class="dow"><div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div></div>
+<div class="grid" id="grid" style="position:relative"></div>
+<div class="loading" id="loading">불러오는 중…</div>
+<div class="toast" id="toast" role="status"><span id="tmsg"></span><button id="tbtn" type="button" hidden></button></div>
+<script src="cal.js"></script>
+<script src="rec_cal.js"></script>
+<script src="cv-shim.js"></script>
+<script src="calview.js"></script>
+</body>
+</html>

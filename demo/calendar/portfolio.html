@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<link rel="icon" href="data:,">
+<title>예시 포트폴리오</title>
+<style>
+:root{--ink:#16181d;--ink2:#4b5160;--ink3:#8a90a0;--line:#e7e9ef;--soft:#f5f6f9;--accent:#3346c4}
+*{box-sizing:border-box}
+html,body{margin:0;background:#fff;color:var(--ink);font-family:-apple-system,"Pretendard","Noto Sans KR","Malgun Gothic",sans-serif}
+.page{max-width:640px;margin:0 auto;padding:22px 18px 40px}
+.tag{display:inline-block;font-size:11.5px;font-weight:800;color:var(--accent);background:#eef0fb;border-radius:8px;padding:3px 9px}
+h1{font-size:21px;line-height:1.4;margin:12px 0 6px;letter-spacing:-.4px}
+.sub{font-size:13.5px;color:var(--ink2);line-height:1.6}
+.note{margin-top:14px;font-size:12px;color:var(--ink3);background:var(--soft);border-radius:10px;padding:9px 12px;line-height:1.5}
+h2{font-size:15px;margin:26px 0 10px;letter-spacing:-.3px}
+.card{border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-top:10px}
+.card h3{margin:0 0 8px;font-size:15px}
+.row{display:flex;gap:10px;font-size:13.5px;line-height:1.6;margin-top:4px}
+.row b{flex:none;width:44px;color:var(--ink3);font-weight:700}
+.nums{display:flex;gap:8px;margin-top:10px}
+.num{flex:1;background:var(--soft);border-radius:10px;padding:10px;text-align:center}
+.num strong{display:block;font-size:18px}
+.num span{font-size:11.5px;color:var(--ink3)}
+ul{margin:0;padding-left:18px;font-size:13.5px;line-height:1.75;color:var(--ink2)}
+</style>
+</head>
+<body>
+<div class="page">
+  <span class="tag">예시 포트폴리오</span>
+  <h1>반복되는 사무 일을 정리해 시간을 줄이는 사람</h1>
+  <div class="sub">지원 회사 <b id="co">가상 회사</b> · 지원자 홍길동(가상)</div>
+  <div class="note">취업캘린더 체험판에서 [포트폴리오 열기] 를 눌렀을 때 보이는 예시 문서입니다. 사람·회사·수치는 모두 지어낸 것입니다.</div>
+
+  <h2>프로젝트</h2>
+  <div class="card">
+    <h3>① 입출고 서류 정리표</h3>
+    <div class="row"><b>문제</b><span>같은 내용을 서류 세 곳에 손으로 옮겨 적어 실수가 잦았다.</span></div>
+    <div class="row"><b>한 일</b><span>한 번 입력하면 세 서류가 함께 채워지는 표를 만들었다.</span></div>
+    <div class="nums"><div class="num"><strong>30분 → 5분</strong><span>하루 정리 시간</span></div><div class="num"><strong>0건</strong><span>한 달 옮겨 적기 실수</span></div></div>
+  </div>
+  <div class="card">
+    <h3>② 자주 묻는 질문 답변 모음</h3>
+    <div class="row"><b>문제</b><span>같은 문의에 사람마다 다른 답을 했다.</span></div>
+    <div class="row"><b>한 일</b><span>문의 100건을 묶어 답변 기준 20개로 정리했다.</span></div>
+  </div>
+  <div class="card">
+    <h3>③ 일정 관리 앱 «취업캘린더»</h3>
+    <div class="row"><b>한 일</b><span>지원 마감·발표·면접 일정을 한 화면에 모으고, 제출한 자소서를 회사별로 다시 볼 수 있게 했다.</span></div>
+  </div>
+
+  <h2>할 수 있는 일</h2>
+  <ul>
+    <li>업무 흐름을 표로 정리하고 빠진 단계를 찾기</li>
+    <li>반복 문의·서류를 기준 하나로 묶기</li>
+    <li>일정과 마감을 놓치지 않게 알림으로 관리하기</li>
+  </ul>
+</div>
+<script>
+(function() {
+  var co = '';
+  try {
+    co = new URLSearchParams(location.search).get('co') || '';
+  } catch (e) {}
+  if (co) document.getElementById('co').textContent = co;
+})();
+</script>
+</body>
+</html>

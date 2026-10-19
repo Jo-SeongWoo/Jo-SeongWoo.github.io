@@ -1,0 +1,2475 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; frame-src 'self'; form-action 'none'; base-uri 'none'">
+<title>취업캘린더</title>
+<link rel="icon" href="data:,">
+
+<script src="holidays.js"></script>
+<script src="demo-data.js"></script>
+<script src="demo-shim.js"></script>
+<style>
+:root{
+  --bg:#fafafa; --card:#fff; --ink:#111; --ink2:#555; --ink3:#9a9a9a; --line:#ececec;
+  --sun:#f2382f; --sat:#9a9a9a; --today:#111; --today-ink:#fff; --accent:#111; --accent-ink:#fff;
+  --hol-bg:#e9f5fd; --hol-ink:#2b9ce0;
+  --press:#ececec; --sel:#f4f4f4; --soft:#f4f4f4; --soft2:#ececec; --icon:#222; --grab:#ddd;
+  --inp-bd:#e6e6e6; --inp-bg:#fff; --sw-off:#ddd; --seg-on:#fff; --del-bg:#fdeceb; --item-bd:#f2f2f2;
+  --dim:rgba(0,0,0,.32); --bar-dim:1;
+  color-scheme:light;
+}
+
+:root[data-theme="dark"]{
+  --bg:#121214; --card:#1d1d20; --ink:#f2f2f2; --ink2:#b5b5b8; --ink3:#7d7d82; --line:#2a2a2e;
+  --sun:#ff5a50; --sat:#8a8a8f; --today:#f2f2f2; --today-ink:#111; --accent:#f2f2f2; --accent-ink:#111;
+  --hol-bg:#16303f; --hol-ink:#6cc0f0;
+  --press:#2a2a2e; --sel:#222226; --soft:#26262a; --soft2:#303035; --icon:#e8e8e8; --grab:#444;
+  --inp-bd:#35353a; --inp-bg:#18181b; --sw-off:#45454a; --seg-on:#3a3a40; --del-bg:#3a1d1c; --item-bd:#29292d;
+  --dim:rgba(0,0,0,.55); --bar-dim:.88;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,"Pretendard","Noto Sans KR","Malgun Gothic",sans-serif;overscroll-behavior:none}
+body{overflow:hidden;user-select:none;-webkit-user-select:none}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+input,textarea,select{font:inherit;color:inherit}
+
+#top{height:88px;padding:4px 8px 0 16px;display:flex;flex-direction:column;justify-content:space-between}
+
+#topRow{display:flex;align-items:center;gap:6px}
+#tabs{display:flex;background:var(--soft);border-radius:12px;padding:3px;margin-right:auto;min-width:0}
+#tabs button{height:32px;padding:0 10px;border-radius:9px;font-size:13.5px;font-weight:700;color:var(--ink3);white-space:nowrap;letter-spacing:-.3px}
+#tabs button.on{background:var(--seg-on);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+
+#scrapPane{display:none;overflow-y:auto;border-top:1px solid var(--line);padding:6px 16px 16px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+body.scrapTab #scrapPane{display:block}
+.icon{width:40px;height:40px;border-radius:20px;display:flex;align-items:center;justify-content:center}
+.icon:active{background:var(--press)}
+.icon svg{width:22px;height:22px;stroke:var(--icon);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#titleRow{display:flex;align-items:baseline;gap:8px;padding-bottom:8px}
+#monthTitle{font-size:22.5px;font-weight:800;letter-spacing:-.5px}
+#yearTitle{font-size:13px;color:var(--ink3);font-weight:600}
+#todayBtn{margin-left:auto;margin-right:6px;font-size:12px;font-weight:700;border:1.5px solid var(--grab);border-radius:14px;padding:4px 11px;color:var(--ink2);display:none}
+
+#dow{display:grid;grid-template-columns:repeat(7,1fr);height:28px;align-items:center;text-align:center;
+  font-size:11px;color:var(--ink2);border-bottom:1px solid var(--line)}
+#dow div:first-child{color:var(--sun)} #dow div:last-child{color:var(--sat)}
+
+#gridWrap{position:relative;overflow:hidden}
+.month{position:absolute;inset:0;display:flex;flex-direction:column;will-change:transform}
+.week{position:relative;flex:1;border-bottom:1px solid var(--line)}
+.week:last-child{border-bottom:0}
+.cells{position:absolute;inset:0;display:grid;grid-template-columns:repeat(7,1fr)}
+.cell{position:relative}
+.cell:active{background:var(--press)}
+.dnum{display:block;margin:5px auto 0;width:24px;height:24px;line-height:24px;text-align:center;
+  font-size:13.5px;font-weight:400;border-radius:12px}
+.cell.out .dnum{opacity:.35}
+.cell.sun .dnum,.cell.hol .dnum{color:var(--sun)}
+.cell.sat .dnum{color:var(--sat)}
+.cell.today .dnum{background:var(--today);color:var(--today-ink);font-weight:700}
+.cell.sel{background:var(--sel)}
+.bars{position:absolute;left:0;right:0;top:32px;bottom:0;pointer-events:none}
+
+.bar{position:absolute;height:16px;border-radius:4px;padding:0 3px;font-size:11px;line-height:16px;
+  color:#fff;font-weight:400;letter-spacing:-.2px;white-space:nowrap;overflow:hidden;filter:brightness(var(--bar-dim))}
+.bar.cont-l{border-top-left-radius:0;border-bottom-left-radius:0}
+.bar.cont-r{border-top-right-radius:0;border-bottom-right-radius:0}
+.bar .hrt{font-size:9.5px;margin-right:1px}
+.hs{width:9px;height:9px;vertical-align:-1px;margin-right:1px;fill:currentColor}
+.item .hs{width:14px;height:14px;vertical-align:-1px;color:#f2382f}
+.bar.hol{background:var(--hol-bg)!important;color:var(--hol-ink)!important}
+.bar .pin{font-size:9px;margin-right:1px}   
+.more{position:absolute;height:16px;font-size:10.5px;line-height:16px;color:#888;text-align:center;font-weight:600;color:var(--ink3)}
+
+.c-red{background:#f2382f}.c-orange{background:#ff8a1f}.c-yellow{background:#fde9a6;color:#6b5000!important}
+.c-green{background:#2fb36b}.c-blue{background:#36a9e1}.c-navy{background:#3f5bd8}
+.c-purple{background:#8b63e6}.c-pink{background:#f98fb6}.c-gray{background:#9aa0a6}
+.c-teal{background:#14a89c}.c-brown{background:#a46b43}
+.dot{width:10px;height:10px;border-radius:5px;flex:none}
+
+#dim{position:fixed;inset:0;background:var(--dim);opacity:0;pointer-events:none;transition:opacity .2s}
+#dim.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-radius:20px 20px 0 0;
+  transform:translateY(105%);transition:transform .24s cubic-bezier(.2,.8,.2,1);max-height:88vh;display:flex;flex-direction:column;
+  box-shadow:0 -4px 24px rgba(0,0,0,.08)}
+.sheet.on{transform:none}
+.grab{width:38px;height:4px;border-radius:2px;background:var(--grab);margin:8px auto 2px;flex:none}
+.sh-head{display:flex;align-items:center;padding:8px 18px 10px;flex:none}
+.sh-head h2{margin:0;font-size:17px;font-weight:800;letter-spacing:-.5px}
+.sh-head .sub{margin-left:8px;font-size:13px;color:var(--hol-ink);font-weight:600}
+.sh-head .x{margin-left:auto}
+.sh-body{overflow-y:auto;padding:0 18px 18px;-webkit-overflow-scrolling:touch}
+.sh-foot{display:flex;gap:10px;padding:10px 18px 18px;flex:none;border-top:1px solid var(--line)}
+
+.item{display:flex;gap:12px;align-items:stretch;padding:12px 0;border-bottom:1px solid var(--item-bd)}
+.item:last-child{border-bottom:0}
+.item .stripe{width:5px;border-radius:3px;flex:none}
+.item .t{font-size:15px;font-weight:600;word-break:break-all}
+.item .m{font-size:13px;color:var(--ink3);margin-top:3px;white-space:pre-line;word-break:break-all}
+.item .role{font-size:12.5px;font-weight:500;color:var(--ink3);margin-left:5px;white-space:nowrap}
+.item:active{background:var(--sel)}
+.judge{display:flex;gap:8px;margin-top:8px;align-items:center}
+.judge button{flex:1;height:36px;border-radius:10px;font-weight:700;font-size:14px;background:var(--soft)}
+.judge button.pass{color:#1a9a55}.judge button.fail{color:var(--sun)}
+.judge button.jx{flex:0 0 auto;height:28px;padding:0 10px;font-size:12px;color:var(--ink3)}
+.badge{display:inline-block;font-size:12px;font-weight:800;padding:3px 8px;border-radius:7px}
+.badge.pass{background:#dcf3e6;color:#178a4c}
+.empty{color:var(--ink3);text-align:center;padding:26px 0;font-size:14px}
+.addLine{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;margin-top:10px;padding:13px;
+  border-radius:12px;background:var(--soft);font-weight:700;font-size:15px}
+
+.btn{flex:1;height:50px;border-radius:14px;font-weight:700;font-size:16px;background:var(--soft)}
+.btn.pri{background:var(--accent);color:var(--accent-ink)}
+.btn.del{flex:0 0 84px;color:var(--sun);background:var(--del-bg)}
+
+.f{margin-top:14px}
+.f label.l{display:block;font-size:13px;color:var(--ink2);font-weight:600;margin-bottom:6px}
+.inp{width:100%;height:46px;border:1.5px solid var(--inp-bd);border-radius:12px;padding:0 12px;background:var(--inp-bg);outline:none}
+.inp:focus{border-color:var(--ink)}
+textarea.inp{height:auto;min-height:74px;padding:10px 12px;resize:none}
+#fTitle{font-size:18px;font-weight:700;height:52px}
+.row{display:flex;gap:8px;align-items:center}
+.row .inp{flex:1}
+.tg{display:flex;align-items:center;justify-content:space-between;padding:10px 0}
+.tg span{font-size:15px;font-weight:600}
+.sw{position:relative;width:48px;height:28px;border-radius:14px;background:var(--sw-off);transition:background .15s;flex:none}
+.sw::after{content:"";position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:11px;background:#fff;
+  box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .15s}
+.sw.on{background:var(--accent)}.sw.on::after{background:var(--accent-ink)}.sw.on::after{transform:translateX(20px)}
+.colors{display:flex;flex-wrap:wrap;gap:10px}
+.sw-c{width:34px;height:34px;border-radius:17px;position:relative}
+.sw-c.on::after{content:"";position:absolute;inset:-4px;border-radius:21px;border:2.5px solid var(--ink)}
+.heartBtn{height:34px;padding:0 12px;border-radius:17px;border:1.5px solid var(--inp-bd);font-weight:700;font-size:14px}
+.heartBtn.on{background:var(--del-bg);border-color:#f2382f;color:#f2382f}
+.seg{display:flex;background:var(--soft);border-radius:12px;padding:3px}
+.seg button{flex:1;height:38px;border-radius:9px;font-size:14px;font-weight:600;color:var(--ink3)}
+.seg button.on{background:var(--seg-on);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.ro{font-size:14px;color:var(--ink2);line-height:1.6;white-space:pre-line;word-break:break-all}
+
+.sec{margin-top:22px;font-size:13px;font-weight:800;color:var(--ink3);letter-spacing:.3px}
+.card{background:var(--soft);border-radius:14px;padding:4px 14px;margin-top:8px}
+.card .tg{border-bottom:1px solid var(--line)}.card .tg:last-child{border-bottom:0}
+.small{font-size:12.5px;color:var(--ink3);line-height:1.55;margin-top:6px}
+.ok{color:#1a9a55;font-weight:700}.bad{color:var(--sun);font-weight:700}
+.linkBtn{font-size:14px;font-weight:700;padding:8px 12px;border-radius:10px;background:var(--soft2)}
+.subItem{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.subItem:last-child{border-bottom:0}
+
+.ap{display:flex;gap:12px;align-items:stretch;padding:12px 0;border-bottom:1px solid var(--item-bd)}
+.ap:last-child{border-bottom:0}
+.ap:active{background:var(--sel)}
+.ap .stripe{width:5px;border-radius:3px;flex:none}
+.ap .t{font-size:15px;font-weight:700;word-break:break-all}
+.ap .role{font-size:12.5px;font-weight:500;color:var(--ink3);margin-left:5px}
+.ap .m{font-size:13px;color:var(--ink2);margin-top:3px;word-break:break-all}
+.ap .d{font-size:12px;color:var(--ink3);margin-top:2px}
+.ap .when{flex:none;text-align:right;font-size:14px;font-weight:800;min-width:58px}
+.ap .when small{display:block;font-size:11.5px;font-weight:700;color:var(--sun);margin-top:2px}
+.ap .when.none{color:var(--ink3);font-weight:600}
+.ap .pass{color:#1a9a55;margin-right:3px}
+.apSec{display:flex;align-items:baseline;gap:6px;margin-top:18px;font-size:13px;font-weight:800;color:var(--ink3)}
+.apSec:first-child{margin-top:2px}
+
+.apGrp{display:flex;align-items:baseline;gap:6px;margin-top:26px;padding-bottom:6px;border-bottom:2px solid var(--line);font-size:16px;font-weight:800;color:var(--ink)}
+.apGrp:first-child{margin-top:0}
+.apGrp span{font-size:13px;font-weight:700;color:var(--ink3)}
+.ap.done .t{color:var(--ink3)}
+.ap .when.fail{color:#d14b4b;font-weight:700}
+
+.coInfo{font-size:14px;color:var(--ink2);line-height:1.6;word-break:break-all}
+.coInfo b{color:var(--ink);font-weight:700;margin-right:6px}
+.coBtns{display:flex;gap:8px;margin-top:12px}
+.coBtns button{flex:1;height:42px;border-radius:12px;background:var(--soft);font-weight:700;font-size:14px}
+.letter{white-space:pre-wrap;font-size:14px;line-height:1.7;word-break:break-all;user-select:text;-webkit-user-select:text;
+  background:var(--soft);border-radius:12px;padding:14px;margin-top:8px}
+.letter .lq{white-space:normal;font-size:14.5px;font-weight:800;color:var(--ink);line-height:1.5;margin:20px 0 10px;padding-top:14px;border-top:1px solid var(--line)}
+.letter .lq:first-child{margin-top:0;padding-top:0;border-top:0}
+.letter .lq span{font-size:12px;font-weight:600;color:var(--ink3);margin-left:6px;white-space:nowrap}
+
+.letter .lb{border-radius:8px;margin:0 -6px;padding:2px 6px;transition:background .3s}
+.letter .lb.cp{background:var(--sel)}
+.letterHint{font-size:12px;color:var(--ink3);margin-top:4px}
+
+.ap .m.clamp{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ap.sc{padding:10px 0}
+.ap .when small.soft{color:var(--ink2)}
+.ap .when small.gray{color:var(--ink3)}
+.ap.done .when{color:var(--ink3)}
+.scT{font-size:16px;font-weight:700;line-height:1.5;margin:0 0 10px;word-break:break-all;user-select:text;-webkit-user-select:text}
+
+.mItem{display:flex;align-items:center;gap:14px;width:100%;padding:11px 2px;border-bottom:1px solid var(--item-bd);text-align:left}
+.mItem:last-child{border-bottom:0}
+.mItem:active{background:var(--sel)}
+.mItem .mIc{width:40px;height:40px;border-radius:20px;background:var(--soft);display:flex;align-items:center;justify-content:center;flex:none;font-size:19px}
+.mItem .mL{flex:1;font-size:16px;font-weight:700}
+.mItem .mR{font-size:13px;color:var(--ink3);font-weight:600}
+.mItem .chev{width:16px;height:16px;stroke:var(--ink3);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+.mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:6px}
+.mgrid button{height:52px;border-radius:12px;background:var(--soft);font-weight:700;font-size:16px}
+.mgrid button.on{background:var(--accent);color:var(--accent-ink)}
+.yrow{display:flex;align-items:center;justify-content:center;gap:18px;font-size:19px;font-weight:800;margin:4px 0 8px}
+
+#toast{position:fixed;left:50%;bottom:40px;transform:translateX(-50%) translateY(20px);background:rgba(20,20,20,.9);color:#fff;
+  padding:11px 18px;border-radius:22px;font-size:14px;opacity:0;transition:all .2s;pointer-events:none;white-space:nowrap}
+#toast.on{opacity:1;transform:translateX(-50%)}
+:root[data-theme="dark"] #toast{background:rgba(70,70,76,.96)}
+</style>
+</head>
+<body>
+<div id="top">
+  
+  <div id="topRow">
+    <div id="tabs" role="tablist"><button data-tab="job" role="tab">📅 지원 진행</button><button data-tab="scrap" role="tab">📌 스크랩 공고</button></div>
+    <button class="icon" id="bMenu" aria-label="메뉴"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    <button class="icon" id="bAdd" aria-label="일정 추가"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+  </div>
+  <div id="titleRow">
+    <span id="monthTitle"></span><span id="yearTitle"></span>
+    <button id="todayBtn">오늘</button>
+  </div>
+</div>
+<div id="dow"><div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div></div>
+<div id="gridWrap"></div>
+<div id="scrapPane"></div>
+
+<div id="dim"></div>
+<div class="sheet" id="shDay"></div>
+<div class="sheet" id="shEdit"></div>
+<div class="sheet" id="shSet"></div>
+<div class="sheet" id="shSearch"></div>
+<div class="sheet" id="shMonth"></div>
+<div class="sheet" id="shApply"></div>
+<div class="sheet" id="shCo"></div>
+<div class="sheet" id="shMenu"></div>
+<div class="sheet" id="shScrap"></div>
+<div id="toast"></div>
+
+<script>
+'use strict';
+
+var HAS_APP = typeof window.App !== 'undefined';
+
+var COLORS = [ 'red', 'orange', 'yellow', 'green', 'teal', 'blue', 'navy', 'purple', 'pink', 'brown', 'gray' ];
+
+var COLOR_NAME = {
+  red: '빨강',
+  orange: '주황',
+  yellow: '노랑',
+  green: '초록',
+  teal: '청록',
+  blue: '파랑',
+  navy: '남색',
+  purple: '보라',
+  pink: '분홍',
+  brown: '갈색',
+  gray: '회색'
+};
+
+var CO_HEX = [ 'e6194b', '2e9e3e', 'ffd60a', '3346c4', 'f58231', '8e24aa', 'ff8fb1', '00897b', '8d5524', 'a4d63a', '455a64', 'e040fb', '808000', '7f0000', 'b39ddb', 'ffb380', '7be0b0', '00bcd4', 'd8c690', 'bdbdbd' ];
+
+function coHex(i) {
+  if (i < CO_HEX.length) return '#' + CO_HEX[i];
+  return 'hsl(' + Math.round(i * 137.508 % 360) + ',' + (55 + i % 3 * 15) + '%,' + (38 + i % 4 * 9) + '%)';
+}
+
+function coInk(i) {
+  if (i >= CO_HEX.length) return i % 4 >= 2 ? '#1f1f1f' : '#fff';
+  var h = CO_HEX[i], lum = [ 0, 2, 4 ].map((function(p) {
+    var c = parseInt(h.substr(p, 2), 16) / 255;
+    return c <= .04045 ? c / 12.92 : Math.pow((c + .055) / 1.055, 2.4);
+  }));
+  var Y = .2126 * lum[0] + .7152 * lum[1] + .0722 * lum[2];
+  return 1.05 / (Y + .05) >= (Y + .05) / .0623 ? '#fff' : '#1f1f1f';
+}
+
+var coCssMax = -1;
+
+function ensureCoCss(n) {
+  if (n - 1 <= coCssMax) return;
+  var st = document.getElementById('coCss');
+  if (!st) {
+    st = document.createElement('style');
+    st.id = 'coCss';
+    document.head.appendChild(st);
+  }
+  var css = '';
+  for (var i = coCssMax + 1; i < n; i++) css += '.c-j' + i + '{background:' + coHex(i) + ';color:' + coInk(i) + '!important}';
+  st.textContent += css;
+  coCssMax = n - 1;
+}
+
+function companyOf(t) {
+  var m = /^\s*\[([^\]]+)\]/.exec(t || '');
+  return m ? m[1].trim() : null;
+}
+
+function groupOf(t) {
+  var c = companyOf(t);
+  if (c) return c;
+  var w = String(t || '').trim().split(/\s+/)[0];
+  return w || null;
+}
+
+function isJobSub(s) {
+  return /취업/.test(s.name || '');
+}
+
+function syncCompanyColors() {
+  var present = {}, live = {}, hid = hiddenSet(), today = todayS();
+  var see = function(e, k, s) {
+    if (hid[k] || isScrap(e, s)) return;
+    var c = groupOf(e.title);
+    if (!c) return;
+    if (!present[c] || e.start < present[c]) present[c] = e.start;
+    if (!isApplyRec(e) && (e.end || e.start) >= today && (!live[c] || e.start < live[c])) live[c] = e.start;
+  };
+  DB.subs.forEach((function(s) {
+    if (isJobSub(s) && !s.hidden) (s.events || []).forEach((function(e) {
+      see(e, 's:' + s.id + ':' + e.id, s);
+    }));
+  }));
+  DB.events.forEach((function(e) {
+    if (e.src === 'job') see(e, 'l:' + e.id);
+  }));
+  var map = DB.coColors || {}, changed = !DB.coColors;
+  if (DB.coColorsVer !== 2 || Object.keys(map).some((function(c) {
+    return !/^j\d+$/.test(map[c]);
+  }))) {
+    map = {};
+    DB.coColorsVer = 2;
+    changed = true;
+  }
+  Object.keys(map).forEach((function(c) {
+    if (!(c in present)) {
+      delete map[c];
+      changed = true;
+    }
+  }));
+  var byStart = function(o) {
+    return function(a, b) {
+      return o[a] < o[b] ? -1 : o[a] > o[b] ? 1 : a < b ? -1 : 1;
+    };
+  };
+  var idx = function(c) {
+    return map[c] ? +map[c].slice(1) : Infinity;
+  };
+  Object.keys(live).sort(byStart(live)).forEach((function(c) {
+    var held = {};
+    Object.keys(map).forEach((function(k) {
+      if (k !== c && live[k] && map[k]) held[map[k]] = 1;
+    }));
+    var i = 0;
+    while (held['j' + i]) i++;
+    if (i >= idx(c)) return;
+    Object.keys(map).forEach((function(k) {
+      if (map[k] === 'j' + i) delete map[k];
+    }));
+    map[c] = 'j' + i;
+    changed = true;
+  }));
+  Object.keys(present).filter((function(c) {
+    return !map[c];
+  })).sort(byStart(present)).forEach((function(c) {
+    var used = {};
+    Object.keys(map).forEach((function(k) {
+      used[map[k]] = 1;
+    }));
+    var i = 0;
+    while (used['j' + i]) i++;
+    map[c] = 'j' + i;
+    changed = true;
+  }));
+  DB.coColors = map;
+  var top = -1;
+  Object.keys(map).forEach((function(c) {
+    top = Math.max(top, +map[c].slice(1));
+  }));
+  ensureCoCss(top + 1);
+  if (changed) saveDB(true);
+}
+
+function jobColor(e, fallback) {
+  var c = groupOf(e.title);
+  return c && DB.coColors && DB.coColors[c] || fallback;
+}
+
+function evColor(e, s) {
+  return !isScrap(e, s) && isJobSub(s) ? jobColor(e, s.color) : s.color;
+}
+
+var SCRAP_HEAD = /^\s*구직\s*도우미\s*스크랩/;
+
+function isScrapSub(s) {
+  return !!s && (!!SCRAP_ICS && s.url === SCRAP_ICS || /스크랩/.test(s.name || ''));
+}
+
+function isScrap(e, s) {
+  if (!e) return false;
+  if (/^\s*📌/.test(e.title || '')) return true;
+  s = s || (e.sub ? subById(e.sub) : null);
+  if (s && isScrapSub(s)) return true;
+  var m = String(e.memo || '');
+  return m.indexOf('스크랩') >= 0 && SCRAP_HEAD.test(m.slice(0, 400).replace(/<[^>]*>/g, '').replace(/&nbsp;/gi, ' '));
+}
+
+function decodeEnt(s) {
+  return String(s).replace(/&(#x[0-9a-f]+|#\d+|amp|lt|gt|quot|apos|nbsp);/gi, (function(all, k) {
+    k = k.toLowerCase();
+    if (k.charAt(0) === '#') {
+      var n = k.charAt(1) === 'x' ? parseInt(k.slice(2), 16) : parseInt(k.slice(1), 10);
+      try {
+        return String.fromCodePoint(n);
+      } catch (e) {
+        return all;
+      }
+    }
+    return {
+      amp: '&',
+      lt: '<',
+      gt: '>',
+      quot: '"',
+      apos: "'",
+      nbsp: ' '
+    }[k];
+  }));
+}
+
+function unwrapUrl(u) {
+  var m = /^https?:\/\/(?:www\.)?google\.[a-z.]+\/url\?(?:[^#]*?&)?q=([^&#]+)/i.exec(u || '');
+  if (m) {
+    try {
+      return decodeURIComponent(m[1]);
+    } catch (e) {}
+  }
+  return u;
+}
+
+function scrapText(m) {
+  m = String(m || '');
+  if (/<(br|a|p|div|span|b|i|u|ul|ol|li|html-blob)\b|<\/[a-z]/i.test(m)) {
+    m = m.replace(/<a\b[^>]*?href\s*=\s*["']([^"']*)["'][^>]*>[\s\S]*?<\/a>/gi, (function(_, h) {
+      return unwrapUrl(decodeEnt(h));
+    })).replace(/<br\s*\/?>/gi, '\n').replace(/<\/(p|div|li|h\d)>/gi, '\n').replace(/<[^>]+>/g, '');
+    m = decodeEnt(m);
+  }
+  return m.replace(/\r/g, '').replace(/\u00a0/g, ' ');
+}
+
+function scrapHead(e) {
+  var t = String(e.title || '').replace(/^\s*📌\s*/, ''), m = /^\[([^\]]+)\]\s*/.exec(t);
+  return {
+    company: m ? m[1].trim() : '',
+    title: (m ? t.slice(m[0].length) : t).trim()
+  };
+}
+
+var SCRAP_KEYS = {
+  '마감': 'due',
+  '근무지': 'place',
+  '통근': 'commute',
+  '평점': 'rating',
+  '사이트': 'site',
+  '링크': 'link'
+};
+
+function scrapInfo(e) {
+  var x = scrapHead(e), lines = scrapText(e.memo).split('\n').map((function(l) {
+    return l.trim();
+  })).filter(Boolean);
+  if (lines.length && SCRAP_HEAD.test(lines[0])) lines.shift();
+  x.extra = [];
+  lines.forEach((function(l) {
+    var m = /^([가-힣]+)\s*:\s*(.*)$/.exec(l), k = m && SCRAP_KEYS[m[1]];
+    if (k && !x[k]) x[k] = m[2].trim(); else x.extra.push(l);
+  }));
+  var u = /https?:\/\/[^\s<>"]+/.exec(x.link || '') || /https?:\/\/[^\s<>"]+/.exec(x.extra.join(' '));
+  x.link = u ? unwrapUrl(u[0]) : '';
+  x.loc = String(e.loc || '').trim();
+  x.always = /상시|수시|채용\s*시/.test(x.due || '') && !/\d{4}\s*[-.\/]\s*\d{1,2}\s*[-.\/]\s*\d{1,2}/.test(x.due || '');
+  x.end = e.end || e.start;
+  x.ev = e;
+  return x;
+}
+
+function scrapMeta(x) {
+  var c = String(x.commute || '').replace(/\s*\([^)]*\)\s*$/, '');
+  return [ x.place, c ? /^통근/.test(c) ? c : '통근 ' + c : '', x.rating ? '평점 ' + x.rating : '' ].filter(Boolean).join(' · ');
+}
+
+function dueText(x) {
+  if (x.always) return '상시';
+  var dd = diffDays(todayS(), x.end);
+  return dd > 0 ? '마감 D-' + dd : dd === 0 ? '오늘 마감' : '마감 지남';
+}
+
+function subById(id) {
+  return DB.subs.filter((function(x) {
+    return x.id === id;
+  }))[0];
+}
+
+function evKey(e) {
+  return (e.sub ? 's:' + e.sub : 'l') + ':' + e.id;
+}
+
+function isJobEv(e) {
+  if (isScrap(e) || !companyOf(e.title)) return false;
+  if (e.src === 'job') return true;
+  var s = e.sub && subById(e.sub);
+  return !!(s && isJobSub(s));
+}
+
+function evStartMs(e, start) {
+  return at(start || e.start, e.allDay ? '00:00' : e.startTime || '00:00');
+}
+
+function resultOf(e) {
+  return (DB.results || {})[evKey(e)];
+}
+
+function hiddenSet() {
+  var h = {};
+  Object.keys(DB.rejected || {}).forEach((function(c) {
+    (DB.rejected[c].keys || []).forEach((function(k) {
+      h[k] = 1;
+    }));
+  }));
+  return h;
+}
+
+function companyKeys(c) {
+  var hid = hiddenSet(), keys = [];
+  DB.events.forEach((function(e) {
+    if (!isScrap(e) && companyOf(e.title) === c && !hid['l:' + e.id]) keys.push('l:' + e.id);
+  }));
+  DB.subs.forEach((function(s) {
+    (s.events || []).forEach((function(e) {
+      var k = 's:' + s.id + ':' + e.id;
+      if (!isScrap(e, s) && companyOf(e.title) === c && !hid[k]) keys.push(k);
+    }));
+  }));
+  return keys;
+}
+
+function markPass(e) {
+  DB.results = DB.results || {};
+  DB.results[evKey(e)] = 'pass';
+  saveDB();
+  toast(companyOf(e.title) + ' 합격 축하해요!');
+}
+
+function markFail(e) {
+  var c = companyOf(e.title), keys = companyKeys(c);
+  DB.results = DB.results || {};
+  DB.results[evKey(e)] = 'fail';
+  DB.rejected = DB.rejected || {};
+  DB.rejected[c] = {
+    at: Date.now(),
+    keys: keys,
+    title: e.title
+  };
+  saveDB();
+  toast(c + ' 일정 ' + keys.length + '개를 지웠어요 (설정에서 되돌리기)');
+}
+
+function undoReject(c) {
+  var r = (DB.rejected || {})[c];
+  if (!r) return;
+  Object.keys(DB.results || {}).forEach((function(k) {
+    if (DB.results[k] === 'fail' && r.keys.indexOf(k) >= 0) delete DB.results[k];
+  }));
+  delete DB.rejected[c];
+  saveDB();
+  toast(c + ' 일정을 되돌렸어요');
+}
+
+function judgeHTML(e) {
+  if (!isJobEv(e)) return '';
+  var r = resultOf(e);
+  if (r === 'pass') return '<div class="judge"><span class="badge pass">합격</span><button class="jx" data-j="undo">취소</button></div>';
+  if (Date.now() < evStartMs(e)) return '';
+  return '<div class="judge"><button class="pass" data-j="pass">합격</button><button class="fail" data-j="fail">불합격</button></div>';
+}
+
+function bindJudge(root, getEv, after) {
+  root.querySelectorAll('.judge button').forEach((function(b) {
+    b.onclick = function(ev) {
+      ev.stopPropagation();
+      var e = getEv(b);
+      if (!e) return;
+      if (b.dataset.j === 'pass') markPass(e); else if (b.dataset.j === 'undo') {
+        delete DB.results[evKey(e)];
+        saveDB();
+      } else {
+        if (b.dataset.armed !== '1') {
+          b.dataset.armed = '1';
+          b.textContent = '정말? 일정 ' + companyKeys(companyOf(e.title)).length + '개 지워져요';
+          return;
+        }
+        markFail(e);
+      }
+      after();
+    };
+  }));
+}
+
+var HOL_URL = '';
+
+var DB = null;
+
+var JOB_ICS = '';
+
+var SCRAP_ICS = '';
+
+var HEART = '<svg class="hs" viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.1 0 3.6 1.1 5.3 3 1.7-1.9 3.2-3 5.3-3 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z"/></svg>';
+
+function defaults() {
+  return {
+    v: 1,
+    events: [],
+    subs: [],
+    holidays: {
+      fetchedAt: 0,
+      list: []
+    },
+    settings: {
+      evening: {
+        on: true,
+        time: '21:00'
+      },
+      morning: {
+        on: true,
+        time: '08:00'
+      },
+      before: {
+        on: true,
+        min: 30
+      },
+      theme: 'system',
+      tab: 'job'
+    }
+  };
+}
+
+function curTab() {
+  return DB && DB.settings && DB.settings.tab === 'scrap' ? 'scrap' : 'job';
+}
+
+function applyTab() {
+  var t = curTab();
+  document.body.classList.toggle('scrapTab', t === 'scrap');
+  document.querySelectorAll('#tabs button').forEach((function(b) {
+    var on = b.dataset.tab === t;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-selected', on ? 'true' : 'false');
+  }));
+  var a = document.getElementById('bAdd');
+  if (a) a.setAttribute('aria-label', t === 'scrap' ? '스크랩 공고 직접 추가' : '일정 추가');
+}
+
+function setTab(t) {
+  t = t === 'scrap' ? 'scrap' : 'job';
+  if (curTab() === t) return;
+  DB.settings.tab = t;
+  saveDB(true);
+  var p = document.getElementById('scrapPane');
+  if (p) p.scrollTop = 0;
+  render(0);
+}
+
+function tabSources(t) {
+  var sc = t === 'scrap';
+  return allSources().filter((function(e) {
+    return isScrap(e) === sc;
+  }));
+}
+
+function systemDark() {
+  try {
+    return HAS_APP ? App.isSystemDark() : window.matchMedia('(prefers-color-scheme: dark)').matches;
+  } catch (e) {
+    return false;
+  }
+}
+
+function isDark() {
+  var t = DB && DB.settings.theme || 'system';
+  return t === 'dark' || t === 'system' && systemDark();
+}
+
+function applyTheme() {
+  var dark = isDark();
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  try {
+    if (HAS_APP) App.setBars(dark);
+  } catch (e) {}
+}
+
+function toggleTheme() {
+  DB.settings.theme = isDark() ? 'light' : 'dark';
+  applyTheme();
+  saveDB(true);
+  toast(isDark() ? '어두운 화면' : '밝은 화면');
+}
+
+function readAsset(name) {
+  if (HAS_APP) return App.readAsset(name);
+  var x = new XMLHttpRequest;
+  x.open('GET', name, false);
+  try {
+    x.send();
+    return x.status === 200 || x.status === 0 ? x.responseText : '';
+  } catch (e) {
+    return '';
+  }
+}
+
+function loadDB() {
+  var raw = '';
+  try {
+    raw = HAS_APP ? App.load() : localStorage.getItem('cal') || '';
+  } catch (e) {}
+  if (raw) {
+    try {
+      DB = JSON.parse(raw);
+    } catch (e) {
+      DB = null;
+    }
+  }
+  if (!DB) {
+    DB = defaults();
+    try {
+      DB.events = JSON.parse(readAsset('seed.json')).events || [];
+    } catch (e) {}
+    try {
+      DB.holidays.list = JSON.parse(readAsset('holidays.json')) || [];
+    } catch (e) {}
+    saveDB(true);
+  }
+  if (!DB.mig1) {
+    DB.events = DB.events.filter((function(e) {
+      var m = /^seed(\d{3})$/.exec(e.id);
+      return !(m && +m[1] >= 62 && +m[1] <= 82);
+    }));
+    DB.mig1 = true;
+    saveDB(true);
+  }
+  var d = defaults();
+  for (var k in d) if (!(k in DB)) DB[k] = d[k];
+  if (!DB.mig2) {
+    if (!DB.subs.some((function(x) {
+      return x.url === JOB_ICS;
+    }))) DB.subs.push({
+      id: 'sjob',
+      name: '취업캘린더',
+      url: JOB_ICS,
+      color: 'purple',
+      events: [],
+      fetchedAt: 0
+    });
+    DB.mig2 = true;
+    saveDB(true);
+  }
+  if (!DB.mig3) {
+    if (SCRAP_ICS && !DB.subs.some((function(x) {
+      return x.url === SCRAP_ICS;
+    }))) DB.subs.push({
+      id: 'sscrap',
+      name: '스크랩 공고',
+      url: SCRAP_ICS,
+      color: 'teal',
+      events: [],
+      fetchedAt: 0
+    });
+    DB.mig3 = true;
+    saveDB(true);
+  }
+  for (var s in d.settings) if (!DB.settings[s]) DB.settings[s] = d.settings[s];
+}
+
+function saveDB(silent) {
+  var s = JSON.stringify(DB);
+  try {
+    if (HAS_APP) App.save(s); else localStorage.setItem('cal', s);
+  } catch (e) {
+    toast('저장 실패: ' + e);
+  }
+  pushAlarms();
+}
+
+function pad(n) {
+  return (n < 10 ? '0' : '') + n;
+}
+
+function ymd(d) {
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+}
+
+function parse(s) {
+  var p = s.split('-');
+  return new Date(+p[0], +p[1] - 1, +p[2]);
+}
+
+function addDays(s, n) {
+  var d = parse(s);
+  d.setDate(d.getDate() + n);
+  return ymd(d);
+}
+
+function diffDays(a, b) {
+  return Math.round((parse(b) - parse(a)) / 864e5);
+}
+
+function todayS() {
+  return ymd(new Date);
+}
+
+var WD = [ '일', '월', '화', '수', '목', '금', '토' ];
+
+function label(s) {
+  var d = parse(s);
+  return d.getMonth() + 1 + '월 ' + d.getDate() + '일 (' + WD[d.getDay()] + ')';
+}
+
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"]/g, (function(c) {
+    return {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;'
+    }[c];
+  }));
+}
+
+function uid() {
+  return 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
+
+function holidayMap() {
+  var m = {};
+  (DB.holidays.list || []).forEach((function(h) {
+    (m[h.date] = m[h.date] || []).push(h.name);
+  }));
+  return m;
+}
+
+function allSources() {
+  var hid = hiddenSet();
+  var out = DB.events.filter((function(e) {
+    return (!hid['l:' + e.id] || isScrap(e)) && !isApplyRec(e);
+  })).map((function(e) {
+    return e.src === 'job' && !isScrap(e) ? Object.assign({}, e, {
+      color: jobColor(e, e.color)
+    }) : e;
+  }));
+  DB.subs.forEach((function(s) {
+    if (s.hidden) return;
+    (s.events || []).forEach((function(e) {
+      if (hid['s:' + s.id + ':' + e.id] && !isScrap(e, s) || isApplyRec(e)) return;
+      out.push(Object.assign({}, e, {
+        color: evColor(e, s),
+        sub: s.id,
+        subName: s.name,
+        readonly: true
+      }));
+    }));
+  }));
+  return out;
+}
+
+function occurrences(from, to, list) {
+  var out = [];
+  (list || allSources()).forEach((function(e) {
+    var len = Math.max(0, diffDays(e.start, e.end || e.start));
+    var rep = e.repeat || 'none';
+    if (rep === 'none') {
+      if (e.start <= to && addDays(e.start, len) >= from) out.push({
+        ev: e,
+        start: e.start,
+        end: addDays(e.start, len)
+      });
+      return;
+    }
+    var s0 = parse(e.start), until = e.until || '9999-12-31';
+    var push = function(st) {
+      var en = addDays(st, len);
+      if (st <= to && en >= from && st <= until && st >= e.start) out.push({
+        ev: e,
+        start: st,
+        end: en
+      });
+    };
+    if (rep === 'weekly') {
+      var k = Math.max(0, Math.floor(diffDays(e.start, from) / 7) - 1);
+      for (var st = addDays(e.start, k * 7); st <= to; st = addDays(st, 7)) push(st);
+    } else if (rep === 'monthly' || rep === 'yearly') {
+      var f = parse(from), y = f.getFullYear(), m = f.getMonth() - 1, day = s0.getDate();
+      if (rep === 'yearly') {
+        for (var yy = y - 1; yy <= parse(to).getFullYear(); yy++) {
+          var d1 = new Date(yy, s0.getMonth(), day);
+          if (d1.getMonth() === s0.getMonth()) push(ymd(d1));
+        }
+      } else {
+        for (var i = 0; i < 400; i++) {
+          var d2 = new Date(y, m + i, day);
+          if (d2.getDate() !== day) continue;
+          var st2 = ymd(d2);
+          if (st2 > to) break;
+          push(st2);
+        }
+      }
+    }
+  }));
+  return out;
+}
+
+function sortOcc(a, b) {
+  if (a.start !== b.start) return a.start < b.start ? -1 : 1;
+  var la = diffDays(a.start, a.end), lb = diffDays(b.start, b.end);
+  if (la !== lb) return lb - la;
+  var ta = a.ev.allDay ? '' : a.ev.startTime, tb = b.ev.allDay ? '' : b.ev.startTime;
+  if (ta !== tb) return ta < tb ? -1 : 1;
+  return (a.ev.title || '') < (b.ev.title || '') ? -1 : 1;
+}
+
+var cur = function() {
+  var d = new Date;
+  return {
+    y: d.getFullYear(),
+    m: d.getMonth()
+  };
+}();
+
+var selDay = null;
+
+var LANE_H = 18, TOP = 32;
+
+function shortTitle(t) {
+  var m = /^\s*\[([^\]]+)\]\s*([①-⑳])?/.exec(t || '');
+  if (!m) return t;
+  return m[1].trim();
+}
+
+function weeksOf(y, m) {
+  var first = new Date(y, m, 1), start = new Date(y, m, 1 - first.getDay());
+  var last = new Date(y, m + 1, 0), n = Math.ceil((first.getDay() + last.getDate()) / 7);
+  var ws = [];
+  for (var w = 0; w < n; w++) {
+    var d = new Date(start);
+    d.setDate(start.getDate() + w * 7);
+    ws.push(ymd(d));
+  }
+  return ws;
+}
+
+function buildMonth(y, m) {
+  var el = document.createElement('div');
+  el.className = 'month';
+  var ws = weeksOf(y, m), hm = holidayMap(), today = todayS();
+  var H = document.getElementById('gridWrap').clientHeight, rowH = Math.floor(H / ws.length);
+  var lanes = Math.max(1, Math.floor((rowH - TOP - 2) / LANE_H));
+  var occ = occurrences(ws[0], addDays(ws[ws.length - 1], 6), tabSources(curTab()));
+  ws.forEach((function(ws0) {
+    var we = addDays(ws0, 6);
+    var wk = document.createElement('div');
+    wk.className = 'week';
+    var cells = '<div class="cells">';
+    for (var i = 0; i < 7; i++) {
+      var ds = addDays(ws0, i), dd = parse(ds);
+      var cls = 'cell' + (dd.getMonth() !== m ? ' out' : '') + (i === 0 ? ' sun' : i === 6 ? ' sat' : '') + (hm[ds] ? ' hol' : '') + (ds === today ? ' today' : '') + (ds === selDay ? ' sel' : '');
+      cells += '<div class="' + cls + '" data-d="' + ds + '"><span class="dnum">' + dd.getDate() + '</span></div>';
+    }
+    cells += '</div>';
+    var items = [];
+    for (var j = 0; j < 7; j++) {
+      var hd = addDays(ws0, j);
+      (hm[hd] || []).forEach((function(n) {
+        items.push({
+          hol: true,
+          title: n,
+          s: j,
+          e: j
+        });
+      }));
+    }
+    occ.filter((function(o) {
+      return o.start <= we && o.end >= ws0;
+    })).sort(sortOcc).forEach((function(o) {
+      var sc = isScrap(o.ev), hd = sc && scrapHead(o.ev);
+      items.push({
+        o: o,
+        sc: sc,
+        title: sc ? hd.company || hd.title : (resultOf(o.ev) === 'pass' ? '✓' : '') + shortTitle(o.ev.title),
+        s: Math.max(0, diffDays(ws0, o.start)),
+        e: Math.min(6, diffDays(ws0, o.end)),
+        cl: o.start < ws0,
+        cr: o.end > we
+      });
+    }));
+    var used = [];
+    items.forEach((function(it) {
+      for (var L = 0; ;L++) {
+        used[L] = used[L] || [];
+        var free = true;
+        for (var d = it.s; d <= it.e; d++) if (used[L][d]) {
+          free = false;
+          break;
+        }
+        if (free) {
+          for (var d2 = it.s; d2 <= it.e; d2++) used[L][d2] = 1;
+          it.lane = L;
+          break;
+        }
+      }
+    }));
+    var perDay = [ 0, 0, 0, 0, 0, 0, 0 ];
+    items.forEach((function(it) {
+      for (var d = it.s; d <= it.e; d++) perDay[d] = Math.max(perDay[d], it.lane + 1);
+    }));
+    var bars = '<div class="bars">', hidden = [ 0, 0, 0, 0, 0, 0, 0 ];
+    items.forEach((function(it) {
+      var show = it.lane < lanes - 1;
+      if (it.lane === lanes - 1) {
+        show = true;
+        for (var d = it.s; d <= it.e; d++) if (perDay[d] > lanes) show = false;
+      }
+      if (!show) {
+        for (var d3 = it.s; d3 <= it.e; d3++) hidden[d3]++;
+        return;
+      }
+      var left = 'calc(' + it.s / 7 * 100 + '% + 1px)', width = 'calc(' + (it.e - it.s + 1) / 7 * 100 + '% - 2px)';
+      var c = it.hol ? 'hol' : 'c-' + (it.o.ev.color || 'blue');
+      var pre = it.hol ? '<span class="hrt">★</span>' : it.sc ? '<span class="pin">📌</span>' : it.o.ev.heart ? HEART : '';
+      bars += '<div class="bar ' + c + (it.cl ? ' cont-l' : '') + (it.cr ? ' cont-r' : '') + '" style="top:' + it.lane * LANE_H + 'px;left:' + left + ';width:' + width + '">' + pre + esc(it.title) + '</div>';
+    }));
+    for (var d4 = 0; d4 < 7; d4++) if (hidden[d4]) bars += '<div class="more" style="top:' + (lanes - 1) * LANE_H + 'px;left:' + d4 / 7 * 100 + '%;width:' + 100 / 7 + '%">+' + hidden[d4] + '</div>';
+    bars += '</div>';
+    wk.innerHTML = cells + bars;
+    el.appendChild(wk);
+  }));
+  return el;
+}
+
+function fitWeeks() {}
+
+function fitPane() {
+  var pane = document.getElementById('scrapPane'), ph = 0;
+  var avail = window.innerHeight - document.getElementById('top').offsetHeight - document.getElementById('dow').offsetHeight;
+  if (curTab() === 'scrap') {
+    drawScrapPane();
+    var y = pane.scrollTop;
+    pane.style.height = 'auto';
+    ph = Math.min(Math.round(avail * .45), Math.max(150, pane.offsetHeight));
+    pane.style.height = ph + 'px';
+    pane.scrollTop = y;
+  }
+  document.getElementById('gridWrap').style.height = avail - ph + 'px';
+}
+
+function render(dir) {
+  applyTab();
+  syncCompanyColors();
+  fitPane();
+  var wrap = document.getElementById('gridWrap');
+  var old = wrap.firstChild, nu = buildMonth(cur.y, cur.m);
+  document.getElementById('monthTitle').textContent = cur.m + 1 + '월';
+  document.getElementById('yearTitle').textContent = cur.y;
+  var t = new Date;
+  document.getElementById('todayBtn').style.display = t.getFullYear() === cur.y && t.getMonth() === cur.m ? 'none' : 'block';
+  if (dir && old) {
+    nu.style.transform = 'translateX(' + dir * 100 + '%)';
+    wrap.appendChild(nu);
+    fitWeeks(nu);
+    nu.getBoundingClientRect();
+    old.style.transition = nu.style.transition = 'transform .26s cubic-bezier(.2,.8,.2,1)';
+    old.style.transform = 'translateX(' + -dir * 100 + '%)';
+    nu.style.transform = 'none';
+    setTimeout((function() {
+      if (old.parentNode) old.parentNode.removeChild(old);
+    }), 300);
+  } else {
+    var keep = old ? old.scrollTop : 0;
+    wrap.innerHTML = '';
+    wrap.appendChild(nu);
+    fitWeeks(nu);
+    nu.scrollTop = keep;
+  }
+}
+
+function go(delta) {
+  var d = new Date(cur.y, cur.m + delta, 1);
+  cur = {
+    y: d.getFullYear(),
+    m: d.getMonth()
+  };
+  render(delta);
+}
+
+function goDate(s) {
+  var d = parse(s), dir = d.getFullYear() * 12 + d.getMonth() - (cur.y * 12 + cur.m);
+  cur = {
+    y: d.getFullYear(),
+    m: d.getMonth()
+  };
+  render(dir ? dir > 0 ? 1 : -1 : 0);
+}
+
+function layout() {
+  render(0);
+}
+
+var stack = [];
+
+function openSheet(id) {
+  var s = document.getElementById(id);
+  if (stack.indexOf(id) < 0) stack.push(id);
+  s.style.zIndex = 10 + stack.length * 2;
+  document.getElementById('dim').style.zIndex = 9 + stack.length * 2;
+  s.classList.add('on');
+  document.getElementById('dim').classList.add('on');
+}
+
+function closeSheet() {
+  var id = stack.pop();
+  if (!id) return false;
+  document.getElementById(id).classList.remove('on');
+  if (!stack.length) {
+    document.getElementById('dim').classList.remove('on');
+    if (selDay) {
+      selDay = null;
+      render(0);
+    }
+  } else document.getElementById('dim').style.zIndex = 9 + stack.length * 2;
+  if (document.activeElement) document.activeElement.blur();
+  return true;
+}
+
+window.onBack = function() {
+  return closeSheet();
+};
+
+document.getElementById('dim').onclick = closeSheet;
+
+var X_BTN = '<button class="icon x" onclick="closeSheet()"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>';
+
+function timeText(o) {
+  var e = o.ev, multi = o.start !== o.end;
+  if (e.allDay) return multi ? label(o.start) + ' ~ ' + label(o.end) : '하루 종일';
+  var s = e.startTime + (e.endTime ? ' ~ ' + e.endTime : '');
+  return multi ? label(o.start) + ' ' + e.startTime + ' ~ ' + label(o.end) + ' ' + (e.endTime || '') : s;
+}
+
+function roleOf(e) {
+  var m = /^\s*직무\s*:\s*(.+)$/m.exec(memoHead(e.memo));
+  return m ? m[1].trim() : '';
+}
+
+function roleHTML(e) {
+  var r = roleOf(e);
+  return r ? '<span class="role">' + esc(r) + '</span>' : '';
+}
+
+function itemHTML(o, ds) {
+  var e = o.ev, meta = [ timeText(o) ];
+  if (e.repeat && e.repeat !== 'none') meta.push({
+    weekly: '매주',
+    monthly: '매월',
+    yearly: '매년'
+  }[e.repeat]);
+  if (e.subName) meta.push(e.subName);
+  return '<div class="item" data-id="' + esc(e.id) + '" data-sub="' + esc(e.sub || '') + '" data-start="' + o.start + '">' + '<div class="stripe c-' + (e.color || 'blue') + '"></div><div style="flex:1;min-width:0">' + '<div class="t">' + (e.heart ? HEART : '') + esc(e.title) + roleHTML(e) + '</div>' + '<div class="m">' + esc(meta.join(' · ')) + (e.memo ? '\n' + esc(e.memo.split('\n')[0]) : '') + '</div>' + judgeHTML(e) + '</div></div>';
+}
+
+function scrapItemHTML(o) {
+  var e = o.ev, x = scrapInfo(e), meta = [ dueText(x), scrapMeta(x) ].filter(Boolean).join(' · ');
+  return '<div class="item" data-id="' + esc(e.id) + '" data-sub="' + esc(e.sub || '') + '" data-start="' + o.start + '">' + '<div class="stripe c-' + (e.color || 'blue') + '"></div><div style="flex:1;min-width:0">' + '<div class="t">📌 ' + esc(x.company || x.title) + '</div>' + '<div class="m">' + esc((x.company && x.title ? x.title + '\n' : '') + meta) + '</div></div></div>';
+}
+
+function openDay(ds) {
+  selDay = ds;
+  render(0);
+  var sc = curTab() === 'scrap', hm = holidayMap(), list = occurrences(ds, ds, tabSources(curTab())).sort(sortOcc);
+  var h = '<div class="grab"></div><div class="sh-head"><h2>' + label(ds) + '</h2>' + (hm[ds] ? '<span class="sub">★ ' + esc(hm[ds].join(', ')) + '</span>' : '') + X_BTN + '</div><div class="sh-body">';
+  h += list.length ? list.map((function(o) {
+    return isScrap(o.ev) ? scrapItemHTML(o) : itemHTML(o, ds);
+  })).join('') : '<div class="empty">' + (sc ? '이 날 마감인 스크랩 공고가 없어요' : '일정이 없어요') + '</div>';
+  h += '<button class="addLine" id="dayAdd">＋ ' + (sc ? '이 날 마감 공고 직접 추가' : '이 날에 일정 추가') + '</button></div>';
+  var s = document.getElementById('shDay');
+  s.innerHTML = h;
+  s.querySelectorAll('.item').forEach((function(it) {
+    it.onclick = function() {
+      var e = findEvent(it.dataset.id, it.dataset.sub);
+      if (e && isScrap(e)) openScrap(e, true); else if (e) openEdit(e);
+    };
+  }));
+  bindJudge(s, (function(b) {
+    var it = b.closest('.item');
+    return findEvent(it.dataset.id, it.dataset.sub);
+  }), (function() {
+    closeSheet();
+    openDay(ds);
+  }));
+  document.getElementById('dayAdd').onclick = function() {
+    openEdit(null, ds, sc);
+  };
+  openSheet('shDay');
+}
+
+var editing = null;
+
+function findEvent(id, sub) {
+  if (sub) {
+    var s = DB.subs.filter((function(x) {
+      return x.id === sub;
+    }))[0];
+    if (!s) return null;
+    var e = (s.events || []).filter((function(x) {
+      return x.id === id;
+    }))[0];
+    return e ? Object.assign({}, e, {
+      color: evColor(e, s),
+      sub: s.id,
+      subName: s.name,
+      readonly: true
+    }) : null;
+  }
+  return DB.events.filter((function(x) {
+    return x.id === id;
+  }))[0] || null;
+}
+
+function openEdit(ev, ds, scrap) {
+  var s = document.getElementById('shEdit');
+  scrap = !!scrap && !ev;
+  if (ev && ev.readonly) {
+    s.innerHTML = '<div class="grab"></div><div class="sh-head"><h2>' + esc(ev.title) + '</h2>' + X_BTN + '</div><div class="sh-body">' + '<div class="ro">' + esc((isApplyRec(ev) ? '지원한 날 · ' : '') + label(ev.start) + (ev.end && ev.end !== ev.start ? ' ~ ' + label(ev.end) : '') + (ev.allDay ? ' · 하루 종일' : ' · ' + ev.startTime + (ev.endTime ? ' ~ ' + ev.endTime : ''))) + '</div>' + judgeHTML(ev) + (memoHead(ev.memo) ? '<div class="sec">메모</div><div class="ro" style="margin-top:6px;user-select:text">' + esc(memoHead(ev.memo)) + '</div>' : '') + (memoLetter(ev.memo) ? '<div class="small" style="margin-top:8px">제출한 자소서는 «지원 현황» 에서 회사를 누르면 보여요.</div>' : '') + '<div class="small" style="margin-top:18px">«' + esc(ev.subName) + '» 구독 일정이라 여기서는 고칠 수 없어요. 구글캘린더에서 고치면 다음에 앱을 열 때 바뀌어요.</div></div>';
+    bindJudge(s, (function() {
+      return ev;
+    }), (function() {
+      closeAll();
+      render(0);
+    }));
+    openSheet('shEdit');
+    return;
+  }
+  var day = ds || selDay || todayS();
+  editing = ev ? JSON.parse(JSON.stringify(ev)) : {
+    id: uid(),
+    title: scrap ? '📌 ' : '',
+    start: day,
+    end: day,
+    allDay: true,
+    startTime: '09:00',
+    endTime: '10:00',
+    color: 'blue',
+    heart: false,
+    repeat: 'none',
+    alarm: true,
+    memo: ''
+  };
+  if (!editing.startTime) editing.startTime = '09:00';
+  if (!editing.endTime) editing.endTime = '10:00';
+  var e = editing;
+  var h = '<div class="grab"></div><div class="sh-head"><h2>' + (ev ? '일정 고치기' : scrap ? '새 스크랩 공고' : '새 일정') + '</h2>' + X_BTN + '</div><div class="sh-body">' + (scrap ? '<div class="small" style="margin:0 0 10px">보통은 PC 크롬의 구직 도우미 «📅 캘린더에 담기» 로 담아요 — 구글 «스크랩 공고» 캘린더로 들어오면 여기에 모여요. ' + '여기서 직접 넣은 공고는 이 폰에만 저장돼요. 날짜는 마감일로 골라 주세요.</div>' : '') + '<input class="inp" id="fTitle" placeholder="' + (scrap ? '📌 [회사] 공고 제목' : '무엇을 하나요?') + '" value="' + esc(e.title) + '" maxlength="80">' + '<div class="card"><div class="tg"><span>하루 종일</span><div class="sw' + (e.allDay ? ' on' : '') + '" id="fAll"></div></div></div>' + '<div class="f"><label class="l">시작</label><div class="row"><input class="inp" type="date" id="fS" value="' + e.start + '">' + '<input class="inp tm" type="time" id="fST" value="' + e.startTime + '"></div></div>' + '<div class="f"><label class="l">끝</label><div class="row"><input class="inp" type="date" id="fE" value="' + e.end + '">' + '<input class="inp tm" type="time" id="fET" value="' + e.endTime + '"></div></div>' + '<div class="f"><label class="l">색</label><div class="colors" id="fC">' + COLORS.map((function(c) {
+    return '<button class="sw-c c-' + c + (e.color === c ? ' on' : '') + '" data-c="' + c + '" aria-label="' + COLOR_NAME[c] + '"></button>';
+  })).join('') + '<button class="heartBtn' + (e.heart ? ' on' : '') + '" id="fH">' + HEART + '하트</button></div></div>' + '<div class="f"><label class="l">반복</label><div class="seg" id="fR">' + [ [ 'none', '안 함' ], [ 'weekly', '매주' ], [ 'monthly', '매월' ], [ 'yearly', '매년' ] ].map((function(r) {
+    return '<button data-r="' + r[0] + '" class="' + (e.repeat === r[0] ? 'on' : '') + '">' + r[1] + '</button>';
+  })).join('') + '</div></div>' + '<div class="card" style="margin-top:14px"><div class="tg"><span>알림 받기</span><div class="sw' + (e.alarm !== false ? ' on' : '') + '" id="fA"></div></div></div>' + '<div class="f"><label class="l">메모</label><textarea class="inp" id="fM" placeholder="' + (scrap ? '한 줄에 하나씩 — 링크: https://… / 근무지: …' : '장소, 준비물 등') + '">' + esc(e.memo) + '</textarea></div>' + '</div><div class="sh-foot">' + (ev ? '<button class="btn del" id="fDel">삭제</button>' : '') + '<button class="btn pri" id="fSave">저장</button></div>';
+  s.innerHTML = h;
+  var $ = function(id) {
+    return document.getElementById(id);
+  };
+  var syncTime = function() {
+    s.querySelectorAll('.tm').forEach((function(t) {
+      t.style.display = e.allDay ? 'none' : '';
+    }));
+  };
+  syncTime();
+  $('fAll').onclick = function() {
+    e.allDay = !e.allDay;
+    this.classList.toggle('on', e.allDay);
+    syncTime();
+  };
+  $('fA').onclick = function() {
+    e.alarm = !(e.alarm !== false);
+    this.classList.toggle('on', e.alarm);
+  };
+  $('fH').onclick = function() {
+    e.heart = !e.heart;
+    this.classList.toggle('on', e.heart);
+  };
+  $('fS').onchange = function() {
+    var old = e.start;
+    e.start = this.value || old;
+    var len = Math.max(0, diffDays(old, $('fE').value || old));
+    $('fE').value = addDays(e.start, len);
+  };
+  s.querySelectorAll('#fC .sw-c').forEach((function(b) {
+    b.onclick = function() {
+      s.querySelectorAll('#fC .sw-c').forEach((function(x) {
+        x.classList.remove('on');
+      }));
+      b.classList.add('on');
+      e.color = b.dataset.c;
+    };
+  }));
+  s.querySelectorAll('#fR button').forEach((function(b) {
+    b.onclick = function() {
+      s.querySelectorAll('#fR button').forEach((function(x) {
+        x.classList.remove('on');
+      }));
+      b.classList.add('on');
+      e.repeat = b.dataset.r;
+    };
+  }));
+  $('fSave').onclick = function() {
+    e.title = $('fTitle').value.trim();
+    e.memo = $('fM').value.trim();
+    e.start = $('fS').value;
+    e.end = $('fE').value || e.start;
+    e.startTime = $('fST').value || '09:00';
+    e.endTime = $('fET').value || '';
+    if (scrap && e.title.replace(/^\s*📌\s*/, '') && !/^\s*📌/.test(e.title)) e.title = '📌 ' + e.title;
+    if (!e.title || scrap && !e.title.replace(/^\s*📌\s*/, '')) {
+      toast('제목을 써 주세요');
+      $('fTitle').focus();
+      return;
+    }
+    if (!e.start) {
+      toast('날짜를 골라 주세요');
+      return;
+    }
+    if (e.end < e.start) e.end = e.start;
+    if (!e.allDay && e.end === e.start && e.endTime && e.endTime < e.startTime) e.endTime = e.startTime;
+    var i = DB.events.map((function(x) {
+      return x.id;
+    })).indexOf(e.id);
+    if (i >= 0) DB.events[i] = e; else DB.events.push(e);
+    saveDB();
+    closeAll();
+    goDate(e.start);
+    toast('저장했어요');
+  };
+  if ($('fDel')) $('fDel').onclick = function() {
+    if (this.dataset.armed !== '1') {
+      this.dataset.armed = '1';
+      this.textContent = '한 번 더';
+      return;
+    }
+    DB.events = DB.events.filter((function(x) {
+      return x.id !== e.id;
+    }));
+    saveDB();
+    closeAll();
+    render(0);
+    toast('지웠어요');
+  };
+  openSheet('shEdit');
+  if (!ev) setTimeout((function() {
+    var t = $('fTitle');
+    t.focus();
+    try {
+      t.setSelectionRange(t.value.length, t.value.length);
+    } catch (x) {}
+  }), 280);
+}
+
+function closeAll() {
+  while (stack.length) closeSheet();
+}
+
+function isApplyRec(e) {
+  return /^\s*\[[^\]]+\]\s*⓪/.test(e.title || '');
+}
+
+var LETTER_MARK = /\n*━+\s*제출 자소서\s*━+[ \t]*\n?/;
+
+function memoHead(m) {
+  return String(m || '').split(LETTER_MARK)[0].trim();
+}
+
+function memoLetter(m) {
+  var p = String(m || '').split(LETTER_MARK);
+  return p.length > 1 ? p.slice(1).join('\n').trim() : '';
+}
+
+var LETTER_Q = /\n*={6,}\n([^\n]+)\n[ \t]*[—-][ \t]*([^\n]+)\n={6,}\n*/g;
+
+function letterParts(t) {
+  t = String(t || '');
+  var parts = [], last = 0, cur = {
+    q: '',
+    n: ''
+  }, m;
+  LETTER_Q.lastIndex = 0;
+  while (m = LETTER_Q.exec(t)) {
+    cur.body = t.slice(last, m.index).trim();
+    if (cur.q || cur.body) parts.push(cur);
+    cur = {
+      q: m[1].trim(),
+      n: m[2].trim()
+    };
+    last = LETTER_Q.lastIndex;
+  }
+  cur.body = t.slice(last).trim();
+  if (cur.q || cur.body) parts.push(cur);
+  return parts;
+}
+
+function letterHTML(parts) {
+  return parts.map((function(p, i) {
+    return (p.q ? '<div class="lq">' + esc(p.q) + (p.n ? '<span>' + esc(p.n) + '</span>' : '') + '</div>' : '') + (p.body ? '<div class="lb" data-i="' + i + '">' + esc(p.body) + '</div>' : '');
+  })).join('');
+}
+
+function copyText(t) {
+  var ok = false;
+  try {
+    if (HAS_APP && App.copy) {
+      App.copy(t);
+      ok = true;
+    }
+  } catch (e) {}
+  if (!ok) {
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = t;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+    } catch (e) {}
+  }
+  if (!ok) {
+    try {
+      navigator.clipboard.writeText(t);
+      ok = true;
+    } catch (e) {}
+  }
+  toast(ok ? '복사했어요 · ' + t.length.toLocaleString() + '자' : '복사하지 못했어요');
+}
+
+function pfUrl(head) {
+  var m = /^\s*(?:포폴|포트폴리오)\s*:\s*(https:\/\/\S+)/m.exec(head || '');
+  return m ? m[1] : '';
+}
+
+function openLink(u) {
+  try {
+    if (HAS_APP && App.openUrl) {
+      App.openUrl(u);
+      return;
+    }
+  } catch (e) {}
+  window.open(u, '_blank');
+}
+
+function applyBoard() {
+  var hid = hiddenSet(), today = todayS(), cos = {}, rej = DB.rejected || {};
+  var get = function(c) {
+    return cos[c] = cos[c] || {
+      name: c,
+      rec: null,
+      next: null,
+      pass: false,
+      color: null
+    };
+  };
+  DB.subs.forEach((function(s) {
+    if (!isJobSub(s) || s.hidden) return;
+    (s.events || []).forEach((function(e) {
+      var k = 's:' + s.id + ':' + e.id, c = companyOf(e.title);
+      if (!c || isScrap(e, s)) return;
+      if (hid[k]) {
+        if (rej[c] && isApplyRec(e)) {
+          var x0 = get(c);
+          if (!x0.rejRec || e.start < x0.rejRec.start) x0.rejRec = Object.assign({}, e, {
+            color: 'gray',
+            sub: s.id,
+            subName: s.name,
+            readonly: true
+          });
+        }
+        return;
+      }
+      var x = get(c), ev = Object.assign({}, e, {
+        color: jobColor(e, s.color),
+        sub: s.id,
+        subName: s.name,
+        readonly: true
+      });
+      x.live = true;
+      x.color = ev.color;
+      if ((DB.results || {})[k] === 'pass') x.pass = true;
+      if (isApplyRec(e)) {
+        if (!x.rec || e.start < x.rec.start) x.rec = ev;
+        return;
+      }
+      if ((e.end || e.start) < today) return;
+      var key = e.start + ' ' + (e.allDay ? '' : e.startTime || '');
+      if (!x.next || key < x.nextKey) {
+        x.next = ev;
+        x.nextKey = key;
+      }
+    }));
+  }));
+  Object.keys(rej).forEach((function(c) {
+    get(c);
+  }));
+  return Object.keys(cos).map((function(c) {
+    var x = cos[c];
+    if (rej[c] && !x.live) {
+      x.done = true;
+      x.rec = x.rejRec || null;
+      x.next = null;
+      x.pass = false;
+      x.color = 'gray';
+      x.rejAt = rej[c].at;
+    }
+    var memo = memoHead(x.rec && x.rec.memo);
+    if (/^\s*결과\s*:\s*불합격/m.test(memo)) {
+      x.done = true;
+      x.next = null;
+      x.color = 'gray';
+    }
+    var m = /^\s*다음\s*:\s*(.+)$/m.exec(memo);
+    x.nextText = m ? m[1].trim() : '';
+    x.pf = pfUrl(memo);
+    x.role = x.rec ? x.rec.title.replace(/^\s*\[[^\]]+\]\s*⓪\s*지원\s*·?\s*/, '').trim() : '';
+    var mm = /(\d{1,2})\s*월/.exec(x.nextText);
+    x.kind = x.done ? 'done' : x.next ? 'date' : mm && !/^없음/.test(x.nextText) ? 'month' : 'none';
+    x.month = mm ? +mm[1] : 0;
+    return x;
+  }));
+}
+
+function stepText(t) {
+  return String(t || '').replace(/^\s*\[[^\]]+\]\s*/, '').replace(/\s*⏳\s*/g, ' ').trim();
+}
+
+function md(s) {
+  var d = parse(s);
+  return d.getMonth() + 1 + '/' + d.getDate() + ' (' + WD[d.getDay()] + ')';
+}
+
+function openApply() {
+  var L = applyBoard(), today = todayS(), nowM = (new Date).getMonth() + 1;
+  var dated = L.filter((function(x) {
+    return x.kind === 'date';
+  })).sort((function(a, b) {
+    return a.nextKey < b.nextKey ? -1 : 1;
+  }));
+  var month = L.filter((function(x) {
+    return x.kind === 'month';
+  })).sort((function(a, b) {
+    return (a.month - nowM + 12) % 12 - (b.month - nowM + 12) % 12 || (a.name < b.name ? -1 : 1);
+  }));
+  var none = L.filter((function(x) {
+    return x.kind === 'none';
+  })).sort((function(a, b) {
+    var sa = a.rec ? a.rec.start : '', sb = b.rec ? b.rec.start : '';
+    return sa < sb ? 1 : sa > sb ? -1 : 0;
+  }));
+  var done = L.filter((function(x) {
+    return x.kind === 'done';
+  })).sort((function(a, b) {
+    return (b.rejAt || 0) - (a.rejAt || 0) || (a.name < b.name ? -1 : 1);
+  }));
+  var row = function(x) {
+    var applied = x.rec ? '지원 ' + md(x.rec.start).replace(/ \(.\)$/, '') : '';
+    var when, line;
+    if (x.kind === 'done') {
+      when = '불합격';
+      line = x.rejAt ? new Date(x.rejAt).getMonth() + 1 + '/' + new Date(x.rejAt).getDate() + ' 불합격 표시' : '불합격';
+    } else if (x.kind === 'date') {
+      var dd = diffDays(today, x.next.start);
+      when = md(x.next.start).replace(' ', '<br>') + '<small>' + (dd <= 0 ? '오늘' : 'D-' + dd) + '</small>';
+      line = stepText(x.next.title);
+    } else if (x.kind === 'month') {
+      when = x.month + '월';
+      line = x.nextText;
+    } else {
+      when = '없음';
+      var flow = /^\s*전형\s*:\s*(.+)$/m.exec(memoHead(x.rec && x.rec.memo));
+      line = x.nextText && !/^없음\s*$/.test(x.nextText) ? x.nextText : flow ? flow[1].replace(/\s*\(날짜 없음[^)]*\)\s*$/, '').trim() : '다음 일정 날짜 없음';
+    }
+    return '<div class="ap' + (x.kind === 'done' ? ' done' : '') + '" data-c="' + esc(x.name) + '"><div class="stripe c-' + (x.color || 'purple') + '"></div><div style="flex:1;min-width:0">' + '<div class="t">' + (x.pass ? '<span class="pass">✓</span>' : '') + esc(x.name) + (x.role ? '<span class="role">' + esc(x.role) + '</span>' : '') + '</div>' + '<div class="m">' + esc(line) + '</div>' + (applied ? '<div class="d">' + esc(applied) + '</div>' : '') + '</div>' + '<div class="when' + (x.kind === 'none' ? ' none' : x.kind === 'done' ? ' fail' : '') + '">' + when + '</div></div>';
+  };
+  var sec = function(title, list) {
+    return list.length ? '<div class="apSec">' + title + ' <span>' + list.length + '</span></div>' + list.map(row).join('') : '';
+  };
+  var grp = function(title, n) {
+    return '<div class="apGrp">' + title + ' <span>' + n + '곳</span></div>';
+  };
+  var before = dated.length + month.length + none.length;
+  var s = document.getElementById('shApply');
+  s.innerHTML = '<div class="grab"></div><div class="sh-head"><h2>지원 현황</h2><span class="sub" style="color:var(--ink3)">' + L.length + '곳</span>' + X_BTN + '</div><div class="sh-body">' + (L.length ? grp('발표 전', before) + (before ? sec('날짜 나온 곳', dated) + sec('월만 나온 곳', month) + sec('날짜 없는 곳', none) : '<div class="empty">없어요</div>') + grp('발표 후', done.length) + (done.length ? done.map(row).join('') : '<div class="small" style="margin-top:8px">아직 없어요 — 일정에서 [불합격] 을 누르면 여기로 와요.</div>') : '<div class="empty">지원한 곳이 없어요</div>') + '<div class="small" style="margin-top:16px">구글 «취업캘린더» 에서 받아 와요. 불합격 처리한 회사는 «발표 후» 로 옮겨요(달력에선 숨김 · 설정에서 되돌리기).</div></div>';
+  s.querySelectorAll('.ap').forEach((function(el) {
+    el.onclick = function() {
+      var x = L.filter((function(y) {
+        return y.name === el.dataset.c;
+      }))[0];
+      if (x) openCo(x);
+    };
+  }));
+  openSheet('shApply');
+}
+
+function openCo(x) {
+  var head = memoHead(x.rec && x.rec.memo), letter = memoLetter(x.rec && x.rec.memo);
+  var flow = /^\s*전형\s*:\s*(.+)$/m.exec(head), info = [];
+  if (x.rec) info.push([ '지원', label(x.rec.start) ]);
+  if (x.kind === 'done') info.push([ '결과', '불합격' + (x.rejAt ? ' (' + new Date(x.rejAt).toLocaleDateString('ko-KR') + ' 표시)' : '') ]); else if (x.kind === 'date') info.push([ '다음', md(x.next.start) + ' · ' + stepText(x.next.title) ]); else if (x.nextText) info.push([ '다음', x.nextText ]);
+  if (flow) info.push([ '전형', flow[1].trim() ]);
+  var parts = letterParts(letter);
+  var btns = (x.kind === 'date' ? '<button id="coCal">달력에서 보기</button>' : '') + (x.pf ? '<button id="coPf">포트폴리오 열기</button>' : '') + (x.kind === 'done' ? (DB.rejected || {})[x.name] ? '<button id="coUndo">불합격 되돌리기</button>' : '' : x.rec ? '<button id="coRec">기록 · 불합격 처리</button>' : '');
+  var s = document.getElementById('shCo');
+  s.innerHTML = '<div class="grab"></div><div class="sh-head"><h2>' + (x.pass ? '<span style="color:#1a9a55">✓ </span>' : '') + esc(x.name) + '</h2>' + (x.role ? '<span class="sub" style="color:var(--ink3)">' + esc(x.role) + '</span>' : '') + X_BTN + '</div><div class="sh-body">' + info.map((function(r) {
+    return '<div class="coInfo"><b>' + r[0] + '</b>' + esc(r[1]) + '</div>';
+  })).join('') + (btns ? '<div class="coBtns">' + btns + '</div>' : '') + '<div class="sec">제출한 자소서</div>' + (parts.length ? '<div class="letterHint">글을 누르면 그 문항이 복사돼요</div><div class="letter">' + letterHTML(parts) + '</div>' : '<div class="empty">아직 여기에 넣어 둔 자소서가 없어요</div>') + '</div>';
+  s.querySelectorAll('.letter .lb').forEach((function(el) {
+    el.onclick = function() {
+      var p = parts[+el.dataset.i];
+      if (!p) return;
+      if (String(window.getSelection ? window.getSelection() : '').length) return;
+      copyText(p.body);
+      el.classList.add('cp');
+      setTimeout((function() {
+        el.classList.remove('cp');
+      }), 600);
+    };
+  }));
+  var b = document.getElementById('coCal');
+  if (b) b.onclick = function() {
+    var ds = x.next.start;
+    closeAll();
+    setTab('job');
+    goDate(ds);
+    setTimeout((function() {
+      openDay(ds);
+    }), 350);
+  };
+  b = document.getElementById('coRec');
+  if (b) b.onclick = function() {
+    openEdit(x.rec);
+  };
+  b = document.getElementById('coPf');
+  if (b) b.onclick = function() {
+    openLink(x.pf);
+  };
+  b = document.getElementById('coUndo');
+  if (b) b.onclick = function() {
+    if (this.dataset.armed !== '1') {
+      this.dataset.armed = '1';
+      this.textContent = '정말 되돌릴까요?';
+      return;
+    }
+    undoReject(x.name);
+    closeAll();
+    render(0);
+    setTimeout(openApply, 300);
+  };
+  s.querySelector('.sh-body').scrollTop = 0;
+  openSheet('shCo');
+}
+
+var scrapL = [];
+
+function scrapRows() {
+  var today = todayS();
+  return tabSources('scrap').map((function(e) {
+    var x = scrapInfo(e);
+    x.dd = x.always ? null : diffDays(today, x.end);
+    x.kind = x.always ? 'always' : x.dd < 0 ? 'past' : 'open';
+    return x;
+  }));
+}
+
+function scrapRowHTML(x, i) {
+  var when = x.kind === 'always' ? '<div class="when none">상시<small class="gray">' + md(x.ev.start).replace(/ \(.\)$/, '') + ' 담음</small></div>' : '<div class="when">' + md(x.end).replace(' ', '<br>') + '<small class="' + (x.kind === 'past' ? 'gray' : x.dd > 3 ? 'soft' : '') + '">' + (x.kind === 'past' ? '지남' : x.dd === 0 ? '오늘' : 'D-' + x.dd) + '</small></div>';
+  var meta = scrapMeta(x);
+  return '<div class="ap sc' + (x.kind === 'past' ? ' done' : '') + '" data-i="' + i + '"><div class="stripe c-' + esc(x.ev.color || 'blue') + '"></div><div style="flex:1;min-width:0">' + '<div class="t">' + esc(x.company || x.title) + '</div>' + (x.company && x.title ? '<div class="m clamp">' + esc(x.title) + '</div>' : '') + (meta ? '<div class="d">' + esc(meta) + '</div>' : '') + '</div>' + when + '</div>';
+}
+
+function drawScrapPane() {
+  var pane = document.getElementById('scrapPane'), L = scrapRows();
+  var byEnd = function(a, b) {
+    return a.end < b.end ? -1 : a.end > b.end ? 1 : a.company + a.title < b.company + b.title ? -1 : 1;
+  };
+  var open = L.filter((function(x) {
+    return x.kind === 'open';
+  })).sort(byEnd);
+  var always = L.filter((function(x) {
+    return x.kind === 'always';
+  })).sort((function(a, b) {
+    return a.ev.start < b.ev.start ? 1 : a.ev.start > b.ev.start ? -1 : 0;
+  }));
+  var past = L.filter((function(x) {
+    return x.kind === 'past';
+  })).sort((function(a, b) {
+    return byEnd(b, a);
+  }));
+  scrapL = open.concat(always, past);
+  var sec = function(t, list, off) {
+    return list.length ? '<div class="apSec">' + t + ' <span>' + list.length + '</span></div>' + list.map((function(x, j) {
+      return scrapRowHTML(x, off + j);
+    })).join('') : '';
+  };
+  pane.innerHTML = scrapL.length ? sec('마감 전', open, 0) + sec('상시', always, open.length) + sec('마감 지남', past, open.length + always.length) : '<div class="empty" style="padding:20px 0 8px">구직 도우미의 📅 캘린더에 담기로 공고를 담으면 여기에 모입니다</div>' + (DB.subs.some((function(s) {
+    return /스크랩/.test(s.name || '');
+  })) ? '' : '<div class="small" style="text-align:center">구글 «스크랩 공고» 캘린더의 iCal 비공개 주소를 ☰ → 설정 → 구독 추가에 넣어 두세요.</div>');
+  pane.querySelectorAll('.ap').forEach((function(el) {
+    el.onclick = function() {
+      var x = scrapL[+el.dataset.i];
+      if (x) openScrap(x.ev);
+    };
+  }));
+}
+
+function openScrap(e, fromDay) {
+  var x = scrapInfo(e), s = document.getElementById('shScrap'), dd = x.always ? null : diffDays(todayS(), x.end), info = [];
+  info.push([ '마감', x.always ? '상시 (마감 없음)' : label(x.end) + ' · ' + (dd > 0 ? 'D-' + dd : dd === 0 ? '오늘 마감' : -dd + '일 지남') ]);
+  if (x.always) info.push([ '담은 날', label(e.start) ]);
+  if (x.place) info.push([ '근무지', x.place ]);
+  if (x.loc && x.loc !== x.place) info.push([ '주소', x.loc ]);
+  if (x.commute) info.push([ '통근', x.commute ]);
+  if (x.rating) info.push([ '평점', x.rating ]);
+  if (x.site) info.push([ '사이트', x.site ]);
+  var btns = (x.link ? '<button id="scOpen">공고 열기</button>' : '') + (fromDay ? '' : '<button id="scCal">달력에서 보기</button>') + (e.readonly ? '' : '<button id="scEdit">고치기</button>');
+  s.innerHTML = '<div class="grab"></div><div class="sh-head"><h2>📌 ' + esc(x.company || x.title) + '</h2>' + X_BTN + '</div><div class="sh-body">' + (x.company && x.title ? '<div class="scT">' + esc(x.title) + '</div>' : '') + info.map((function(r) {
+    return '<div class="coInfo"><b>' + r[0] + '</b>' + esc(r[1]) + '</div>';
+  })).join('') + (btns ? '<div class="coBtns">' + btns + '</div>' : '') + (x.link ? '' : '<div class="small">메모에 공고 링크가 없어요.</div>') + (x.extra.length ? '<div class="sec">메모</div><div class="ro" style="margin-top:6px;user-select:text;-webkit-user-select:text">' + esc(x.extra.join('\n')) + '</div>' : '') + '<div class="small" style="margin-top:18px">' + (e.readonly ? '«' + esc(e.subName || '') + '» 구독 일정이라 여기서는 고칠 수 없어요. 다 본 공고는 구글캘린더에서 지우면 다음에 앱을 열 때 여기서도 빠져요.' : '이 폰에만 저장된 공고예요.') + '</div></div>';
+  var b = document.getElementById('scOpen');
+  if (b) b.onclick = function() {
+    openLink(x.link);
+  };
+  b = document.getElementById('scCal');
+  if (b) b.onclick = function() {
+    var ds = x.end;
+    closeAll();
+    setTab('scrap');
+    goDate(ds);
+    setTimeout((function() {
+      openDay(ds);
+    }), 350);
+  };
+  b = document.getElementById('scEdit');
+  if (b) b.onclick = function() {
+    openEdit(e);
+  };
+  s.querySelector('.sh-body').scrollTop = 0;
+  openSheet('shScrap');
+}
+
+var CHEV = '<svg class="chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>';
+
+function openMenu() {
+  var dark = isDark(), pend = applyBoard().filter((function(x) {
+    return x.kind !== 'done';
+  })).length;
+  var items = [ [ 'apply', '💼', '지원 현황', pend ? '발표 전 ' + pend + '곳' : '' ], [ 'search', '🔍', '검색', '' ], [ 'theme', dark ? '☀️' : '🌙', dark ? '밝게' : '어둡게', '' ], [ 'set', '⚙️', '설정', '' ] ];
+  var s = document.getElementById('shMenu');
+  s.innerHTML = '<div class="grab"></div><div class="sh-body" style="padding:4px 18px 20px">' + items.map((function(m) {
+    return '<button class="mItem" data-m="' + m[0] + '"><span class="mIc">' + m[1] + '</span><span class="mL">' + m[2] + '</span>' + (m[3] ? '<span class="mR">' + esc(m[3]) + '</span>' : '') + CHEV + '</button>';
+  })).join('') + '</div>';
+  var run = {
+    apply: openApply,
+    search: openSearch,
+    theme: toggleTheme,
+    set: openSettings
+  };
+  s.querySelectorAll('.mItem').forEach((function(b) {
+    b.onclick = function() {
+      closeSheet();
+      run[b.dataset.m]();
+    };
+  }));
+  openSheet('shMenu');
+}
+
+function openSearch() {
+  var s = document.getElementById('shSearch');
+  s.innerHTML = '<div class="grab"></div><div class="sh-head"><h2>검색</h2>' + X_BTN + '</div><div class="sh-body" style="min-height:50vh">' + '<input class="inp" id="q" placeholder="일정 이름" autocomplete="off"><div id="qr"></div></div>';
+  var run = function() {
+    var q = document.getElementById('q').value.trim().toLowerCase(), box = document.getElementById('qr');
+    if (!q) {
+      box.innerHTML = '';
+      return;
+    }
+    var hits = allSources().filter((function(e) {
+      return (e.title + ' ' + (e.memo || '')).toLowerCase().indexOf(q) >= 0;
+    }));
+    hits.sort((function(a, b) {
+      return a.start < b.start ? 1 : -1;
+    }));
+    box.innerHTML = hits.length ? hits.slice(0, 80).map((function(e) {
+      var sc = isScrap(e);
+      return '<div class="item" data-id="' + esc(e.id) + '" data-sub="' + esc(e.sub || '') + '" data-start="' + e.start + '" data-sc="' + (sc ? '1' : '') + '"><div class="stripe c-' + (e.color || 'blue') + '"></div>' + '<div style="flex:1;min-width:0"><div class="t">' + esc(e.title) + (sc ? '' : roleHTML(e)) + '</div><div class="m">' + label(e.start) + ' · ' + e.start.slice(0, 4) + (sc ? ' · 📌 스크랩 공고' : '') + '</div></div></div>';
+    })).join('') : '<div class="empty">찾는 일정이 없어요</div>';
+    box.querySelectorAll('.item').forEach((function(it) {
+      it.onclick = function() {
+        closeAll();
+        setTab(it.dataset.sc ? 'scrap' : 'job');
+        goDate(it.dataset.start);
+        setTimeout((function() {
+          openDay(it.dataset.start);
+        }), 320);
+      };
+    }));
+  };
+  document.getElementById('q').oninput = run;
+  openSheet('shSearch');
+  setTimeout((function() {
+    document.getElementById('q').focus();
+  }), 280);
+}
+
+function openMonthPick() {
+  var y = cur.y, s = document.getElementById('shMonth');
+  var draw = function() {
+    s.innerHTML = '<div class="grab"></div><div class="sh-body" style="padding-top:10px"><div class="yrow">' + '<button class="icon" id="yP"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><span>' + y + '년</span>' + '<button class="icon" id="yN"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></div><div class="mgrid">' + [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 ].map((function(m) {
+      return '<button data-m="' + m + '" class="' + (y === cur.y && m === cur.m ? 'on' : '') + '">' + (m + 1) + '월</button>';
+    })).join('') + '</div></div>';
+    document.getElementById('yP').onclick = function() {
+      y--;
+      draw();
+    };
+    document.getElementById('yN').onclick = function() {
+      y++;
+      draw();
+    };
+    s.querySelectorAll('.mgrid button').forEach((function(b) {
+      b.onclick = function() {
+        var dir = y * 12 + +b.dataset.m - (cur.y * 12 + cur.m);
+        cur = {
+          y: y,
+          m: +b.dataset.m
+        };
+        closeAll();
+        render(dir ? dir > 0 ? 1 : -1 : 0);
+      };
+    }));
+  };
+  draw();
+  openSheet('shMonth');
+}
+
+function openSettings() {
+  var st = DB.settings, info = {};
+  try {
+    info = HAS_APP ? JSON.parse(App.info()) : {};
+  } catch (e) {}
+  var mins = [ 5, 10, 15, 30, 60, 120, 180 ];
+  var s = document.getElementById('shSet');
+  var hFetched = DB.holidays.fetchedAt ? new Date(DB.holidays.fetchedAt).toLocaleDateString('ko-KR') : '앱에 들어 있는 목록';
+  s.innerHTML = '<div class="grab"></div><div class="sh-head"><h2>설정</h2>' + X_BTN + '</div><div class="sh-body">' + '<div class="sec" style="margin-top:4px">화면</div><div class="seg" id="sTh" style="margin-top:8px">' + [ [ 'system', '폰 설정 따라' ], [ 'light', '밝게' ], [ 'dark', '어둡게' ] ].map((function(r) {
+    return '<button data-t="' + r[0] + '" class="' + ((st.theme || 'system') === r[0] ? 'on' : '') + '">' + r[1] + '</button>';
+  })).join('') + '</div>' + '<div class="sec">알림</div><div class="card">' + '<div class="tg"><span>전날 저녁</span><div class="row" style="gap:10px"><input class="inp" type="time" id="sEvT" value="' + st.evening.time + '" style="width:136px;height:38px;padding:0 8px">' + '<div class="sw' + (st.evening.on ? ' on' : '') + '" id="sEv"></div></div></div>' + '<div class="tg"><span>당일 아침</span><div class="row" style="gap:10px"><input class="inp" type="time" id="sMoT" value="' + st.morning.time + '" style="width:136px;height:38px;padding:0 8px">' + '<div class="sw' + (st.morning.on ? ' on' : '') + '" id="sMo"></div></div></div>' + '<div class="tg"><span>시간 있는 일정</span><div class="row" style="gap:10px"><select class="inp" id="sBfM" style="width:136px;height:38px;padding:0 8px">' + mins.map((function(m) {
+    return '<option value="' + m + '"' + (st.before.min === m ? ' selected' : '') + '>' + (m < 60 ? m + '분' : m / 60 + '시간') + ' 전</option>';
+  })).join('') + '</select><div class="sw' + (st.before.on ? ' on' : '') + '" id="sBf"></div></div></div>' + '</div>' + (HAS_APP ? '<div class="small">알림 허용: ' + (info.notif ? '<span class="ok">켜짐</span>' : '<span class="bad">꺼짐</span> — 아래 버튼으로 켜 주세요') + ' · 정시 알람: ' + (info.exact ? '<span class="ok">가능</span>' : '<span class="bad">불가</span> (몇 분 늦을 수 있어요)') + '<br>다음 알림: ' + esc(info.next || '없음') + '</div>' : '<div class="small">브라우저 미리보기 — 알림은 폰 앱에서만 울려요.</div>') + '<div class="row" style="margin-top:10px;flex-wrap:wrap"><button class="linkBtn" id="sTest">알림 시험 (5초 뒤)</button>' + (HAS_APP && !info.notif ? '<button class="linkBtn" id="sPerm">알림 허용하기</button>' : '') + (HAS_APP && !info.exact ? '<button class="linkBtn" id="sExact">정시 알람 허용</button>' : '') + '</div>' + '<div class="sec">구글캘린더 구독 (읽기만)</div><div class="card" id="subList">' + (DB.subs.length ? DB.subs.map((function(x) {
+    return '<div class="subItem"><div class="dot c-' + x.color + '"></div><div style="flex:1;min-width:0"><div style="font-weight:700">' + esc(x.name) + '</div>' + '<div class="small" style="margin:0">' + (x.fetchedAt ? (x.events || []).length + '개 · ' + new Date(x.fetchedAt).toLocaleString('ko-KR') : '아직 못 받음') + (x.err ? ' · <span class="bad">' + esc(x.err) + '</span>' : '') + '</div></div>' + '<button class="linkBtn" data-del="' + x.id + '">빼기</button></div>';
+  })).join('') : '<div class="small" style="padding:10px 0">없음</div>') + '</div>' + '<div class="f"><input class="inp" id="subName" placeholder="이름 (예: 취업캘린더)" value="' + (DB.subs.length ? '' : '취업캘린더') + '"></div>' + '<div class="f" style="margin-top:8px"><input class="inp" id="subUrl" placeholder="여기에 iCal 주소 붙여넣기"></div>' + '<div class="row" style="margin-top:8px"><select class="inp" id="subColor" style="flex:0 0 110px">' + COLORS.map((function(c) {
+    return '<option value="' + c + '"' + (c === 'purple' ? ' selected' : '') + '>' + COLOR_NAME[c] + '</option>';
+  })).join('') + '</select><button class="linkBtn" id="subAdd" style="flex:1;height:46px">구독 추가</button></div>' + '<div class="small">구글캘린더(PC) → 캘린더 설정 → «iCal 형식의 비공개 주소» 를 복사해 넣으면, 앱을 열 때마다 새로 받아 와요. ' + '«취업캘린더» 를 연결하면 처음에 옮겨 둔 취업 일정 사본은 지우고 구독으로 대신해요. ' + '구직 도우미가 담는 «스크랩 공고» 캘린더도 같은 방법으로 넣으면 📌 일정이 «📌 스크랩 공고» 탭에 모여요.</div>' + '<div class="sec">공휴일</div><div class="card"><div class="tg"><span style="font-weight:500;font-size:14px">' + esc(hFetched) + ' 기준 · ' + DB.holidays.list.length + '개</span>' + '<button class="linkBtn" id="sHol">새로 받기</button></div></div>' + '<div class="sec">백업</div><div class="row" style="margin-top:8px"><button class="linkBtn" id="sExp" style="flex:1;height:46px">내보내기</button>' + '<button class="linkBtn" id="sImp" style="flex:1;height:46px">가져오기</button></div>' + '<div class="small">앱을 지우면 일정도 같이 지워져요. 가끔 내보내기로 카톡·텔레그램 «나에게» 보내 두세요.</div>' + '<div id="impBox" style="display:none"><textarea class="inp" id="impTxt" placeholder="내보낸 글을 붙여 넣기" style="margin-top:8px;min-height:120px"></textarea>' + '<button class="btn pri" id="impGo" style="width:100%;margin-top:8px">이걸로 바꾸기</button></div>' + (Object.keys(DB.rejected || {}).length ? '<div class="sec">불합격 처리한 회사</div><div class="card">' + Object.keys(DB.rejected).map((function(c) {
+    var r = DB.rejected[c];
+    return '<div class="subItem"><div style="flex:1;min-width:0"><div style="font-weight:700">' + esc(c) + '</div>' + '<div class="small" style="margin:0">' + new Date(r.at).toLocaleDateString('ko-KR') + ' · 일정 ' + r.keys.length + '개 숨김</div></div>' + '<button class="linkBtn" data-undo="' + esc(c) + '">되돌리기</button></div>';
+  })).join('') + '</div>' : '') + '<div class="sec">업데이트</div><div class="row" style="margin-top:8px"><button class="linkBtn" id="sUpd" style="flex:1;height:46px">새 판 확인</button></div>' + '<div class="small">앱을 켤 때 하루 한 번 집 컴퓨터에 새 판이 있는지 물어봐요. 컴퓨터가 꺼져 있으면 그냥 넘어가요 (달력·알림은 상관없음).</div>' + '<div class="small" style="margin:22px 0 4px;text-align:center">일정 ' + DB.events.length + '개' + (info.version ? ' · v' + esc(info.version) : '') + '</div>' + '</div>';
+  var $ = function(id) {
+    return document.getElementById(id);
+  };
+  var saveSet = function() {
+    saveDB();
+    render(0);
+  };
+  $('sEv').onclick = function() {
+    st.evening.on = !st.evening.on;
+    this.classList.toggle('on', st.evening.on);
+    saveSet();
+  };
+  $('sMo').onclick = function() {
+    st.morning.on = !st.morning.on;
+    this.classList.toggle('on', st.morning.on);
+    saveSet();
+  };
+  $('sBf').onclick = function() {
+    st.before.on = !st.before.on;
+    this.classList.toggle('on', st.before.on);
+    saveSet();
+  };
+  $('sEvT').onchange = function() {
+    if (this.value) {
+      st.evening.time = this.value;
+      saveSet();
+    }
+  };
+  $('sMoT').onchange = function() {
+    if (this.value) {
+      st.morning.time = this.value;
+      saveSet();
+    }
+  };
+  $('sBfM').onchange = function() {
+    st.before.min = +this.value;
+    saveSet();
+  };
+  $('sTest').onclick = function() {
+    if (HAS_APP) {
+      App.testAlarm();
+      toast('5초 뒤 알림이 와요');
+    } else toast('폰 앱에서만 돼요');
+  };
+  if ($('sPerm')) $('sPerm').onclick = function() {
+    App.requestNotif();
+  };
+  if ($('sExact')) $('sExact').onclick = function() {
+    App.openExactAlarmSettings();
+  };
+  $('sHol').onclick = function() {
+    fetchHolidays(true);
+  };
+  s.querySelectorAll('#sTh button').forEach((function(b) {
+    b.onclick = function() {
+      s.querySelectorAll('#sTh button').forEach((function(x) {
+        x.classList.remove('on');
+      }));
+      b.classList.add('on');
+      st.theme = b.dataset.t;
+      applyTheme();
+      saveDB(true);
+    };
+  }));
+  s.querySelectorAll('[data-undo]').forEach((function(b) {
+    b.onclick = function() {
+      undoReject(b.dataset.undo);
+      render(0);
+      refreshSettings();
+    };
+  }));
+  $('sUpd').onclick = function() {
+    if (HAS_APP) {
+      App.checkUpdate();
+      toast('확인 중…');
+    } else toast('폰 앱에서만 돼요');
+  };
+  $('subAdd').onclick = function() {
+    var url = $('subUrl').value.trim(), name = $('subName').value.trim() || '구독';
+    url = url.replace(/^webcal:\/\//i, 'https://');
+    if (!/^https:\/\//i.test(url)) {
+      toast('https 로 시작하는 주소를 넣어 주세요');
+      return;
+    }
+    var sub = {
+      id: 's' + Date.now().toString(36),
+      name: name,
+      url: url,
+      color: $('subColor').value,
+      events: [],
+      fetchedAt: 0
+    };
+    DB.subs.push(sub);
+    saveDB(true);
+    fetchSub(sub, true);
+  };
+  s.querySelectorAll('[data-del]').forEach((function(b) {
+    b.onclick = function() {
+      if (b.dataset.armed !== '1') {
+        b.dataset.armed = '1';
+        b.textContent = '정말?';
+        return;
+      }
+      DB.subs = DB.subs.filter((function(x) {
+        return x.id !== b.dataset.del;
+      }));
+      saveDB();
+      render(0);
+      refreshSettings();
+    };
+  }));
+  $('sExp').onclick = function() {
+    var txt = JSON.stringify({
+      events: DB.events,
+      settings: DB.settings,
+      subs: DB.subs.map((function(x) {
+        return {
+          name: x.name,
+          url: x.url,
+          color: x.color
+        };
+      }))
+    });
+    if (HAS_APP) App.share(txt); else {
+      try {
+        navigator.clipboard.writeText(txt);
+      } catch (e) {}
+      toast('복사했어요');
+    }
+  };
+  $('sImp').onclick = function() {
+    $('impBox').style.display = 'block';
+  };
+  $('impGo').onclick = function() {
+    try {
+      var j = JSON.parse($('impTxt').value);
+      if (!Array.isArray(j.events)) throw 0;
+      DB.events = j.events;
+      if (j.settings) DB.settings = j.settings;
+      if (Array.isArray(j.subs)) DB.subs = j.subs.map((function(x, i) {
+        return {
+          id: 's' + i + Date.now().toString(36),
+          name: x.name,
+          url: x.url,
+          color: x.color,
+          events: [],
+          fetchedAt: 0
+        };
+      }));
+      saveDB();
+      render(0);
+      closeAll();
+      toast('가져왔어요 · 일정 ' + DB.events.length + '개');
+      DB.subs.forEach((function(x) {
+        fetchSub(x);
+      }));
+    } catch (e) {
+      toast('내보낸 글이 아니에요');
+    }
+  };
+  openSheet('shSet');
+}
+
+function refreshSettings() {
+  if (stack[stack.length - 1] === 'shSet') {
+    var y = document.querySelector('#shSet .sh-body').scrollTop;
+    closeSheet();
+    openSettings();
+    document.querySelector('#shSet .sh-body').scrollTop = y;
+  }
+}
+
+var cbN = 0;
+
+function fetchText(url, done) {
+  var name = '__cb' + ++cbN;
+  window[name] = function(ok, text) {
+    delete window[name];
+    done(ok, text);
+  };
+  if (HAS_APP) App.fetch(url, name); else {
+    var x = new XMLHttpRequest;
+    x.open('GET', url);
+    x.onload = function() {
+      window[name](x.status === 200, x.responseText);
+    };
+    x.onerror = function() {
+      window[name](false, '연결 안 됨');
+    };
+    try {
+      x.send();
+    } catch (e) {
+      window[name](false, String(e));
+    }
+  }
+}
+
+function icsUnesc(s) {
+  return s.replace(/\\n/gi, '\n').replace(/\\([,;\\])/g, '$1').trim();
+}
+
+function icsTime(v, params) {
+  var m = /^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})(\d{2})(Z?))?/.exec(v);
+  if (!m) return null;
+  if (!m[4] || /VALUE=DATE(?!-)/.test(params)) return {
+    date: m[1] + '-' + m[2] + '-' + m[3],
+    time: null
+  };
+  var d = m[7] ? new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5])) : new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]);
+  return {
+    date: ymd(d),
+    time: pad(d.getHours()) + ':' + pad(d.getMinutes())
+  };
+}
+
+function parseICS(text) {
+  var lines = text.replace(/\r?\n[ \t]/g, '').split(/\r?\n/), out = [], cur = null;
+  lines.forEach((function(l) {
+    if (l === 'BEGIN:VEVENT') {
+      cur = {};
+      return;
+    }
+    if (l === 'END:VEVENT') {
+      if (cur) out.push(cur);
+      cur = null;
+      return;
+    }
+    if (!cur) return;
+    var i = l.indexOf(':');
+    if (i < 0) return;
+    var head = l.slice(0, i), val = l.slice(i + 1), semi = head.indexOf(';');
+    var key = semi < 0 ? head : head.slice(0, semi), params = semi < 0 ? '' : head.slice(semi + 1);
+    cur[key] = {
+      v: val,
+      p: params
+    };
+  }));
+  var evs = [];
+  out.forEach((function(r) {
+    if (!r.DTSTART || r.STATUS && r.STATUS.v === 'CANCELLED' || r['RECURRENCE-ID']) return;
+    var s = icsTime(r.DTSTART.v, r.DTSTART.p);
+    if (!s) return;
+    var e = r.DTEND ? icsTime(r.DTEND.v, r.DTEND.p) : null;
+    var ev = {
+      id: r.UID ? r.UID.v : uid(),
+      title: r.SUMMARY ? icsUnesc(r.SUMMARY.v) : '(제목 없음)',
+      memo: r.DESCRIPTION ? icsUnesc(r.DESCRIPTION.v) : '',
+      allDay: !s.time,
+      start: s.date,
+      end: s.date,
+      startTime: s.time || '',
+      endTime: '',
+      repeat: 'none',
+      alarm: true,
+      heart: false
+    };
+    if (e) {
+      if (!s.time) {
+        ev.end = addDays(e.date, -1);
+        if (ev.end < ev.start) ev.end = ev.start;
+      } else {
+        ev.end = e.date;
+        ev.endTime = e.time;
+        if (e.time === '00:00' && e.date > s.date) {
+          ev.end = addDays(e.date, -1);
+          ev.endTime = '23:59';
+        }
+      }
+    }
+    if (r.RRULE) {
+      var f = /FREQ=(\w+)/.exec(r.RRULE.v), u = /UNTIL=(\d{8})/.exec(r.RRULE.v);
+      var map = {
+        WEEKLY: 'weekly',
+        MONTHLY: 'monthly',
+        YEARLY: 'yearly'
+      };
+      if (f && map[f[1]] && !/INTERVAL=(?!1\b)|BYDAY=.*,|COUNT=/.test(r.RRULE.v)) {
+        ev.repeat = map[f[1]];
+        if (u) ev.until = u[1].slice(0, 4) + '-' + u[1].slice(4, 6) + '-' + u[1].slice(6, 8);
+      }
+    }
+    if (r.LOCATION && r.LOCATION.v.trim()) ev.loc = icsUnesc(r.LOCATION.v);
+    ev._desc = r.DESCRIPTION ? icsUnesc(r.DESCRIPTION.v) : '';
+    evs.push(ev);
+  }));
+  return evs;
+}
+
+function fetchHolidays(manual) {
+  if (manual) toast('공휴일 받는 중…');
+  fetchText(HOL_URL, (function(ok, text) {
+    if (!ok) {
+      if (manual) toast('못 받았어요: ' + String(text).slice(0, 40));
+      return;
+    }
+    var list = parseICS(text).filter((function(e) {
+      return e._desc.indexOf('공휴일') === 0;
+    })).map((function(e) {
+      return {
+        date: e.start,
+        name: e.title
+      };
+    })).sort((function(a, b) {
+      return a.date < b.date ? -1 : 1;
+    }));
+    if (list.length < 20) {
+      if (manual) toast('받은 목록이 이상해요 (그대로 둠)');
+      return;
+    }
+    DB.holidays = {
+      fetchedAt: Date.now(),
+      list: list
+    };
+    saveDB(true);
+    render(0);
+    if (manual) {
+      toast('공휴일 ' + list.length + '개 받았어요');
+      refreshSettings();
+    }
+  }));
+}
+
+function fetchSub(sub, manual) {
+  if (manual) toast('«' + sub.name + '» 받는 중…');
+  fetchText(sub.url, (function(ok, text) {
+    var s = DB.subs.filter((function(x) {
+      return x.id === sub.id;
+    }))[0];
+    if (!s) return;
+    if (!ok || text.indexOf('BEGIN:VCALENDAR') < 0) {
+      s.err = ok ? '달력 주소가 아니에요' : '못 받음';
+      saveDB(true);
+      refreshSettings();
+      if (manual) toast('못 받았어요 — 주소를 확인해 주세요');
+      return;
+    }
+    s.events = parseICS(text).map((function(e) {
+      delete e._desc;
+      return e;
+    }));
+    s.fetchedAt = Date.now();
+    delete s.err;
+    var removed = 0;
+    if (/취업/.test(s.name)) {
+      var n0 = DB.events.length;
+      DB.events = DB.events.filter((function(e) {
+        return e.src !== 'job';
+      }));
+      removed = n0 - DB.events.length;
+    }
+    saveDB();
+    render(0);
+    refreshSettings();
+    if (manual) toast('«' + s.name + '» ' + s.events.length + '개 받았어요' + (removed ? ' · 옮겨 둔 사본 ' + removed + '개 정리' : ''));
+  }));
+}
+
+function refreshRemote() {
+  if (Date.now() - (DB.holidays.fetchedAt || 0) > 7 * 864e5) fetchHolidays(false);
+  DB.subs.forEach((function(s) {
+    if (Date.now() - (s.fetchedAt || 0) > 5 * 6e4) fetchSub(s, false);
+  }));
+}
+
+function at(ds, hm) {
+  var p = hm.split(':');
+  var d = parse(ds);
+  d.setHours(+p[0], +p[1], 0, 0);
+  return d.getTime();
+}
+
+function buildTriggers() {
+  var st = DB.settings, now = Date.now(), from = addDays(todayS(), -1), to = addDays(todayS(), 400);
+  var occ = occurrences(from, to).filter((function(o) {
+    return o.ev.alarm !== false;
+  })).sort(sortOcc);
+  var byDay = {}, scDay = {};
+  occ.forEach((function(o) {
+    if (isScrap(o.ev)) {
+      var x = scrapInfo(o.ev);
+      if (!x.always) (scDay[o.end] = scDay[o.end] || []).push(x);
+      return;
+    }
+    (byDay[o.start] = byDay[o.start] || []).push(o);
+  }));
+  var T = [];
+  var line = function(o) {
+    return (o.ev.allDay ? '' : o.ev.startTime + ' ') + o.ev.title;
+  };
+  Object.keys(byDay).forEach((function(ds) {
+    var L = byDay[ds], body = L.map(line).join('\n'), short = L.map(line).join(' · ');
+    if (st.evening.on) T.push({
+      t: at(addDays(ds, -1), st.evening.time),
+      title: '내일 일정 ' + L.length + '개 · ' + label(ds),
+      body: body,
+      short: short
+    });
+    if (st.morning.on) T.push({
+      t: at(ds, st.morning.time),
+      title: '오늘 일정 ' + L.length + '개 · ' + label(ds),
+      body: body,
+      short: short
+    });
+  }));
+  Object.keys(scDay).forEach((function(ds) {
+    var L = scDay[ds], body = L.map((function(x) {
+      return (x.company ? x.company + ' · ' : '') + x.title;
+    })).join('\n'), short = L.map((function(x) {
+      return x.company || x.title;
+    })).join(' · ');
+    if (st.evening.on) T.push({
+      t: at(addDays(ds, -1), st.evening.time),
+      title: '📌 내일 마감 공고 ' + L.length + '개 · ' + label(ds),
+      body: body,
+      short: short,
+      open: 'scrap|' + ds
+    });
+    if (st.morning.on) T.push({
+      t: at(ds, st.morning.time),
+      title: '📌 오늘 마감 공고 ' + L.length + '개 · ' + label(ds),
+      body: body,
+      short: short,
+      open: 'scrap|' + ds
+    });
+  }));
+  if (st.before.on) occ.forEach((function(o) {
+    if (o.ev.allDay || isScrap(o.ev)) return;
+    var m = st.before.min, ht = m < 60 ? m + '분' : m / 60 + '시간';
+    T.push({
+      t: at(o.start, o.ev.startTime) - m * 6e4,
+      title: ht + ' 뒤 · ' + o.ev.title,
+      body: o.ev.startTime + (o.ev.endTime ? ' ~ ' + o.ev.endTime : '') + (o.ev.memo ? '\n' + o.ev.memo.split('\n')[0] : ''),
+      short: ''
+    });
+  }));
+  occ.forEach((function(o) {
+    var e = o.ev;
+    if (!isJobEv(e) || e.title.indexOf('발표') < 0 || resultOf(e)) return;
+    var t = at(o.start, '18:00'), st0 = evStartMs(e, o.start);
+    if (st0 >= t) t = st0 + 36e5;
+    var c = companyOf(e.title);
+    T.push({
+      t: t,
+      title: c + ' 결과 나왔나요?',
+      body: e.title + '\n눌러서 합격/불합격을 골라 주세요',
+      short: '눌러서 합격/불합격을 골라 주세요',
+      open: evKey(e) + '|' + o.start
+    });
+  }));
+  T = T.filter((function(x) {
+    return x.t > now;
+  })).sort((function(a, b) {
+    return a.t - b.t;
+  })).slice(0, 600);
+  T.forEach((function(x) {
+    if (!x.short) x.short = x.body.split('\n')[0];
+  }));
+  return T;
+}
+
+function pushAlarms() {
+  if (!HAS_APP) return;
+  try {
+    App.setAlarms(JSON.stringify(buildTriggers()));
+  } catch (e) {
+    toast('알림 등록 실패: ' + e);
+  }
+}
+
+var tT = 0;
+
+function toast(m) {
+  var t = document.getElementById('toast');
+  t.textContent = m;
+  t.classList.add('on');
+  clearTimeout(tT);
+  tT = setTimeout((function() {
+    t.classList.remove('on');
+  }), 2200);
+}
+
+(function() {
+  var sx = 0, sy = 0, st = 0, on = false, w = document.getElementById('gridWrap');
+  w.addEventListener('touchstart', (function(e) {
+    var t = e.touches[0];
+    sx = t.clientX;
+    sy = t.clientY;
+    st = Date.now();
+    on = true;
+  }), {
+    passive: true
+  });
+  w.addEventListener('touchend', (function(e) {
+    if (!on) return;
+    on = false;
+    var t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.3 && Date.now() - st < 700) {
+      swiped = Date.now();
+      go(dx < 0 ? 1 : -1);
+    }
+  }), {
+    passive: true
+  });
+})();
+
+var swiped = 0;
+
+document.getElementById('gridWrap').addEventListener('click', (function(e) {
+  if (Date.now() - swiped < 400) return;
+  var c = e.target.closest('.cell');
+  if (c) openDay(c.dataset.d);
+}));
+
+document.getElementById('titleRow').addEventListener('click', (function(e) {
+  if (e.target.id !== 'todayBtn') openMonthPick();
+}));
+
+document.getElementById('todayBtn').onclick = function() {
+  var t = new Date, dir = t.getFullYear() * 12 + t.getMonth() - (cur.y * 12 + cur.m);
+  cur = {
+    y: t.getFullYear(),
+    m: t.getMonth()
+  };
+  render(dir ? dir > 0 ? 1 : -1 : 0);
+};
+
+document.getElementById('bAdd').onclick = function() {
+  openEdit(null, null, curTab() === 'scrap');
+};
+
+document.getElementById('bMenu').onclick = openMenu;
+
+document.querySelectorAll('#tabs button').forEach((function(b) {
+  b.onclick = function() {
+    setTab(b.dataset.tab);
+  };
+}));
+
+window.onThemeChange = function() {
+  applyTheme();
+};
+
+window.addEventListener('resize', (function() {
+  layout();
+}));
+
+window.onResume = function() {
+  applyTheme();
+  render(0);
+  pushAlarms();
+  refreshRemote();
+  checkOpen();
+};
+
+function checkOpen() {
+  var v = '';
+  try {
+    v = HAS_APP ? App.takeOpen() : '';
+  } catch (e) {}
+  if (!v) return;
+  var ds = v.split('|')[1];
+  if (!/^\d{4}-\d\d-\d\d$/.test(ds || '')) return;
+  closeAll();
+  setTab(v.indexOf('scrap|') === 0 ? 'scrap' : 'job');
+  goDate(ds);
+  setTimeout((function() {
+    openDay(ds);
+  }), 350);
+}
+
+window.checkOpen = checkOpen;
+
+loadDB();
+
+applyTheme();
+
+layout();
+
+pushAlarms();
+
+setTimeout(refreshRemote, 600);
+
+setTimeout(checkOpen, 300);
+</script>
+<!-- coach -->
+<script src="../../assets/coach.js"></script>
+<script src="coach-config.js"></script>
+<!-- /coach -->
+</body>
+</html>
