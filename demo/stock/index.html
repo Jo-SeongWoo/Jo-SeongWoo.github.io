@@ -322,6 +322,10 @@
   .arpill { font-size:12.5px; padding:4px 12px; border-radius:999px; font-weight:700; cursor:pointer; }
   .arpill.on { background:#16a34a; color:#fff; } .arpill.off { background:#9aa3af; color:#fff; }
   .arpill.unk { background:#e5e7eb; color:#6b7280; cursor:default; }
+  
+  .arsw { flex:0 0 auto; display:inline-flex; align-items:center; gap:6px; }
+  .arpill.saving { opacity:.5; cursor:default; }
+  .arsv { font-size:11.5px; font-weight:700; color:#6b7280; white-space:nowrap; }
   .arbd { padding:2px 14px 4px 43px; font-size:13.5px; color:#374151; line-height:1.65; }
   .arbtns { display:flex; flex-wrap:wrap; gap:6px; padding:4px 14px 6px 43px; }
   .aredit { background:#eef2f7; border:none; border-radius:9px; padding:7px 11px; font:inherit; font-size:12.5px;
@@ -471,12 +475,15 @@
   .stk .amt .dot { color:#c3c9d1; }
   .stk .amt .gap.sm { margin-left:0; }
   .stk .ln.tap:active { background:#f3f4f6; }
+  
+  .stk .ln .lsub { display:block; font-size:12px; line-height:1.4; color:#8030E0; opacity:.85; font-weight:600; margin-top:1px; }
+  .stk .stkadd { padding:9px 15px; font-size:13.5px; font-weight:700; color:#1a5490; border-top:1px solid #f0f2f5; cursor:pointer; }
+  .stk .stkadd:active { background:#f3f4f6; }
   .card.tap { cursor:pointer; } .card.tap:active { background:#f3f4f6; }
   
   .gapline { margin-top:3px; font-size:12.5px; color:#9aa3af; }
   .gapline .gap { font-size:13px; font-weight:700; margin:0; }
   
-  .capline { margin-top:2px; font-size:12.5px; color:#1a5490; font-weight:600; }
   
   .card > .dchg { margin-top:2px; font-size:12.5px; font-weight:700; color:#6b7280; white-space:nowrap; }
   .card > .dchg.up { color:#dc2626; } .card > .dchg.dn { color:#2563eb; }
@@ -626,6 +633,11 @@
   .fxst { font-size:12px; color:#6b7280; margin:2px 4px 8px; line-height:1.55; }
   .fxst.dirty { color:#e8730a; font-weight:700; }
   .fxst.bad { color:#b91c1c; font-weight:700; }
+  
+  .fxtabs { display:flex; gap:6px; overflow-x:auto; margin:0 0 9px; padding:1px 0 3px; -webkit-overflow-scrolling:touch; }
+  .fxtab { flex:0 0 auto; border:none; border-radius:999px; background:#eef1f5; color:#374151; font:inherit; font-size:13.5px;
+        font-weight:600; padding:7px 14px; max-width:60vw; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .fxtab.on { background:#1f6feb; color:#fff; }
   
   .fxtime { border:none; background:#eef1f5; border-radius:9px; padding:7px 10px; font:inherit; font-size:14px;
         font-weight:700; color:#111827; }
@@ -833,7 +845,7 @@
     <button data-tab="alerts"><span class="i">🔔<span class="badge" id="alert-badge" style="display:none"></span></span>알림</button>
     <button data-tab="orders" class="on"><span class="i">📋</span>주문</button>
     
-    <button data-tab="today"><span class="i">🧾</span>당일매매</button>
+    <button data-tab="today"><span class="i">🧾<span class="badge" id="today-badge" style="display:none"></span></span>당일매매</button>
     
     <button data-tab="balance"><span class="i">💰</span>잔고</button>
     
@@ -1562,6 +1574,7 @@ function renderMarket(first, open) {
       __err: e
     };
   })) ]).then((function(res) {
+    tdBadgeSet(lvRead(res[1]));
     if (TAB !== 'market' || MK.sel || seq !== MK.seq) return;
     if (balQTapping()) {
       MK_Q_LATE = 'all';
@@ -1732,12 +1745,12 @@ function renderMarketGroup(first) {
       })));
       k.appendChild(r);
       k.onclick = function() {
-        chOpen(s.code, s.name);
+        stockPick(s.code, s.name);
       };
       grp.appendChild(k);
     }));
     if (st.length) f.appendChild(grp); else f.appendChild(el('div', 'empty', '이 묶음에 든 종목이 없습니다'));
-    f.appendChild(infoLine('mut', anyLive ? '종목 등락률 = 오늘 실시간(' + (d.at || '') + ' 기준)' : '종목 등락률 = 최종거래일 종가 기준', '종목을 누르면 차트 · ☆ = 주요개별종목'));
+    f.appendChild(infoLine('mut', anyLive ? '종목 등락률 = 오늘 실시간(' + (d.at || '') + ' 기준)' : '종목 등락률 = 최종거래일 종가 기준', '종목을 누르면 차트 보기 · 이 종목의 테마·업종 보기 · ☆ = 주요개별종목'));
     (d.errors || []).slice(0, 3).forEach((function(m2) {
       f.appendChild(el('div', 'mut', '⚠ ' + m2));
     }));
@@ -2105,13 +2118,23 @@ function tdFill(f, d) {
 function renderToday(first) {
   TITLE.textContent = '당일매매';
   if (!first && document.hidden) return;
-  if (first && hasCache(TD_URL)) first = false;
+  if (first && hasCache(TD_URL) && hasCache(LV_URL)) first = false;
   if (first) BD.textContent = '불러오는 중…';
-  getJSONc(TD_URL).catch((function(e) {
+  Promise.all([ getJSONc(TD_URL).catch((function(e) {
     return {
       __err: e
     };
-  })).then((function(d) {
+  })), getJSONc(LV_URL).catch((function(e) {
+    return {
+      __err: e
+    };
+  })), getJSONc(THM_URL).catch((function(e) {
+    return {
+      __err: e
+    };
+  })) ]).then((function(res) {
+    var d = res[0], _lr = lvRead(res[1]);
+    tdBadgeSet(_lr);
     if (TAB !== 'today') return;
     if (balQFocused() || balQTapping()) {
       TD_Q_LATE = true;
@@ -2119,6 +2142,9 @@ function renderToday(first) {
     }
     d = d || {};
     var f = document.createDocumentFragment();
+    var _lf = ordLiveFrag(_lr, res[2]);
+    thmDecorate(_lf);
+    f.appendChild(_lf);
     function tdSwap(x) {
       swapBody(x);
       applyTdFind();
@@ -2365,6 +2391,9 @@ function jcCutErr() {
 
 function getJSONc(url) {
   warmLearn(url);
+  try {
+    JC_RD[url] = scrKey();
+  } catch (_e) {}
   var c = JC[url], age = c ? Date.now() - c.ts : 1e9;
   if (c && age < JC_FRESH) {
     if (age > JC_REFETCH && !jcBusy(c)) {
@@ -2396,6 +2425,49 @@ function dropCache() {
       JC[k].ts = old;
       JC[k].busy = false;
     }
+  }));
+}
+
+var JC_RD = {};
+
+function jcRefetchAfterSave() {
+  var me = scrKey(), mine = [], rest = [];
+  Object.keys(JC).forEach((function(u) {
+    if (!JC[u] || !JC_RD[u]) return;
+    (JC_RD[u] === me ? mine : rest).push(u);
+  }));
+  var act = 0;
+  function pump() {
+    while (act < 2 && rest.length && !document.hidden) {
+      var u = rest.shift(), c = JC[u];
+      if (!c || Date.now() - c.ts < JC_REFETCH || jcBusy(c) || GJ_INF[u]) continue;
+      act++;
+      getJSON(u).catch((function() {})).then((function() {
+        act--;
+        pump();
+      }));
+    }
+  }
+  var left = mine.length;
+  if (!left) {
+    pump();
+    return;
+  }
+  mine.forEach((function(u) {
+    var c = JC[u], at = Date.now();
+    c.busy = at;
+    var fin = function() {
+      if (c.busy === at) c.busy = false;
+      var n = JC[u];
+      if (n && n.busy === at) n.busy = false;
+      if (--left === 0) {
+        try {
+          repaint();
+        } catch (_e) {}
+        pump();
+      }
+    };
+    getJSON(u).then(fin, fin);
   }));
 }
 
@@ -3336,56 +3408,6 @@ function ordSortSet(v) {
   } catch (e) {}
 }
 
-function capLineText(c) {
-  if (!c) return '';
-  if (!(Number(c.cap) > 0)) return '체결 한도 없음 — 시장가';
-  var p2 = Number(c.pct);
-  p2 = isFinite(p2) ? p2.toFixed(2) : String(c.pct);
-  return '체결 한도 +' + p2 + '% · ' + (Number(c.ticks) || 0) + '호가 → 최대 ' + fmt(c.cap) + '원' + (c.own ? '' : ' · 기본');
-}
-
-function capEdit(o) {
-  var nm = o.name || o.code;
-  fetch('/api/buy_cap', {
-    headers: {
-      Accept: 'application/json'
-    },
-    cache: 'no-store'
-  }).then((function(r) {
-    return r.ok ? r.json() : null;
-  })).catch((function() {
-    return null;
-  })).then((function(bc) {
-    var mx = bc && bc.max, tmx = bc && bc.ticks_max || 15;
-    var now = capLineText(o.cap);
-    function send(unit, v) {
-      var s = String(v).replace(/[\s,%]/g, '').replace(/호가$/, '');
-      var ok = unit === 'ticks' ? /^\d+$/.test(s) : /^\d+(\.\d+)?$/.test(s);
-      if (!ok) {
-        say(unit === 'ticks' ? '0 이상 정수로 적어 주세요 (예: 5 = 5호가 · 0 = 한도 없이 시장가)' : '0 이상 숫자로 적어 주세요 (예: 1.5 = 트리거 +1.5% · 0 = 한도 없이 시장가)');
-        return;
-      }
-      botPost('/api/orders/' + encodeURIComponent(o.order_id) + '/cap_pct', {
-        value: Number(s),
-        unit: unit
-      }, '«' + nm + '» 체결 한도를 바꿨습니다');
-    }
-    askPick('«' + nm + '» 체결 한도' + (now ? ' — 지금 ' + now.replace(/^체결 한도 /, '') : ''), [ [ '％ 퍼센트로', function() {
-      askVal('트리거보다 몇 % 위까지만 살까요? (숫자만 · 예: 1.5)' + (mx ? '\n최대 ' + mx + '% — 넘으면 최대로 잘립니다' : '') + '\n0 = 한도 없이 시장가', '', (function(v) {
-        send('pct', v);
-      }), true);
-    }, false, {
-      sub: '트리거 +N% 까지만 즉시 체결'
-    } ], [ '🔢 호가 수로', function() {
-      askVal('트리거보다 몇 호가 위까지만 살까요? (정수 · 예: 5)\n최대 ' + tmx + '호가 — 넘으면 최대로 잘립니다\n0 = 한도 없이 시장가', '', (function(v) {
-        send('ticks', v);
-      }), true);
-    }, false, {
-      sub: '트리거 +N호가 까지만 즉시 체결'
-    } ] ], o.code);
-  }));
-}
-
 var ORD_PX = {};
 
 function ordGap(o) {
@@ -3428,10 +3450,6 @@ function orderActions(o) {
         man: v
       });
     }), true);
-  } ], [ '🎯 체결 한도 고치기', function() {
-    capEdit(o);
-  }, false, {
-    sub: capLineText(o.cap) || '한도 정보를 못 받았습니다 — 눌러서 정할 수 있습니다'
   } ], [ '🗑 이 주문 삭제', function() {
     ask('«' + nm + '» 주문을 지웁니다.\n되살리려면 컴퓨터 주문창의 [↩ 되돌리기] 가 필요합니다.', (function() {
       botPost('/api/orders/' + encodeURIComponent(o.order_id), null, '지웠습니다', 'DELETE');
@@ -3974,36 +3992,76 @@ function obkRun(ids, delta, defBet, expect, pct) {
 }
 
 function sellRuleActions(r, kind) {
-  var flds = kind === 'balance' ? [ [ 'base_pct', '매입가 대비 %' ], [ 'qty_pct', '수량(%)' ] ] : [ [ 'target_price', '목표가(원)' ], [ 'qty_pct', '수량(%)' ] ];
+  if (kind !== 'balance') {
+    holdRuleActions(r);
+    return;
+  }
+  var flds = [ [ 'base_pct', '매입가 대비 %' ], [ 'qty_pct', '수량(%)' ] ];
   var items = flds.map((function(f) {
     return [ '✏️ ' + f[1] + ' 고치기', function() {
-      if (kind === 'balance' && f[0] === 'base_pct') {
+      if (f[0] === 'base_pct') {
         balPctEdit(r);
         return;
       }
       askVal('«' + r.label + '»\n' + f[1] + ' 새 값 (숫자만)', '', (function(v) {
-        if (f[0] === 'target_price') {
-          var _bm = beFloorBlock(r, parseFloat(String(v).replace(/[,\s원]/g, '')));
-          if (_bm) {
-            say(_bm);
-            return;
-          }
-        }
         var body = {};
         body[f[0]] = v;
         botPost('/api/sell/rules/' + encodeURIComponent(r.rule_id), body, '고쳤습니다', 'PUT');
       }), true);
     } ];
   }));
-  if (kind !== 'balance') items.splice(1, 0, [ '✏️ 목표가 % 로 고치기', function() {
-    holdPctEdit(r);
-  } ]);
-  if (kind !== 'balance' && r.be_lock && r.be_del) {
-    items.push([ '🗑 이 매도조건 삭제', null, true, {
+  items.push([ '🗑 이 매도조건 삭제', function() {
+    ask('«' + r.label + '» 규칙을 지웁니다.', (function() {
+      botPost('/api/bot/delete', {
+        kind: 'sellrule',
+        value: r.rule_id
+      });
+    }), true);
+  }, true ]);
+  askPick('«' + r.label + '»', items);
+}
+
+function ruleTapSub(r) {
+  if (r.app_edit === undefined || r.app_edit === null) return '누르면 봅니다 — 고치기는 컴퓨터 서버를 새로 켠 뒤에';
+  if (r.app_edit && r.app_del) return '누르면 고치거나 지웁니다';
+  if (r.app_edit) return '누르면 고칩니다';
+  if (r.app_del) return '누르면 지울 수 있습니다(고치기는 앱에서 안 됨)';
+  return '보기만 — 누르면 까닭' + (r.add_ok ? ' · ＋ 익절 조건 추가' : '');
+}
+
+function holdRuleActions(r) {
+  var items = [];
+  var known = r.app_edit !== undefined && r.app_edit !== null;
+  var OLD = '컴퓨터 서버를 새로 켠 뒤에 다시 열어 주세요';
+  if (!known) {
+    items.push([ '✏️ 고치기', null, false, {
       off: true,
-      sub: r.be_del_msg || '자동으로 본절로 올라온 조건이라 지울 수 없습니다 — 전량 매도되면 저절로 정리됩니다'
+      sub: OLD
+    } ]);
+  } else if (!r.app_edit) {
+    items.push([ '✏️ 고치기', null, false, {
+      off: true,
+      sub: r.app_why || '앱에서는 고칠 수 없습니다'
     } ]);
   } else {
+    items.push([ '✏️ 목표가(원) 고치기', function() {
+      holdTargetEdit(r);
+    }, false, {
+      sub: r.be_line ? '본절선 ' + fmt(r.be_line) + '원보다 위로만' : null
+    } ]);
+    items.push([ '✏️ 매수가 대비 % 로 고치기', function() {
+      holdPctEdit(r);
+    } ]);
+    items.push([ '✏️ 수량(%) 고치기', function() {
+      holdQtyEdit(r);
+    } ]);
+  }
+  if (!known) {
+    items.push([ '🗑 이 매도조건 삭제', null, true, {
+      off: true,
+      sub: OLD
+    } ]);
+  } else if (r.app_del) {
     items.push([ '🗑 이 매도조건 삭제', function() {
       ask('«' + r.label + '» 규칙을 지웁니다.', (function() {
         botPost('/api/bot/delete', {
@@ -4012,8 +4070,104 @@ function sellRuleActions(r, kind) {
         });
       }), true);
     }, true ]);
+  } else {
+    items.push([ '🗑 이 매도조건 삭제', null, true, {
+      off: true,
+      sub: r.app_del_why || '앱에서는 지울 수 없습니다'
+    } ]);
   }
+  if (r.add_ok) items.push([ '＋ 이 종목에 익절 조건 추가', function() {
+    sellAddPick(r);
+  }, false, {
+    sub: '아래로·위로 익절 · 본절선 ' + fmt(r.be_line) + '원 위에만'
+  } ]);
   askPick('«' + r.label + '»', items);
+}
+
+function appFloorBlock(r, price, add) {
+  var fl = Number(r.be_line), p = Number(price);
+  if (!(fl > 0) || !isFinite(p)) return '';
+  if (p > fl) return '';
+  return (add ? r.add_floor_msg : r.app_floor_msg) || '목표가가 본절선(' + fmt(fl) + '원)보다 위여야 합니다';
+}
+
+function holdTargetEdit(r) {
+  askVal('«' + r.label + '»\n목표가(원) 새 값 (숫자만)' + (r.be_line ? '\n본절선 ' + fmt(r.be_line) + '원보다 위여야 합니다' : ''), '', (function(v) {
+    var _bm = appFloorBlock(r, parseFloat(String(v).replace(/[,\s원]/g, '')));
+    if (_bm) {
+      say(_bm);
+      return;
+    }
+    botPost('/api/sell/rules/' + encodeURIComponent(r.rule_id), {
+      target_price: v
+    }, '고쳤습니다', 'PUT');
+  }), true);
+}
+
+function holdQtyEdit(r) {
+  askVal('«' + r.label + '»\n수량(%) 새 값 (숫자만)', '', (function(v) {
+    botPost('/api/sell/rules/' + encodeURIComponent(r.rule_id), {
+      qty_pct: v
+    }, '고쳤습니다', 'PUT');
+  }), true);
+}
+
+function sellAddPick(r) {
+  var nm = r.name || r.code || '', fl = Number(r.be_line) || 0, avg = Number(r.be_avg) || 0, cur = Number(r._cur) || 0;
+  function go(dir, mode) {
+    var dn = dir === 'down';
+    var what = dn ? '⬇ 아래로 익절' : '⬆ 위로 익절';
+    askVal('«' + nm + '» ' + what + '\n' + (mode === 'won' ? '목표가(원)를 넣으세요 (숫자만)' : '매수가보다 몇 % 위로 할까요? (숫자만 · 예: 5)') + '\n' + '본절선 ' + fmt(fl) + '원보다 위' + (cur > 0 ? ' · 지금 ' + fmt(cur) + '원' : ''), '', (function(v) {
+      var n = parseFloat(String(v).replace(/[,\s원%]/g, '').replace(/[−–]/g, '-'));
+      if (!isFinite(n) || !(n > 0)) {
+        say('0 보다 큰 숫자를 넣어 주세요.');
+        return;
+      }
+      var tp = mode === 'won' ? n : avg > 0 ? avg * (1 + n / 100) : 0;
+      var _bm = tp > 0 ? appFloorBlock(r, tp, true) : '';
+      if (_bm) {
+        say(_bm);
+        return;
+      }
+      var _hitWarn = cur > 0 && tp > 0 && (dn ? cur <= tp : cur >= tp) ? '⚠ 화면에 보이는 지금 값(' + fmt(cur) + '원) 기준으로는 걸자마자 팔릴 수 있습니다 — 보내면 컴퓨터가 지금 시세로 다시 보고 ' + '곧바로 팔릴 값이면 거절합니다(' + (dn ? '아래로 익절은 지금 값보다 아래' : '위로 익절은 지금 값보다 위') + '여야 합니다).' : '';
+      askVal('«' + nm + '» ' + what + '\n몇 % 팔까요? (1~100 · 그때 남은 보유 기준)', '100', (function(q) {
+        var qp = parseFloat(String(q).replace(/[%\s]/g, ''));
+        if (!isFinite(qp) || !(qp > 0) || qp > 100) {
+          say('1~100 사이 숫자를 넣어 주세요.');
+          return;
+        }
+        var body = {
+          kind: 'holding',
+          direction: dir,
+          code: r.code,
+          name: nm,
+          qty_pct: qp
+        };
+        if (mode === 'won') body.target_price = n; else {
+          body.ref_pct = n;
+          body.ref_basis = 'avg';
+          if (avg > 0) body.ref_price = avg;
+        }
+        if (cur > 0) body.cur_price = cur;
+        ask('«' + nm + '» 에 매도 조건을 추가합니다.\n\n' + '· ' + what + ' — ' + (mode === 'won' ? fmt(n) + '원' : '매수가 +' + n + '%' + (tp > 0 ? ' (약 ' + fmt(Math.round(tp)) + '원)' : '')) + '\n' + '· 수량 ' + qp + '% · 시장가\n' + '· ' + (dn ? '값이 내려와 목표가에 닿으면 팝니다' : '값이 올라 목표가에 닿으면 팝니다') + '\n\n' + '본절선 ' + fmt(fl) + '원 위라서 앱에서 걸 수 있습니다.' + (_hitWarn ? '\n\n' + _hitWarn : ''), (function() {
+          botPost('/api/sell/rules', body, '조건을 추가했습니다');
+        }));
+      }), true);
+    }), true);
+  }
+  askPick('«' + nm + '» 익절 조건 추가 — 본절선 ' + fmt(fl) + '원 위만', [ [ '⬇ 아래로 익절 — 목표가(원)', function() {
+    go('down', 'won');
+  }, false, {
+    sub: '값이 내려와 닿으면 팝니다 · 지금 값 아래 · 본절선 위'
+  } ], [ '⬇ 아래로 익절 — 매수가 +%', function() {
+    go('down', 'pct');
+  } ], [ '⬆ 위로 익절 — 목표가(원)', function() {
+    go('up', 'won');
+  }, false, {
+    sub: '값이 올라 닿으면 팝니다 · 지금 값 위'
+  } ], [ '⬆ 위로 익절 — 매수가 +%', function() {
+    go('up', 'pct');
+  } ] ]);
 }
 
 function balPctEdit(r) {
@@ -4049,116 +4203,24 @@ function balPctEdit(r) {
   }));
 }
 
-function beFloorBlock(r, price) {
-  if (!r || !r.be_lock) return '';
-  var p = Number(price), prev = Number(r.be_floor_prev), now = Number(r.target_price);
-  if (!isFinite(p) || !(prev > 0)) return '';
-  if (now > 0 && p >= now) return '';
-  return p <= prev ? r.be_msg || '자동으로 본절로 올라온 조건이라 본절선 아래로는 못 내립니다' : '';
-}
-
-function beCurBlock(r, n, cb) {
-  if (!r || !r.be_lock || !(Number(r.be_floor_prev) > 0)) {
-    cb('');
-    return;
-  }
-  fetch('/api/balance', {
-    headers: {
-      Accept: 'application/json'
-    },
-    cache: 'no-store'
-  }).then((function(x) {
-    if (!x.ok) throw new Error('HTTP ' + x.status);
-    return x.json();
-  })).then((function(b) {
-    var h = (b && b.holdings || []).filter((function(y) {
-      return nc(y['종목코드']) === nc(r.code);
-    }))[0];
-    var cur = h ? Number(h['현재가']) : 0;
-    cb(cur > 0 ? beFloorBlock(r, cur * (1 - Number(n) / 100)) : '');
-  })).catch((function() {
-    cb('');
-  }));
-}
-
 function holdPctEdit(r) {
-  fetch('/api/sell/rules?kind=holding', {
-    headers: {
-      Accept: 'application/json'
-    },
-    cache: 'no-store'
-  }).then((function(x) {
-    if (!x.ok) throw new Error('HTTP ' + x.status);
-    return x.json();
-  })).then((function(d) {
-    var rule = (d && d.rules || []).filter((function(y) {
-      return y.rule_id === r.rule_id;
-    }))[0];
-    if (!rule || rule.direction !== 'down' && rule.direction !== 'up') {
-      say('이 조건을 못 찾았습니다 — [매도 목록] 을 다시 연 뒤 해 주세요.');
+  var avg = Number(r.be_avg) || 0;
+  askVal('«' + r.label + '»\n매수가보다 몇 % 위로 할까요? (숫자만 · 예: 5)' + (r.be_line ? '\n본절선 ' + fmt(r.be_line) + '원보다 위여야 합니다' : '') + '\n평단은 컴퓨터가 잔고에서 지금 읽습니다', '', (function(v) {
+    var n = Math.abs(parseFloat(String(v).replace(/[−–]/g, '-').replace(/[%\s]/g, '')));
+    if (!isFinite(n) || !(n > 0)) {
+      say('0 보다 큰 숫자를 넣어 주세요.');
       return;
     }
-    var down = rule.direction === 'down';
-    function send(pct, basis) {
-      botPost('/api/sell/rules/' + encodeURIComponent(r.rule_id), {
-        ref_pct: pct,
-        ref_basis: basis
-      }, '고쳤습니다', 'PUT');
+    var _bm = avg > 0 ? appFloorBlock(r, avg * (1 + n / 100)) : '';
+    if (_bm) {
+      say(_bm);
+      return;
     }
-    function askMag(msg, cb) {
-      askVal('«' + r.label + '»\n' + msg + '\n숫자만 넣으세요 (예: 5)', '', (function(v) {
-        var n = Math.abs(parseFloat(String(v).replace(/[−–]/g, '-').replace(/[%\s]/g, '')));
-        if (!isFinite(n) || !(n > 0)) {
-          say('0 보다 큰 숫자를 넣어 주세요.');
-          return;
-        }
-        cb(n);
-      }), true);
-    }
-    askPick('«' + r.label + '» — 무엇을 기준으로 % 를 잴까요?', [ [ '📍 현재가 대비', function() {
-      askMag(down ? '아래로 — 지금 값보다 몇 % 아래에서 팔까요?' : '위로 — 지금 값보다 몇 % 위에서 팔까요?', (function(n) {
-        if (down && r.be_lock) {
-          beCurBlock(r, n, (function(_bm) {
-            if (_bm) {
-              say(_bm);
-              return;
-            }
-            send(-n, 'cur');
-          }));
-          return;
-        }
-        send(down ? -n : n, 'cur');
-      }));
-    }, false, {
-      sub: down ? '지금 값에서 −N% (아래로 닿으면 파는 조건이라 아래로만)' : '지금 값에서 +N% (위로 닿으면 파는 조건이라 위로만)'
-    } ], [ '💵 매수가(평단) 대비', function() {
-      var _avg = Number(r.be_avg) || 0;
-      function _pre(n, sign) {
-        return _avg > 0 ? beFloorBlock(r, _avg * (1 + sign * n / 100)) : '';
-      }
-      askPick('«' + r.label + '» — 매수가보다 위인가요, 아래인가요?', [ [ '⬆ 매수가보다 위 (+%)', function() {
-        askMag('매수가보다 몇 % 위로 할까요?', (function(n) {
-          var _bm = _pre(n, 1);
-          if (_bm) {
-            say(_bm);
-            return;
-          }
-          send(n, 'avg');
-        }));
-      } ], r.be_lock ? [ '⬇ 매수가보다 아래 (−%)', null, false, {
-        off: true,
-        sub: r.be_off || '자동 본절이라 본절선 아래로는 못 내립니다'
-      } ] : [ '⬇ 매수가보다 아래 (−%)', function() {
-        askMag('매수가보다 몇 % 아래로 할까요?', (function(n) {
-          send(-n, 'avg');
-        }));
-      } ] ]);
-    }, false, {
-      sub: '평단은 컴퓨터가 잔고에서 지금 읽습니다'
-    } ] ]);
-  })).catch((function(e) {
-    say('이 조건이 손절인지 익절인지 못 읽었습니다 — 잠시 후 다시 해 주세요.\n(' + (e && e.message || e) + ')');
-  }));
+    botPost('/api/sell/rules/' + encodeURIComponent(r.rule_id), {
+      ref_pct: n,
+      ref_basis: 'avg'
+    }, '고쳤습니다', 'PUT');
+  }), true);
 }
 
 function renderSellList() {
@@ -4183,7 +4245,14 @@ function renderSellList() {
     if (!box || TAB !== 'orders' || BOT.pick !== 'sell') return;
     var f = document.createDocumentFragment();
     var hold = d.holding || [];
-    f.appendChild(infoLine('mut', '보유종목 ' + hold.length + '건 · 눌러서 고치기·지우기', '줄을 누르면 고치거나 지웁니다.\n새로 산 종목에 거는 매도는 ☰ «🤖 자동 규칙» 에 있습니다.'));
+    var _cur = {};
+    (bl.holdings || []).forEach((function(h) {
+      if (Number(h['현재가']) > 0) _cur[String(h['종목코드'])] = Number(h['현재가']);
+    }));
+    hold.forEach((function(r) {
+      r._cur = _cur[String(r.code)] || 0;
+    }));
+    f.appendChild(infoLine('mut', '보유종목 ' + hold.length + '건 · 눌러서 보기·고치기', '줄을 누르면 보거나 고칩니다.\n' + '앱에서는 자동으로 걸린 조건과 본절은 보기만 하고, 직접 건 익절(본절선 위)만 고칩니다 — 직접 건 조건은 지울 수도 있습니다(본절선 아래 손절 포함) · 자동 조건은 컴퓨터 주문 총괄에서 고칩니다.\n' + '본절이 걸린 종목은 «＋ 익절 조건 추가» 로 아래로·위로 익절을 더할 수 있습니다(목표가는 본절선 위만).\n' + '새로 산 종목에 거는 매도는 ☰ «🤖 자동 규칙» 에 있습니다.'));
     var g1 = secBox(f, '📤 보유종목 자동매도');
     if (!hold.length) g1.appendChild(el('div', 'empty', '걸어 둔 것이 없습니다'));
     stkList(g1, hold, {
@@ -4216,6 +4285,20 @@ function renderSellList() {
         }
         return a;
       },
+      lineSub: function(r) {
+        return r.be_info && r.be_info.text ? r.be_info.text : '';
+      },
+      foot: function(rows) {
+        var r0 = (rows || []).filter((function(x) {
+          return x.add_ok;
+        }))[0];
+        if (!r0) return null;
+        var b = el('div', 'stkadd', '＋ 익절 조건 추가');
+        b.onclick = function() {
+          sellAddPick(r0);
+        };
+        return b;
+      },
       pick: function(r) {
         sellRuleActions(r, 'holding');
       }
@@ -4246,13 +4329,272 @@ function arHead(g, n, title, st) {
   return h;
 }
 
-function arPill(on, onTap) {
-  var p = el('span', 'st arpill ' + (on === true ? 'on' : on === false ? 'off' : 'unk'), on === true ? '켜짐' : on === false ? '꺼짐' : '?');
-  if (on === true || on === false) {
-    p.onclick = onTap;
+function arPill(on, onTap, key) {
+  var pd = key ? AR_PEND[key] : null;
+  if (key && !pd) {
+    var _cv = arCur(key);
+    if (_cv === true || _cv === false) on = _cv;
+  }
+  var v = pd ? pd.on : on;
+  var p = el('span', 'st arpill ' + (v === true ? 'on' : v === false ? 'off' : 'unk') + (pd ? ' saving' : ''), v === true ? '켜짐' : v === false ? '꺼짐' : '?');
+  if (!pd && (on === true || on === false)) {
+    p.onclick = key ? function() {
+      arTap(key);
+    } : onTap;
     p.setAttribute('role', 'button');
   }
-  return p;
+  if (!key) return p;
+  var w = el('span', 'arsw');
+  w.setAttribute('data-ark', key);
+  if (pd) {
+    w.appendChild(el('span', 'arsv', '저장 중…'));
+    w.setAttribute('aria-busy', 'true');
+  }
+  w.appendChild(p);
+  return w;
+}
+
+var AR_PEND = {};
+
+var AR_SAVE_MAX = 15e3;
+
+var AR_LATE_RECHECK = 35e3;
+
+var AR_SEQ = {};
+
+var AR_SW = {
+  be: {
+    name: '🛡 본전 자동상향',
+    get: '/api/bot/edit_targets',
+    url: '/api/bot/breakeven',
+    ask: function(on) {
+      return '본전 자동상향을 ' + (on ? '끕니다' : '켭니다') + '.';
+    },
+    danger: function() {
+      return false;
+    },
+    body: function(to) {
+      return {
+        action: to ? 'on' : 'off'
+      };
+    },
+    cur: function(d) {
+      return d && d.breakeven ? !!d.breakeven.enabled : null;
+    },
+    srv: function(j) {
+      return j && j.config && typeof j.config.enabled === 'boolean' ? j.config.enabled : null;
+    },
+    put: function(j) {
+      jcPatch('/api/bot/edit_targets', (function(d) {
+        d.breakeven = j.config;
+      }));
+    },
+    set: function(to) {
+      jcPatch('/api/bot/edit_targets', (function(d) {
+        var b = {}, k, o = d.breakeven || {};
+        for (k in o) if (Object.prototype.hasOwnProperty.call(o, k)) b[k] = o[k];
+        b.enabled = to;
+        d.breakeven = b;
+      }));
+    }
+  },
+  ms: {
+    name: '📈 익절선 자동 트레일링 전환',
+    get: '/api/ma_switch_config',
+    url: '/api/ma_switch_config',
+    ask: function(on) {
+      return on ? '익절선 자동 트레일링 전환을 끕니다.\n이미 건 선 매도는 그대로 둡니다.' : '익절선 자동 트레일링 전환을 켭니다.\n오늘 고가가 이평선보다 설정 % 이상 위인 보유종목에 그 선을 따라가는 매도를 겁니다(본절 손절은 그대로).';
+    },
+    danger: function() {
+      return false;
+    },
+    body: function(to) {
+      return {
+        enabled: to
+      };
+    },
+    cur: function(d) {
+      return d ? !!d.enabled : null;
+    },
+    srv: function(j) {
+      return j && typeof j.enabled === 'boolean' && j.l21 && j.l50 ? j.enabled : null;
+    },
+    put: function(j) {
+      jcPut('/api/ma_switch_config', j);
+    },
+    set: function(to) {
+      jcPatch('/api/ma_switch_config', (function(d) {
+        d.enabled = to;
+      }));
+    }
+  },
+  bv: {
+    name: '📉 돌파 거래량 점검',
+    get: '/api/bvc_config',
+    url: '/api/bvc_config',
+    ask: function(on) {
+      return on ? '돌파 거래량 점검을 끕니다.\n거래량이 모자라도 팔지 않습니다.' : '돌파 거래량 점검을 켭니다.\n그날 자동 매수가 체결된 종목의 15:10 거래량이 모자라면 보유의 일부를 시장가로 팝니다.';
+    },
+    danger: function(on) {
+      return !on;
+    },
+    body: function(to) {
+      return {
+        enabled: to
+      };
+    },
+    cur: function(d) {
+      return d ? !!d.enabled : null;
+    },
+    srv: function(j) {
+      return j && typeof j.enabled === 'boolean' && j.ratio != null && j.sell != null ? j.enabled : null;
+    },
+    put: function(j) {
+      jcPut('/api/bvc_config', j);
+    },
+    set: function(to) {
+      jcPatch('/api/bvc_config', (function(d) {
+        d.enabled = to;
+      }));
+    }
+  }
+};
+
+function jcPut(url, data) {
+  var now = Date.now(), c = JC[url];
+  JC[url] = {
+    ts: now,
+    data: data,
+    busy: c ? c.busy : false,
+    from: now,
+    forcedAt: now
+  };
+}
+
+function jcPatch(url, fn) {
+  var c = JC[url];
+  if (!c || !c.data) return false;
+  var d = {}, k;
+  for (k in c.data) if (Object.prototype.hasOwnProperty.call(c.data, k)) d[k] = c.data[k];
+  fn(d);
+  JC[url] = {
+    ts: c.ts,
+    data: d,
+    busy: c.busy,
+    from: c.from,
+    forcedAt: Date.now()
+  };
+  return true;
+}
+
+function arCur(key) {
+  var sw = AR_SW[key], c = sw ? JC[sw.get] : null;
+  return c && c.data ? sw.cur(c.data) : null;
+}
+
+function arPaint(key, fb) {
+  var w = document.querySelector('#ar-box .arsw[data-ark="' + key + '"]');
+  if (!w || !w.parentNode) return false;
+  var on = arCur(key);
+  w.parentNode.replaceChild(arPill(on === null ? fb === undefined ? null : fb : on, null, key), w);
+  return true;
+}
+
+function arTap(key) {
+  if (AR_PEND[key]) return;
+  var sw = AR_SW[key], on = arCur(key);
+  if (on !== true && on !== false) return;
+  ask(sw.ask(on), (function() {
+    arSave(key, !on, on);
+  }), sw.danger(on));
+}
+
+function arSave(key, to, was) {
+  if (AR_PEND[key]) return;
+  var sw = AR_SW[key], ended = false, tmo = null, ac = jcCutter();
+  var seq = AR_SEQ[key] = (AR_SEQ[key] || 0) + 1;
+  AR_PEND[key] = {
+    on: to,
+    was: was,
+    at: Date.now()
+  };
+  arPaint(key, was);
+  function end(x, err) {
+    if (ended) return;
+    ended = true;
+    clearTimeout(tmo);
+    delete AR_PEND[key];
+    if (x && !x.j) {
+      err = '답을 못 읽었습니다(HTTP ' + x.r.status + ')';
+      x = null;
+    }
+    var j = x ? x.j : null, sv = j ? sw.srv(j) : null;
+    if (x && x.r.ok && j.ok !== false) {
+      if (sv === true || sv === false) sw.put(j); else {
+        sw.set(to);
+        sv = to;
+      }
+      arPaint(key, sv);
+      if (sv === to) toast(j.msg && /이미/.test(j.msg) ? j.msg : sw.name + ' — ' + (to ? '켰습니다' : '껐습니다'), 2200, true); else toast('⚠ ' + sw.name + ' — 서버 값은 «' + (sv ? '켜짐' : '꺼짐') + '» 입니다' + (j.msg ? ' · ' + j.msg : ''), 6e3, true);
+      return;
+    }
+    if (sv === true || sv === false) sw.put(j);
+    arPaint(key, sv === true || sv === false ? sv : was);
+    if (x) {
+      toast('⚠ ' + sw.name + ' — 못 바꿨습니다: ' + (j.msg || j.error || 'HTTP ' + x.r.status) + ' · 원래대로 둡니다', 6e3, true);
+      return;
+    }
+    toast('⚠ ' + sw.name + ' — 답을 못 받았습니다(' + err + ') · 저장됐는지 모릅니다 — 서버 값을 다시 읽습니다(잠시 뒤 한 번 더)', 6e3, true);
+    var _lbl = function(v) {
+      return v ? '켜짐' : '꺼짐';
+    };
+    var chk = function(late) {
+      getJSON(sw.get).then((function() {
+        if (AR_PEND[key] || AR_SEQ[key] !== seq) return;
+        arPaint(key, was);
+        var nv = arCur(key);
+        if (nv === to) toast(sw.name + ' — ' + (late ? '늦게 저장됐습니다 · 지금 ' : '다시 읽어 보니 ') + '«' + _lbl(to) + '» 으로 저장돼 있습니다', 4e3, true); else if (!late) setTimeout((function() {
+          chk(true);
+        }), AR_LATE_RECHECK); else if (nv === true || nv === false) toast(sw.name + ' — 다시 확인해 보니 «' + _lbl(nv) + '» 그대로입니다(저장되지 않았습니다)', 5e3, true);
+      }), (function() {
+        if (!late && AR_SEQ[key] === seq) setTimeout((function() {
+          chk(true);
+        }), AR_LATE_RECHECK);
+      }));
+    };
+    chk(false);
+  }
+  tmo = setTimeout((function() {
+    try {
+      ac.abort();
+    } catch (_e) {}
+    end(null, Math.round(AR_SAVE_MAX / 1e3) + '초 넘게 답이 없어 끊었습니다');
+  }), AR_SAVE_MAX);
+  var opt = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(sw.body(to))
+  };
+  if (typeof AbortController === 'function') opt.signal = ac.signal;
+  fetch(sw.url, opt).then((function(r) {
+    return r.json().then((function(j) {
+      return {
+        r: r,
+        j: j
+      };
+    }), (function() {
+      return {
+        r: r,
+        j: null
+      };
+    }));
+  })).then((function(x) {
+    end(x, '');
+  }), (function(e) {
+    end(null, e && e.message || String(e));
+  }));
 }
 
 function arBody(g, lines) {
@@ -4408,14 +4750,9 @@ function renderAutoRules() {
       arHead(g, 2, '🛡 본전 자동상향');
       arErr(g, '본전 자동상향', '설정이 비어 왔습니다');
     } else {
-      arHead(g, 2, '🛡 본전 자동상향', arPill(!!c.enabled, (function() {
-        ask('본전 자동상향을 ' + (c.enabled ? '끕니다' : '켭니다') + '.', (function() {
-          botPost('/api/bot/breakeven', {
-            action: c.enabled ? 'off' : 'on'
-          });
-        }));
-      })));
-      arBody(g, [ '이익 <b>' + arEsc(c.pct) + '%</b> 도달 시 → 손절을 본전 <b>+' + arEsc(c.ticks) + '틱</b> (보유종목 전체)' ]);
+      arHead(g, 2, '🛡 본전 자동상향', arPill(!!c.enabled, null, 'be'));
+      var _mpc = c.max_pct != null ? c.max_pct : null;
+      arBody(g, [ '이익 <b>' + arEsc(c.pct) + '%</b> 도달 시 → 손절을 본절 <b>매수가 +' + arEsc(c.ticks) + '틱</b>' + (_mpc != null ? ' (최대 <b>' + arEsc(_mpc) + '%</b> · 둘 중 작은 쪽)' : '') + ' · 보유종목 전체' ]);
       arBtns(g, [ [ '📈 이익 % 수정', function() {
         askVal('몇 % 이익에서 본전으로 올릴까요? (숫자만)', c.pct, (function(v) {
           botPost('/api/bot/breakeven', {
@@ -4427,6 +4764,13 @@ function renderAutoRules() {
         askVal('본전 위로 몇 틱에 걸까요? (숫자만)', c.ticks, (function(v) {
           botPost('/api/bot/breakeven', {
             action: 'ticks',
+            value: v
+          });
+        }), true);
+      } ], [ '➗ 최대 % 수정', function() {
+        askVal('본절을 매수가보다 최대 몇 % 위로 둘까요? (0.1~1 · 틱과 둘 중 작은 쪽)', _mpc != null ? _mpc : 1, (function(v) {
+          botPost('/api/bot/breakeven', {
+            action: 'maxpct',
             value: v
           });
         }), true);
@@ -4452,13 +4796,7 @@ function renderAutoRules() {
       arHead(g, 3, '📈 익절선 자동 트레일링 전환');
       arErr(g, '익절선 자동 트레일링 전환', ms.__err || '설정이 비어 왔습니다');
     } else {
-      arHead(g, 3, '📈 익절선 자동 트레일링 전환', arPill(!!ms.enabled, (function() {
-        ask(ms.enabled ? '익절선 자동 트레일링 전환을 끕니다.\n이미 건 선 매도는 그대로 둡니다.' : '익절선 자동 트레일링 전환을 켭니다.\n오늘 고가가 이평선보다 설정 % 이상 위인 보유종목에 그 선을 따라가는 매도를 겁니다(본절 손절은 그대로).', (function() {
-          botPost('/api/ma_switch_config', {
-            enabled: !ms.enabled
-          }, ms.enabled ? '껐습니다' : '켰습니다');
-        }));
-      })));
+      arHead(g, 3, '📈 익절선 자동 트레일링 전환', arPill(!!ms.enabled, null, 'ms'));
       arBody(g, [ '고가가 21일선보다 <b>' + arEsc(ms.l21.pct) + '%</b> 위 → 21일선 매도 <b>' + arEsc(ms.l21.qty) + '%</b>', '고가가 50일선보다 <b>' + arEsc(ms.l50.pct) + '%</b> 위 → 50일선 매도 <b>' + arEsc(ms.l50.qty) + '%</b>' ]);
       arBtns(g, [ [ '✏️ 수정', function() {
         function one(key, q, now) {
@@ -4486,13 +4824,7 @@ function renderAutoRules() {
       arHead(g, 4, '📉 돌파 거래량 점검');
       arErr(g, '돌파 거래량 점검', bv.__err || '설정이 비어 왔습니다');
     } else {
-      arHead(g, 4, '📉 돌파 거래량 점검', arPill(!!bv.enabled, (function() {
-        ask(bv.enabled ? '돌파 거래량 점검을 끕니다.\n거래량이 모자라도 팔지 않습니다.' : '돌파 거래량 점검을 켭니다.\n그날 자동 매수가 체결된 종목의 15:10 거래량이 모자라면 보유의 일부를 시장가로 팝니다.', (function() {
-          botPost('/api/bvc_config', {
-            enabled: !bv.enabled
-          }, bv.enabled ? '껐습니다' : '켰습니다');
-        }), !bv.enabled);
-      })));
+      arHead(g, 4, '📉 돌파 거래량 점검', arPill(!!bv.enabled, null, 'bv'));
       arBody(g, [ '15:10 거래량이 50일 평균의 <b>' + arEsc(bv.ratio) + '%</b> 미만 → 보유의 <b>' + arEsc(bv.sell) + '%</b> 시장가 매도', '<span class="armut">돌파로 산 날 · 종목마다 그날 한 번</span>' ]);
       arBtns(g, [ [ '✏️ 수정', function() {
         askPick('📉 돌파 거래량 점검 — 무엇을 고칠까요?', [ [ '📊 거래량 기준 % (50일 평균의)', function() {
@@ -5866,6 +6198,13 @@ function warnActions(code, nm) {
   } ], stgItem(code, nm) ], code);
 }
 
+function stockPick(code, nm) {
+  nm = nm || code;
+  askPick('«' + nm + '»', [ [ '📈 차트 보기', function() {
+    chOpen(code, nm);
+  } ], stgItem(code, nm) ], code);
+}
+
 function passedRow(x, done) {
   var row = el('div', 'strow');
   row.setAttribute('data-code', x.code || '');
@@ -5876,7 +6215,7 @@ function passedRow(x, done) {
   row.appendChild(top);
   row.appendChild(el('div', 'sub', x.route ? x.route : '들어온 테마·업종 기록 없음'));
   row.onclick = function() {
-    if (x.code) chOpen(x.code, x.name || x.code);
+    if (x.code) stockPick(x.code, x.name || x.code);
   };
   return row;
 }
@@ -6237,6 +6576,110 @@ function okLineTo(arr, into) {
   into.appendChild(okl);
 }
 
+var LV_URL = '/api/bot/orders_live';
+
+function lvRead(raw) {
+  var lv = raw || {};
+  var bad = !raw ? '답이 비었습니다' : lv.__err ? mkWhy(lv) : lv.ok === false || lv.error && !lv.unfilled && !lv.passed ? lv.error || '못 읽음' : '';
+  if (bad) lv = {};
+  var pxBad = !bad && lv.error ? String(lv.error) : '';
+  var unBad = !bad && lv.unfilled && lv.unfilled.error ? String(lv.unfilled.error) : '';
+  var pn = pxBad ? 0 : (lv.passed || {}).n || 0, un = (lv.unfilled || {}).n || 0, ptd = lv.passed_today || [];
+  return {
+    lv: lv,
+    bad: bad,
+    pxBad: pxBad,
+    unBad: unBad,
+    pn: pn,
+    un: un,
+    ptd: ptd,
+    n: un + pn + ptd.length
+  };
+}
+
+function ordLiveFrag(r, thm) {
+  var lv = r.lv, _lvBad = r.bad, _lvPxBad = r.pxBad, _unBad = r.unBad;
+  var fO = document.createDocumentFragment();
+  fO.appendChild(el('div', 'sec', '📋 미체결 · 지나친 주문'));
+  var _pn = r.pn, _un = r.un;
+  if (_un) {
+    var uw = el('div', 'warnbox b');
+    uw.appendChild(el('div', 'wt', '⏳ 미체결 ' + _un + '건'));
+    var uc = botTextCards(lv.unfilled.text);
+    if (uc) uw.appendChild(uc); else uw.appendChild(el('div', 'bnote', lv.unfilled.text || ''));
+    fO.appendChild(uw);
+  }
+  if (_pn) {
+    var pw = el('div', 'warnbox');
+    pw.appendChild(el('div', 'wt', '🚫 매수가 지나친 대기주문 ' + _pn + '건'));
+    var _pits = (lv.passed || {}).items || [];
+    if (_pits.length) _pits.forEach((function(x) {
+      pw.appendChild(passedRow(x, false));
+    })); else {
+      var pc = botTextCards(lv.passed.text);
+      if (pc) pw.appendChild(pc); else pw.appendChild(el('div', 'bnote', lv.passed.text || ''));
+    }
+    pw.appendChild(el('div', 'ddnote', '곧 자동으로 지워집니다 (지운 뒤 알림이 옵니다)'));
+    fO.appendChild(pw);
+  }
+  var _ptd = r.ptd;
+  if (_ptd.length) {
+    var tw = el('div', 'warnbox k');
+    tw.appendChild(el('div', 'wt', '🗑 오늘 지나쳐 자동삭제된 주문 ' + _ptd.length + '건'));
+    _ptd.forEach((function(x) {
+      tw.appendChild(passedRow(x, true));
+    }));
+    fO.appendChild(tw);
+  } else if (lv.passed_today_error) {
+    fO.appendChild(el('div', 'err', '⚠ ' + lv.passed_today_error));
+  }
+  var _okLine = okLineTo;
+  var _okO = [];
+  if (_lvBad) {
+    fO.appendChild(el('div', 'err', '⚠ 미체결·지나친 주문을 못 읽었습니다 — ' + _lvBad));
+  } else {
+    if (_lvPxBad) fO.appendChild(el('div', 'err', '⚠ 지나친 주문을 못 읽었습니다 — ' + _lvPxBad));
+    if (_unBad) fO.appendChild(el('div', 'err', '⚠ ' + _unBad));
+    if (!_un && !_unBad) _okO.push(el('span', '', '⏳ 미체결 없음'));
+    if (!_pn && !_ptd.length && !_lvPxBad) _okO.push(el('span', '', '🚫 지나친 주문 없음'));
+  }
+  _okLine(_okO, fO);
+  var _pAll = _pn + _ptd.length, _osum = [];
+  if (_lvBad) _osum.push({
+    t: '미체결 · 지나친 주문'
+  }, {
+    t: '못 읽음',
+    c: 'fbad'
+  }); else if (!_un && !_pAll && !lv.passed_today_error && !_lvPxBad && !_unBad) _osum.push({
+    t: '미체결 · 지나친 주문 없음'
+  }); else {
+    _osum.push(_unBad ? {
+      t: '미체결 못 읽음',
+      c: 'fbad'
+    } : {
+      t: '미체결 ' + _un,
+      c: _un ? 'fhit' : ''
+    });
+    _osum.push(_lvPxBad ? {
+      t: '지나친 주문 못 읽음',
+      c: 'fbad'
+    } : {
+      t: '지나친 주문 ' + _pAll,
+      c: _pAll ? 'fhit' : ''
+    });
+    if (!_ptd.length && lv.passed_today_error) _osum.push({
+      t: '자동삭제 기록 못 읽음',
+      c: 'fbad'
+    });
+  }
+  if (thm && fO.querySelector('[data-code], .ln')) {
+    var _tn = thmNote(thm);
+    if (_tn) fO.appendChild(_tn);
+  }
+  foldSec(fO, 'ordlive', _osum, '📋 ');
+  return fO;
+}
+
 function renderOrders(first) {
   TITLE.textContent = '주문';
   if (first && hasCache('/api/orders?active=1')) first = false;
@@ -6270,12 +6713,10 @@ function renderOrders(first) {
       __err: e
     };
   })) ]).then((function(res) {
+    var _lr = lvRead(res[2]), lv = _lr.lv, _lvBad = _lr.bad, _lvPxBad = _lr.pxBad;
+    tdBadgeSet(_lr);
     if (TAB !== 'orders') return;
-    var od = res[0], md = res[1], lv = res[2] || {};
-    var _lvBad = !res[2] ? '답이 비었습니다' : lv.__err ? mkWhy(lv) : lv.ok === false || lv.error && !lv.unfilled && !lv.passed ? lv.error || '못 읽음' : '';
-    if (_lvBad) lv = {};
-    var _lvPxBad = !_lvBad && lv.error ? String(lv.error) : '';
-    var _unBad = !_lvBad && lv.unfilled && lv.unfilled.error ? String(lv.unfilled.error) : '';
+    var od = res[0], md = res[1];
     BOT.menu = res[3] && res[3].items || BOT.menu || [];
     var f = document.createDocumentFragment();
     live(true, '');
@@ -6285,81 +6726,6 @@ function renderOrders(first) {
     }), (function() {
       setWatch('off');
     }), true, '끄면 매수만 멈춤 · 손절·익절은 그대로'));
-    var fO = document.createDocumentFragment();
-    fO.appendChild(el('div', 'sec', '📋 미체결 · 지나친 주문'));
-    var _pn = _lvPxBad ? 0 : (lv.passed || {}).n || 0, _un = (lv.unfilled || {}).n || 0;
-    if (_un) {
-      var uw = el('div', 'warnbox b');
-      uw.appendChild(el('div', 'wt', '⏳ 미체결 ' + _un + '건'));
-      var uc = botTextCards(lv.unfilled.text);
-      if (uc) uw.appendChild(uc); else uw.appendChild(el('div', 'bnote', lv.unfilled.text || ''));
-      fO.appendChild(uw);
-    }
-    if (_pn) {
-      var pw = el('div', 'warnbox');
-      pw.appendChild(el('div', 'wt', '🚫 매수가 지나친 대기주문 ' + _pn + '건'));
-      var _pits = (lv.passed || {}).items || [];
-      if (_pits.length) _pits.forEach((function(x) {
-        pw.appendChild(passedRow(x, false));
-      })); else {
-        var pc = botTextCards(lv.passed.text);
-        if (pc) pw.appendChild(pc); else pw.appendChild(el('div', 'bnote', lv.passed.text || ''));
-      }
-      pw.appendChild(el('div', 'ddnote', '곧 자동으로 지워집니다 (지운 뒤 알림이 옵니다)'));
-      fO.appendChild(pw);
-    }
-    var _ptd = lv.passed_today || [];
-    if (_ptd.length) {
-      var tw = el('div', 'warnbox k');
-      tw.appendChild(el('div', 'wt', '🗑 오늘 지나쳐 자동삭제된 주문 ' + _ptd.length + '건'));
-      _ptd.forEach((function(x) {
-        tw.appendChild(passedRow(x, true));
-      }));
-      fO.appendChild(tw);
-    } else if (lv.passed_today_error) {
-      fO.appendChild(el('div', 'err', '⚠ ' + lv.passed_today_error));
-    }
-    var _okLine = okLineTo;
-    var _okO = [];
-    if (_lvBad) {
-      fO.appendChild(el('div', 'err', '⚠ 미체결·지나친 주문을 못 읽었습니다 — ' + _lvBad));
-    } else {
-      if (_lvPxBad) fO.appendChild(el('div', 'err', '⚠ 지나친 주문을 못 읽었습니다 — ' + _lvPxBad));
-      if (_unBad) fO.appendChild(el('div', 'err', '⚠ ' + _unBad));
-      if (!_un && !_unBad) _okO.push(el('span', '', '⏳ 미체결 없음'));
-      if (!_pn && !_ptd.length && !_lvPxBad) _okO.push(el('span', '', '🚫 지나친 주문 없음'));
-    }
-    _okLine(_okO, fO);
-    var _pAll = _pn + _ptd.length, _osum = [];
-    if (_lvBad) _osum.push({
-      t: '미체결 · 지나친 주문'
-    }, {
-      t: '못 읽음',
-      c: 'fbad'
-    }); else if (!_un && !_pAll && !lv.passed_today_error && !_lvPxBad && !_unBad) _osum.push({
-      t: '미체결 · 지나친 주문 없음'
-    }); else {
-      _osum.push(_unBad ? {
-        t: '미체결 못 읽음',
-        c: 'fbad'
-      } : {
-        t: '미체결 ' + _un,
-        c: _un ? 'fhit' : ''
-      });
-      _osum.push(_lvPxBad ? {
-        t: '지나친 주문 못 읽음',
-        c: 'fbad'
-      } : {
-        t: '지나친 주문 ' + _pAll,
-        c: _pAll ? 'fhit' : ''
-      });
-      if (!_ptd.length && lv.passed_today_error) _osum.push({
-        t: '자동삭제 기록 못 읽음',
-        c: 'fbad'
-      });
-    }
-    foldSec(fO, 'ordlive', _osum, '📋 ');
-    f.appendChild(fO);
     var _tn = thmNote(res[4]);
     if (_tn) f.appendChild(_tn);
     thmDecorate(f);
@@ -7196,7 +7562,7 @@ function balActions(hh) {
       return [ '✏️ ' + (r.label || '매도조건'), function() {
         sellRuleActions(r, 'holding');
       }, false, {
-        sub: '누르면 고치거나 지웁니다'
+        sub: ruleTapSub(r)
       } ];
     }));
     if (!err && rules.length >= 2) {
@@ -7249,8 +7615,12 @@ function balActions(hh) {
     return r.json();
   })).then((function(d) {
     clearTimeout(tm2);
+    var _cp = Number(hh['현재가']) || 0;
     putRules((d && d.holding || []).filter((function(r) {
       return String(r.code) === code;
+    })).map((function(r) {
+      r._cur = _cp;
+      return r;
     })));
   })).catch((function(e) {
     clearTimeout(tm2);
@@ -8815,11 +9185,12 @@ function beItem(cd, code, nm) {
     sub: it.reason || '지금은 올릴 수 없습니다'
   } ];
   var tk = cd.ticks != null ? cd.ticks : '?';
+  var _bn = it.be_note || '매수가 +' + tk + '틱';
   return [ '🛡 본전 상향', function() {
     beAsk(it, code, nm, '', tk);
   }, false, {
     id: 'pk-be',
-    sub: '손절을 ' + fmt(it.breakeven) + '원(매수가 +' + tk + '틱)으로 올립니다'
+    sub: '손절을 ' + fmt(it.breakeven) + '원(' + _bn + ')으로 올립니다'
   } ];
 }
 
@@ -8827,7 +9198,7 @@ function beAsk(it, code, nm, why, tk) {
   var msg = '«' + nm + '» 손절을 본전으로 올립니다.\n\n';
   if (it) {
     var pl = Number(it.pl_rate || 0);
-    msg += '· 새 손절 ' + fmt(it.breakeven) + '원 (매수가 ' + fmt(it.avg) + '원 + ' + tk + '틱)\n' + '· 지금 ' + fmt(it.cur) + '원 · 수익률 ' + (pl >= 0 ? '+' : '') + pl.toFixed(2) + '%\n\n' + '새 손절 이하로 걸린 손절은 이 하나(남은 수량 전부)로 바뀝니다.\n' + '새 손절보다 높게 걸린 손절·트레일링 선과 익절은 그대로 둡니다.\n' + '값이 새 손절까지 내려오면 남은 수량 전부를 시장가로 팝니다.' + (it.reason ? '\n\n※ ' + it.reason : '');
+    msg += '· 새 손절 ' + fmt(it.breakeven) + '원 (매수가 ' + fmt(it.avg) + '원 · ' + (it.be_note ? it.be_note.replace(/^매수가 /, '') : '+' + tk + '틱') + ')\n' + '· 지금 ' + fmt(it.cur) + '원 · 수익률 ' + (pl >= 0 ? '+' : '') + pl.toFixed(2) + '%\n\n' + '새 손절 이하로 걸린 손절은 이 하나(남은 수량 전부)로 바뀝니다.\n' + '새 손절보다 높게 걸린 손절·트레일링 선과 익절은 그대로 둡니다.\n' + '값이 새 손절까지 내려오면 남은 수량 전부를 시장가로 팝니다.' + (it.reason ? '\n\n※ ' + it.reason : '');
   } else {
     msg += '가능한지 미리 못 읽었습니다 (' + why + ').\n' + '누르면 컴퓨터가 그 자리에서 다시 확인하고, 안 되면 까닭을 알려 드립니다.';
   }
@@ -9437,7 +9808,7 @@ function renderMajor(first) {
       }
       if (tl) k.appendChild(tl);
       if (x.nocode) k.appendChild(el('div', 'mut', '종목코드가 없어 차트를 못 엽니다')); else k.onclick = function() {
-        chOpen(x.code, x.name);
+        stockPick(x.code, x.name);
       };
       grp.appendChild(k);
     }));
@@ -9470,8 +9841,118 @@ var FX = {
   err: '',
   note: '',
   caret: null,
-  touched: false
+  touched: false,
+  tab: 'stock',
+  tabs: [],
+  tabsKnown: false
 };
+
+try {
+  FX.tab = localStorage.getItem('fx_tab') || 'stock';
+} catch (_e) {
+  FX.tab = 'stock';
+}
+
+function fxIsStock() {
+  return FX.tab === 'stock';
+}
+
+function fxUrl() {
+  return fxIsStock() ? FX_URL : FX_URL + '?tab=' + encodeURIComponent(FX.tab);
+}
+
+function fxStale(d) {
+  return !!d && typeof d === 'object' && (d.tab || 'stock') !== FX.tab;
+}
+
+function fxTabName() {
+  for (var i = 0; i < FX.tabs.length; i++) if (FX.tabs[i].id === FX.tab) return FX.tabs[i].name;
+  return fxIsStock() ? '주식' : FX.tab;
+}
+
+function fxTabsApply(d) {
+  if (!d || typeof d !== 'object') return;
+  if (!Array.isArray(d.tabs) && (d.ok === false || !('text' in d || 'rev' in d))) return;
+  if (!Array.isArray(d.tabs)) {
+    FX.tabsKnown = false;
+    FX.tabs = [];
+    if (!fxIsStock()) FX.tab = 'stock';
+    fxTabsPaint();
+    return;
+  }
+  FX.tabsKnown = true;
+  FX.tabs = d.tabs;
+  fxTabsPaint();
+}
+
+function fxTabsPaint() {
+  var box = fxEl('fx-tabs');
+  if (!box) return;
+  if (!FX.tabsKnown) {
+    box.style.display = 'none';
+    box._sig = '';
+    return;
+  }
+  var sig = FX.tab + '|' + JSON.stringify(FX.tabs.map((function(t) {
+    return [ t.id, t.name, !!t.enabled, t.lines || 0 ];
+  })));
+  if (box._sig === sig) return;
+  box._sig = sig;
+  box.textContent = '';
+  box.style.display = '';
+  FX.tabs.forEach((function(t) {
+    var b = el('button', 'fxtab' + (t.id === FX.tab ? ' on' : ''), t.name + (t.lines > 0 ? t.enabled ? ' ●' : ' ○' : ''));
+    b.setAttribute('data-tab', t.id);
+    b.onclick = function() {
+      fxTabGo(t.id);
+    };
+    box.appendChild(b);
+  }));
+}
+
+function fxTabGo(id, force) {
+  if (id === FX.tab && !force) return;
+  if (FX.busy && !force) {
+    toast('저장·사진 올리기가 끝난 뒤 탭을 바꿔 주세요', 2400, true);
+    return;
+  }
+  var go2 = function() {
+    FX.tab = id;
+    try {
+      localStorage.setItem('fx_tab', id);
+    } catch (_e) {}
+    FX.loaded = false;
+    FX.hasRev = false;
+    FX.rev = null;
+    FX.baseText = FX.cur = '';
+    FX.dirty = false;
+    FX.updated_at = FX.last_done_at = '';
+    FX.images = {};
+    FX.gone = {};
+    FX.err = '';
+    FX.note = '';
+    var ta = fxEl('fx-ta');
+    if (ta) {
+      ta.value = '';
+      ta.readOnly = true;
+    }
+    fxTabsPaint();
+    fxSwitch();
+    fxPicShow();
+    fxThumbs();
+    fxStatus();
+    fxLoad();
+  };
+  if (FX.dirty && !force) fxLeaveAsk(go2); else go2();
+}
+
+function fxTabGone(r, d, forTab) {
+  if (r.status !== 404 || !d || d.error !== 'unknown_tab' || forTab !== FX.tab) return false;
+  fxTabsApply(d);
+  say('📑 [' + forTab + '] 탭이 없어져 [주식] 탭으로 돌아갑니다' + (FX.dirty ? ' — 저장 안 한 글은 남지 않습니다' : ''));
+  fxTabGo('stock', true);
+  return true;
+}
 
 var FX_PICK_WAIT = 2500;
 
@@ -9507,9 +9988,15 @@ function fxStatus(msg) {
   if (st.className !== cls) st.className = cls;
   var sv = fxEl('fx-save');
   if (sv) {
-    sv.disabled = !!FX.busy;
+    sv.disabled = !!FX.busy || !FX.loaded;
     sv.className = 'btn' + (FX.dirty ? ' p' : '');
   }
+}
+
+function fxNotLoaded(what) {
+  if (FX.loaded) return false;
+  toast('📝 아직 이 탭 글을 못 불러왔습니다 — 불러온 뒤에 ' + what + ' (지금 하면 컴퓨터 글을 덮습니다)', 2800, true);
+  return true;
 }
 
 function fxSetDirty() {
@@ -9640,7 +10127,7 @@ function schPost(url, body, busyMsg, okMsg) {
 }
 
 function fxResync() {
-  fetch(FX_URL, {
+  fetch(fxUrl(), {
     headers: {
       Accept: 'application/json'
     },
@@ -9648,7 +10135,7 @@ function fxResync() {
   }).then((function(r) {
     return r.ok ? r.json() : null;
   })).then((function(d) {
-    if (!d || TAB !== 'fixnotes') return;
+    if (!d || TAB !== 'fixnotes' || fxStale(d)) return;
     if (!FX.dirty) {
       fxApply(d);
       fxThumbs();
@@ -9697,7 +10184,11 @@ function fxSwitch() {
   var when = SCH.known && SCH.time ? fxTimeWords(SCH.time) : '';
   var enWhy = '켜 두면 ' + (when ? when + '에' : '새벽 작업이') + ' 이 글부터 처리합니다(코드리뷰는 따로 켜 둔 밤에만 그 뒤에 합니다). ' + '꺼 두면 글은 그대로 두고 그 밤만 건너뜁니다. 컴퓨터 메인 «📝 수정사항 모음» 과 같은 글입니다.';
   var enShort = '켜면 ' + (when ? when + '에' : '새벽 작업이') + ' 이 글부터 처리';
-  if (SCH.known && SCH.armed && !FX.enabled) {
+  if (!fxIsStock()) {
+    enShort = '켜면 ' + (when ? when + '에' : '새벽 작업이') + ' [' + fxTabName() + '] 폴더에서 처리';
+    enWhy = '켜 두면 ' + (when ? when + '에' : '새벽 작업이') + ' [' + fxTabName() + '] 폴더에서 Claude 를 켜서 이 글을 처리합니다(그 폴더의 규칙을 따릅니다). ' + '꺼 두면 글은 그대로 두고 그 밤만 건너뜁니다. 컴퓨터 «📝 수정사항 모음» 의 같은 탭과 같은 글입니다.';
+  }
+  if (fxIsStock() && SCH.known && SCH.armed && !FX.enabled) {
     enWhy = '⏳ 주간 한도 리셋 뒤 자동 시작 대기 — ' + fxRunAt(SCH.runAt) + ' 에 시작합니다. 그 전까지 새벽 작업은 수정사항을 안 합니다. ' + enWhy;
     enShort = '⏳ 리셋 뒤 자동 시작 대기 — ' + fxRunAt(SCH.runAt) + ' 시작';
   }
@@ -9709,13 +10200,15 @@ function fxSwitch() {
   en.setAttribute('data-fx', 'enabled');
   box.appendChild(en);
   if (!SCH.known) return;
-  var ar = switchRow('⏳ 주간 한도 리셋 뒤 자동 시작', !!SCH.armed, '켬', '끔', (function() {
-    schSetArmed(true);
-  }), (function() {
-    schSetArmed(false);
-  }), false, SCH.armed ? [ '켜짐 — ' + fxRunAt(SCH.runAt) + ' 시작', '켜짐 — ' + fxRunAt(SCH.runAt) + ' 에 주간 한도가 풀린 것을 확인하고 수정사항을 시작합니다. 그 전까지 새벽 작업은 수정사항을 안 합니다. ' + '시작하면 [자동수정 활성화] 로 넘어가 남은 것을 이어서 합니다.' ] : [ '켜면 다음 한도 리셋 직후 자동 시작', '켜면 다음 주간 한도 리셋 시각을 찾아 그 직후에 수정사항을 자동으로 시작합니다. [자동수정 활성화] 와 함께 켤 수 없습니다(켜면 그쪽이 꺼집니다).' ], true);
-  ar.setAttribute('data-fx', 'after_reset');
-  box.appendChild(ar);
+  if (fxIsStock()) {
+    var ar = switchRow('⏳ 주간 한도 리셋 뒤 자동 시작', !!SCH.armed, '켬', '끔', (function() {
+      schSetArmed(true);
+    }), (function() {
+      schSetArmed(false);
+    }), false, SCH.armed ? [ '켜짐 — ' + fxRunAt(SCH.runAt) + ' 시작', '켜짐 — ' + fxRunAt(SCH.runAt) + ' 에 주간 한도가 풀린 것을 확인하고 수정사항을 시작합니다. 그 전까지 새벽 작업은 수정사항을 안 합니다. ' + '시작하면 [자동수정 활성화] 로 넘어가 남은 것을 이어서 합니다.' ] : [ '켜면 다음 한도 리셋 직후 자동 시작', '켜면 다음 주간 한도 리셋 시각을 찾아 그 직후에 수정사항을 자동으로 시작합니다. [자동수정 활성화] 와 함께 켤 수 없습니다(켜면 그쪽이 꺼집니다).' ], true);
+    ar.setAttribute('data-fx', 'after_reset');
+    box.appendChild(ar);
+  }
   var tw = el('div', 'topsw');
   tw.setAttribute('data-fx', 'time');
   var top = el('div', 'top');
@@ -9806,23 +10299,34 @@ function fxApply(d, force) {
 }
 
 function fxLoad() {
-  return fetch(FX_URL, {
+  var forTab = FX.tab;
+  return fetch(fxUrl(), {
     headers: {
       Accept: 'application/json'
     },
     cache: 'no-store'
   }).then((function(r) {
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    return r.json();
+    return r.json().catch((function() {
+      return null;
+    })).then((function(d) {
+      if (fxTabGone(r, d, forTab)) return {
+        gone: true
+      };
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      if (!d || typeof d !== 'object') throw new Error('답을 못 읽었습니다');
+      return d;
+    }));
   })).then((function(d) {
-    if (TAB !== 'fixnotes') return;
+    if (TAB !== 'fixnotes' || d && d.gone) return;
+    fxTabsApply(d || {});
+    if (fxStale(d || {})) return;
     fxApply(d || {});
     fxSwitch();
     fxPicShow();
     fxThumbs();
     fxStatus();
   })).catch((function(e) {
-    if (TAB !== 'fixnotes') return;
+    if (TAB !== 'fixnotes' || forTab !== FX.tab) return;
     FX.err = '수정사항을 못 읽었습니다 — ' + (e && e.message || e) + ' (다시 불러올 때까지 적을 수 없습니다 · 20초마다 다시 해 봅니다)';
     fxStatus();
   }));
@@ -9838,15 +10342,22 @@ function fxPoll() {
   if (FX.dirty || DLG.classList.contains('on')) return;
   var ta = fxEl('fx-ta');
   if (!ta || document.activeElement === ta) return;
-  fetch(FX_URL, {
+  var forTab = FX.tab;
+  fetch(fxUrl(), {
     headers: {
       Accept: 'application/json'
     },
     cache: 'no-store'
   }).then((function(r) {
-    return r.ok ? r.json() : null;
+    return r.json().catch((function() {
+      return null;
+    })).then((function(d) {
+      if (fxTabGone(r, d, forTab)) return null;
+      return r.ok ? d : null;
+    }));
   })).then((function(d) {
-    if (!d || TAB !== 'fixnotes' || FX.dirty || document.activeElement === ta) return;
+    if (d && Array.isArray(d.tabs) && TAB === 'fixnotes') fxTabsApply(d);
+    if (!d || TAB !== 'fixnotes' || FX.dirty || document.activeElement === ta || fxStale(d)) return;
     var changed = FX.hasRev ? d.rev !== FX.rev : String(d.text || '') !== FX.baseText || d.enabled !== false !== FX.enabled;
     if (!changed) return;
     fxApply(d);
@@ -9858,6 +10369,19 @@ function fxPoll() {
 }
 
 function fxPost(body) {
+  if (!fxIsStock() && !FX.tabsKnown) return Promise.resolve({
+    r: {
+      ok: false,
+      status: 0
+    },
+    j: {
+      ok: false,
+      msg: '컴퓨터 서버가 탭을 몰라 저장을 멈췄습니다 — 서버를 다시 켠 뒤 저장해 주세요'
+    }
+  });
+  if (FX.tabsKnown) body = Object.assign({}, body, {
+    tab: FX.tab
+  });
   return fetch(FX_URL, {
     method: 'POST',
     headers: {
@@ -9880,6 +10404,7 @@ function fxPost(body) {
 function fxSave() {
   var ta = fxEl('fx-ta');
   if (!ta || FX.busy) return;
+  if (fxNotLoaded('저장해 주세요')) return;
   var txt = ta.value;
   var body = {
     text: txt
@@ -9890,6 +10415,7 @@ function fxSave() {
   fxPost(body).then((function(x) {
     FX.busy = false;
     var j = x.j;
+    if (fxTabGone(x.r, j, FX.tab)) return;
     if (x.r.status === 409 && j.conflict) {
       fxStatus();
       fxConflict(j.cur || {});
@@ -9900,6 +10426,7 @@ function fxSave() {
       say('저장하지 못했습니다 — ' + (j.msg || j.error || 'HTTP ' + x.r.status));
       return;
     }
+    if (Array.isArray(j.tabs)) fxTabsApply(j);
     if (j.rev !== undefined && j.rev !== null) {
       FX.rev = j.rev;
       FX.hasRev = true;
@@ -9978,7 +10505,7 @@ function fxSetEnabled(on) {
     fxSwitch();
     fxStatus();
     toast(on ? '📝 자동수정 활성화 켰습니다 — ' + (SCH.known && SCH.time ? fxTimeWords(SCH.time) + '에' : '새벽 작업 때') + ' 이 글부터 합니다' + (arNote ? ' · ⏳ ' + arNote : '') : '📝 자동수정 활성화 껐습니다 — 그 밤은 건너뜁니다', arNote ? 4200 : 2600, true);
-    fetch(FX_URL, {
+    fetch(fxUrl(), {
       headers: {
         Accept: 'application/json'
       },
@@ -9986,7 +10513,8 @@ function fxSetEnabled(on) {
     }).then((function(r) {
       return r.ok ? r.json() : null;
     })).then((function(d) {
-      if (!d || TAB !== 'fixnotes') return;
+      if (!d || TAB !== 'fixnotes' || fxStale(d)) return;
+      if (Array.isArray(d.tabs)) fxTabsApply(d);
       if (!FX.dirty) {
         fxApply(d);
         fxThumbs();
@@ -10012,6 +10540,7 @@ function fxPicShow() {
 function fxPick() {
   var ta = fxEl('fx-ta'), inp = fxEl('fx-file');
   if (!ta || !inp || FX.busy) return;
+  if (fxNotLoaded('사진을 넣어 주세요')) return;
   FX.caret = FX.touched ? [ ta.selectionStart || 0, ta.selectionEnd || 0 ] : [ ta.value.length, ta.value.length ];
   var opened = false;
   function mark() {
@@ -10133,6 +10662,10 @@ function renderFix(first) {
     return;
   }
   var f = document.createDocumentFragment();
+  var tb = el('div', 'fxtabs');
+  tb.id = 'fx-tabs';
+  tb.style.display = 'none';
+  f.appendChild(tb);
   var sw = el('div', '');
   sw.id = 'fx-sw';
   f.appendChild(sw);
@@ -10177,6 +10710,7 @@ function renderFix(first) {
   f.appendChild(im);
   f.appendChild(infoLine('mut', '[사진: 번호] = 사진 자리 · 컴퓨터와 같은 글', '글 안의 [사진: 번호] 가 사진 자리입니다 · 컴퓨터 메인 «📝 수정사항 모음» 과 같은 글이라 어디서 고쳐도 같이 바뀝니다.'));
   swapBody(f);
+  fxTabsPaint();
   fxSwitch();
   fxThumbs();
   fxStatus();
@@ -10201,7 +10735,8 @@ function botPost(url, body, okMsg, method) {
   fetch(url, {
     method: method || 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'X-Order-Client': 'phone'
     },
     body: JSON.stringify(body || {})
   }).then((function(r) {
@@ -10215,9 +10750,7 @@ function botPost(url, body, okMsg, method) {
     BOT.busy = false;
     dropCache();
     try {
-      Object.keys(JC).forEach((function(u) {
-        getJSON(u).catch((function() {}));
-      }));
+      jcRefetchAfterSave();
     } catch (_e) {}
     say(x.j.msg || x.j.error || (x.r.ok ? okMsg || '했습니다' : '실패했습니다'), (function() {
       go(TAB);
@@ -10437,11 +10970,19 @@ function stkList(box, rows, opt) {
     g.rows.forEach((function(r) {
       var ln = el('div', 'ln tap', stripName(opt.line(r), g.name));
       sellKindPaint(ln);
+      if (opt.lineSub) {
+        var _ls = opt.lineSub(r);
+        if (_ls) ln.appendChild(el('span', 'lsub', _ls));
+      }
       ln.onclick = function() {
         opt.pick(r);
       };
       s.appendChild(ln);
     }));
+    if (opt.foot) {
+      var _ft = opt.foot(g.rows, k);
+      if (_ft) s.appendChild(_ft);
+    }
     box.appendChild(s);
   }));
 }
@@ -11281,6 +11822,46 @@ function commitAlertSeen() {
   showBadge(0);
 }
 
+var TDB = document.getElementById('today-badge');
+
+var TDB_TIMER = null, TDB_AT = 0;
+
+function tdBadgeSet(r) {
+  if (!TDB || !r || r.bad) return;
+  var n = r.n || 0;
+  TDB.textContent = n > 0 ? n > 99 ? '99+' : String(n) : '';
+  TDB.setAttribute('data-n', String(n));
+  TDB.style.display = n > 0 ? '' : 'none';
+}
+
+function tdBadgeTick() {
+  if (document.hidden) return;
+  var c = JC[LV_URL], now = Date.now();
+  if (c && now - c.ts < 9e3) {
+    tdBadgeSet(lvRead(c.data));
+    return;
+  }
+  if (TAB === 'orders' || TAB === 'today' || TAB === 'market' && !MK.sel) return;
+  if (jcBusy(c) || TDB_AT && now - TDB_AT < JC_BUSY_MAX) return;
+  var ac = jcCutter(), at = now;
+  TDB_AT = at;
+  if (c) c.busy = at;
+  var tm = setTimeout((function() {
+    ac.abort();
+  }), JC_BUSY_MAX);
+  var fin = function() {
+    clearTimeout(tm);
+    if (TDB_AT === at) TDB_AT = 0;
+    if (c && c.busy === at) c.busy = false;
+    var n = JC[LV_URL];
+    if (n && n.busy === at) n.busy = false;
+  };
+  getJSON(LV_URL, ac).then((function(d) {
+    fin();
+    tdBadgeSet(lvRead(d));
+  }), fin);
+}
+
 window.appBack = function() {
   return navBack(appBackStep);
 };
@@ -11548,6 +12129,10 @@ DOTS_TIMER = setInterval(loadDots, 1e4);
 
 UNREAD_TIMER = setInterval(checkUnread, 2e4);
 
+tdBadgeTick();
+
+TDB_TIMER = setInterval(tdBadgeTick, 1e4);
+
 var PV = {
   base: null,
   askedAt: 0,
@@ -11567,6 +12152,7 @@ function pvBusy() {
   if (BAL_REFRESHING) return '잔고 받는 중';
   if (AM.open) return '전체 메뉴';
   if (TAB === 'fixnotes' && (FX.dirty || FX.busy)) return '수정사항 작성 중';
+  for (var _ak in AR_PEND) if (AR_PEND[_ak]) return '자동 규칙 저장 중';
   if (Date.now() - PV.touchAt < 1500) return '손가락';
   return '';
 }
@@ -11638,6 +12224,7 @@ document.addEventListener('visibilitychange', (function() {
   checkUnread();
   loadDots();
   if (TAB === 'balance') renderBalance(); else if (TAB === 'orders') renderOrders(); else if (TAB === 'today') renderToday(); else if (TAB === 'chart') chLiveLoop();
+  tdBadgeTick();
   warmRun();
 }));
 </script>
