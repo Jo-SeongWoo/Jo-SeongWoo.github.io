@@ -6,7 +6,7 @@
 <script src="demo-shim.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#2f3b4c">
-<title>주식 앱 체험판</title>
+<title>나만의 MTS 체험판</title>
 
 
 
@@ -820,7 +820,7 @@
   
   <div class="dots" id="dots">
     <span><i id="d-pc"></i>컴퓨터</span>
-    <span><i id="d-wk"></i>자동매매</span>
+    <span><i id="d-wk"></i>주문</span>
     
     <span><i id="d-sw"></i>매수</span>
     
@@ -2950,7 +2950,7 @@ function askVal(msg, preset, cb, numeric) {
 }
 
 function setWatch(to) {
-  ask('[매수] 를 ' + (to === 'on' ? '켭니다' : '끕니다') + '.\n' + (to === 'on' ? '장이 열리면 자동매수가 나갑니다.' : '자동매수가 안 나갑니다 (매도는 그대로 나갑니다).'), (function() {
+  ask('[매수] 를 ' + (to === 'on' ? '켭니다' : '끕니다') + '.\n' + (to === 'on' ? '장이 열리면 예약 매수가 나갑니다.' : '예약 매수가 안 나갑니다 (매도는 그대로 나갑니다).'), (function() {
     fetch('/api/bot/watch', {
       method: 'POST',
       headers: {
@@ -4252,8 +4252,8 @@ function renderSellList() {
     hold.forEach((function(r) {
       r._cur = _cur[String(r.code)] || 0;
     }));
-    f.appendChild(infoLine('mut', '보유종목 ' + hold.length + '건 · 눌러서 보기·고치기', '줄을 누르면 보거나 고칩니다.\n' + '앱에서는 자동으로 걸린 조건과 본절은 보기만 하고, 직접 건 익절(본절선 위)만 고칩니다 — 직접 건 조건은 지울 수도 있습니다(본절선 아래 손절 포함) · 자동 조건은 컴퓨터 주문 총괄에서 고칩니다.\n' + '본절이 걸린 종목은 «＋ 익절 조건 추가» 로 아래로·위로 익절을 더할 수 있습니다(목표가는 본절선 위만).\n' + '새로 산 종목에 거는 매도는 ☰ «🤖 자동 규칙» 에 있습니다.'));
-    var g1 = secBox(f, '📤 보유종목 자동매도');
+    f.appendChild(infoLine('mut', '보유종목 ' + hold.length + '건 · 눌러서 보기·고치기', '줄을 누르면 보거나 고칩니다.\n' + '앱에서는 자동으로 걸린 조건과 본절은 보기만 하고, 직접 건 익절(본절선 위)만 고칩니다 — 직접 건 조건은 지울 수도 있습니다(본절선 아래 손절 포함) · 자동 조건은 컴퓨터 주문 총괄에서 고칩니다.\n' + '본절이 걸린 종목은 «＋ 익절 조건 추가» 로 아래로·위로 익절을 더할 수 있습니다(목표가는 본절선 위만).\n' + '새로 산 종목에 거는 매도는 ☰ «⚙ 기본 매도 규칙» 에 있습니다.'));
+    var g1 = secBox(f, '📤 보유종목 조건 매도');
     if (!hold.length) g1.appendChild(el('div', 'empty', '걸어 둔 것이 없습니다'));
     stkList(g1, hold, {
       key: function(r) {
@@ -4724,7 +4724,7 @@ function renderAutoRules() {
     if (!box || TAB !== 'orders' || BOT.pick !== 'auto') return;
     var ed = res[0] || {}, ms = res[1] || {}, bv = res[2] || {}, dd = res[3] || {};
     var f = document.createDocumentFragment();
-    f.appendChild(infoLine('mut', '산 종목에 저절로 걸리는 규칙 5가지', '산 종목에 저절로 걸리는 규칙 5가지 — 컴퓨터 주문총괄 [🤖 자동 규칙] 탭과 같은 설정입니다.'));
+    f.appendChild(infoLine('mut', '산 종목에 저절로 걸리는 규칙 5가지', '산 종목에 저절로 걸리는 규칙 5가지 — 컴퓨터 주문총괄 [⚙ 기본 매도 규칙] 탭과 같은 설정입니다.'));
     var g = el('div', 'grp argrp');
     f.appendChild(g);
     var bal = ed.balance || [];
@@ -4870,7 +4870,7 @@ function renderAutoRules() {
     var box = document.getElementById('ar-box');
     if (box) {
       box.textContent = '';
-      box.appendChild(el('div', 'err', '자동 규칙을 못 읽었습니다 — ' + e.message));
+      box.appendChild(el('div', 'err', '기본 매도 규칙을 못 읽었습니다 — ' + e.message));
     }
   }));
 }
@@ -7557,7 +7557,7 @@ function balActions(hh) {
       sub: '못 읽었습니다 — ' + err + ' (주문 탭 [매도 목록] 에서도 고칠 수 있습니다)'
     } ] ] : !rules.length ? [ [ '📕 매도조건', null, false, {
       off: true,
-      sub: '이 종목에 걸린 자동매도 조건이 없습니다'
+      sub: '이 종목에 걸린 매도 조건이 없습니다'
     } ] ] : rules.map((function(r) {
       return [ '✏️ ' + (r.label || '매도조건'), function() {
         sellRuleActions(r, 'holding');
@@ -8201,7 +8201,7 @@ function sellNowSend(code, nm, pct, qty) {
       snUnsure(nm, '요청 번호가 답에 없습니다');
       return;
     }
-    toast('📤 매도 요청을 보냈습니다 — 자동매매가 곧 냅니다', 3e3, true);
+    toast('📤 매도 요청을 보냈습니다 — 주문 프로그램이 곧 냅니다', 3e3, true);
     var t0 = Date.now();
     (function poll() {
       fetch('/api/bot/sell_now/' + encodeURIComponent(j.req_id), {
@@ -9348,18 +9348,18 @@ function renderPower(first) {
     live(true, '');
     var known = !!(es && es.ok);
     var running = known && !es.stopped;
-    var row2 = switchRow('🤖 자동매매 프로그램', running, '켬', '끔', (function() {
-      ask('멈춰 둔 자동매매를 다시 시작합니다.\n매수·매도가 모두 다시 나갑니다.', (function() {
+    var row2 = switchRow('🖥 주문 프로그램', running, '켬', '끔', (function() {
+      ask('멈춰 둔 주문 프로그램을 다시 시작합니다.\n매수·매도가 모두 다시 나갑니다.', (function() {
         botPost('/api/bot/eresume', {}, '다시 시작했습니다');
       }));
     }), (function() {
-      ask('자동매매를 전부 멈춥니다.\n\n' + '· 매수도 매도도 안 나갑니다 (손절·익절 포함)\n' + '· 다시 켤 때까지 스스로 안 켜집니다\n\n' + '매수만 멈추려면 [주문] 탭의 [매수] 를 [끔] 으로 하세요.', (function() {
+      ask('주문 프로그램을 전부 멈춥니다.\n\n' + '· 매수도 매도도 안 나갑니다 (손절·익절 포함)\n' + '· 다시 켤 때까지 스스로 안 켜집니다\n\n' + '매수만 멈추려면 [주문] 탭의 [매수] 를 [끔] 으로 하세요.', (function() {
         botPost('/api/bot/estop', {}, '전부 멈췄습니다');
       }), true);
     }), true, known ? '끄면 매수·매도 전부 멈춤 (손절·익절 포함)' : '⚠ 지금 상태를 못 읽었습니다 — 컴퓨터에서 확인하세요.');
     f.appendChild(row2);
     f.appendChild(switchRow('💻 컴퓨터', true, '켜짐', '끄기', null, (function() {
-      ask('컴퓨터를 30초 뒤에 끕니다.\n자동매수·자동매도가 전부 멎습니다.', (function() {
+      ask('컴퓨터를 30초 뒤에 끕니다.\n예약 매수·조건 매도가 전부 멎습니다.', (function() {
         ask('정말 끌까요? 다시 켜려면 컴퓨터 앞으로 가야 합니다.', (function() {
           botPost('/api/bot/shutdown', {
             confirm: true
@@ -10773,7 +10773,7 @@ function menuOf(tab) {
   if (tab === 'orders') {
     out.push({
       key: 'auto',
-      label: '🤖 자동 규칙'
+      label: '⚙ 기본 매도 규칙'
     });
     var _ord = [ 'wait', 'sell', 'auto', 'orders' ];
     out.sort((function(x, y) {
@@ -11607,11 +11607,11 @@ var AL_PAIRS = [ {
   },
   r: _alRe(/^✅ \[테마분석\] 빌드 정상 복구/)
 }, {
-  k: '자동주문 워커 죽음',
+  k: '주문 워커 죽음',
   p: function(p) {
     return p.fn === 'send_worker_dead' ? '' : null;
   },
-  r: _alRe(/^✅ \[워커\] 자동주문 워커 정상 복구/)
+  r: _alRe(/^✅ \[워커\] 주문 워커 정상 복구/)
 }, {
   k: '지수 일봉 대체 소스',
   p: _alRe(/^지수 일봉\(ka20006\) 실패/, '대체 소스 폴백'),
@@ -12152,7 +12152,7 @@ function pvBusy() {
   if (BAL_REFRESHING) return '잔고 받는 중';
   if (AM.open) return '전체 메뉴';
   if (TAB === 'fixnotes' && (FX.dirty || FX.busy)) return '수정사항 작성 중';
-  for (var _ak in AR_PEND) if (AR_PEND[_ak]) return '자동 규칙 저장 중';
+  for (var _ak in AR_PEND) if (AR_PEND[_ak]) return '기본 매도 규칙 저장 중';
   if (Date.now() - PV.touchAt < 1500) return '손가락';
   return '';
 }

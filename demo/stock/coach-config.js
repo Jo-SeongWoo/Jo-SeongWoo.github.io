@@ -1,4 +1,4 @@
-/* 자동매매 앱 체험판 — 화면 안 «여기 눌러 보세요» 표시 설정 (공용 코드 = ../../assets/coach.js)
+/* 나만의 MTS 체험판 — 화면 안 «여기 눌러 보세요» 표시 설정 (공용 코드 = ../../assets/coach.js)
  * 원본 앱을 다시 복사해 와도 이 파일은 그대로 두고, index.html 끝의 <!-- coach --> 두 줄만 다시 넣으면 된다. */
 (function () {
   if (!window.Coach) return;

@@ -1,4 +1,4 @@
-/* 주식 자동매매 앱 — 체험판 가짜 서버 (demo-shim.js)
+/* 나만의 MTS — 체험판 가짜 서버 (demo-shim.js)
    화면(index.html)보다 먼저 실려, 화면이 부르는 /api/... 요청을 전부 이 파일 안에서 답한다.
    실제 서버·증권사로는 아무 요청도 나가지 않는다. 종목·가격·금액은 전부 가상이다.
    · 보는 요청(GET)          → 가상 상태에서 만든 응답
@@ -405,14 +405,14 @@
     }) };
   }
   function ordersText() {
-    var L = ['📋 전체 주문', '', '🛒 자동매수 대기 ' + ST.orders.length + '건'];
+    var L = ['📋 전체 주문', '', '🛒 예약 매수 대기 ' + ST.orders.length + '건'];
     PC().forEach(function (c) {
       var os = ST.orders.filter(function (o) { return o.code === c; });
       L.push(nm(c) + ' (' + c + ')' + (os.length > 1 ? ' · ' + os.length + '건' : ''));
       os.forEach(function (o) { L.push('  [' + (o.payment_type === 'credit' ? '신용' : '현금') + '] 트리거 ' + won(o.trigger_price) + ' / ' + o.quantity + '주 / ' + won(o.total_amount)); });
     });
     var rs = rules();
-    L.push('', '📤 보유종목 자동매도 ' + rs.length + '건');
+    L.push('', '📤 보유종목 조건 매도 ' + rs.length + '건');
     var seen = {};
     rs.forEach(function (r) {
       if (seen[r.code]) return; seen[r.code] = 1;
@@ -420,7 +420,7 @@
       L.push(r.name + ' (' + r.code + ')' + (g.length > 1 ? ' · ' + g.length + '건' : ''));
       g.forEach(function (x) { L.push('  · ' + x.kt + ' ' + won(x.target_price) + ' (' + (x.pc >= 0 ? '+' : '') + x.pc.toFixed(1) + '%) / ' + x.qty_pct + '%'); });
     });
-    L.push('', '🤖 자동 규칙 — 새로 산 종목에 거는 매도 ' + ST.balRules.length + '건');
+    L.push('', '⚙ 기본 매도 규칙 — 새로 산 종목에 거는 매도 ' + ST.balRules.length + '건');
     if (ST.balRules.length) L.push('신규편입 공통 · ' + ST.balRules.length + '건');
     ST.balRules.forEach(function (b) { var v = balView(b); L.push('  · ' + v.kt + ' 매입가 ' + (b.base_pct > 0 ? '+' : '') + b.base_pct + '% / ' + b.qty_pct + '%'); });
     return L.join('\n');
@@ -513,7 +513,7 @@
   function baseAlerts() {
     var d0 = SESS, d1 = prevTrade(d0), d2 = prevTrade(d1), d3 = prevTrade(d2), d5 = prevTrade(prevTrade(d3));
     return [
-      [d0, '09:00:02', 'system', '▶ 기동', 'order', null, '▶ 자동매매 시작 — 대기 매수 9건 · 매도 조건 10건 · [매수] 켬'],
+      [d0, '09:00:02', 'system', '▶ 기동', 'order', null, '▶ 주문 프로그램 시작 — 대기 매수 9건 · 매도 조건 10건 · [매수] 켬'],
       [d0, '09:03:41', 'trade', '🚀 매수 발사', 'trade', '해솔전기', '🚀 해솔전기 매수 발사\n트리거 7,990원 · 120주 · 한도 +1.00%'],
       [d0, '09:03:44', 'trade', '✅ 체결', 'trade', '해솔전기', '✅ 해솔전기 매수 체결 120/120주 · 평균 7,990원'],
       [d0, '09:47:15', 'trade', '📤 손절 발사', 'trade', '별빛엔터', '📤 별빛엔터 손절 발사 · 13,450원 · 150주 시장가'],
@@ -530,17 +530,17 @@
       [d0, '15:31:00', 'data', '📊 시작', 'order', null, '📊 매일 데이터 업데이트를 시작합니다 (보통 25분)'],
       [d0, '15:56:40', 'data', '🏁 전부 끝', 'order', null, '🏁 데이터 업데이트 끝 — 25분 40초 · 결손 0종목'],
       [d1, '08:31:12', 'credit', '💵 자동 현금전환', 'order', null, '💵 신용 불가로 바뀐 1종목을 현금 주문으로 바꿨습니다\n도담모빌리티 — 신용 → 현금'],
-      [d1, '09:00:03', 'system', '▶ 기동', 'order', null, '▶ 자동매매 시작 — 대기 매수 8건 · 매도 조건 10건 · [매수] 켬'],
+      [d1, '09:00:03', 'system', '▶ 기동', 'order', null, '▶ 주문 프로그램 시작 — 대기 매수 8건 · 매도 조건 10건 · [매수] 켬'],
       [d1, '10:05:44', 'trade', '🛡 본전 상향', 'trade', '가람에너지', '🛡 가람에너지 본전 상향 — 손절 19,000원 (매수가 +3틱)'],
       [d1, '14:47:09', 'trade', '🚀 매수 발사', 'trade', '다솜전자', '🚀 다솜전자 매수 발사\n트리거 29,650원 · 67주 · 한도 +1.00%'],
       [d1, '14:47:11', 'trade', '✅ 체결', 'trade', '다솜전자', '✅ 다솜전자 매수 체결 67/67주 · 평균 29,650원'],
       [d1, '15:41:30', 'theme', '★ 주요테마·업종', 'theme', null, '★ 주요테마 «원자력» 오늘 +3.9% · 등락률 TOP10 2위'],
-      [d2, '09:00:01', 'system', '▶ 기동', 'order', null, '▶ 자동매매 시작 — 대기 매수 9건 · 매도 조건 9건 · [매수] 켬'],
+      [d2, '09:00:01', 'system', '▶ 기동', 'order', null, '▶ 주문 프로그램 시작 — 대기 매수 9건 · 매도 조건 9건 · [매수] 켬'],
       [d2, '09:01:15', 'trade', '⚠️ 갭 건너뜀', 'trade', '보람정밀', '⚠️ 보람정밀 시가 갭 +4.8% — 한도를 넘어 오늘은 건너뜁니다'],
       [d2, '13:12:40', 'error', '🔴 이상', 'error', null, '🔴 시세 응답이 40초 늦었습니다 — 다시 연결했습니다 (자동 복구)'],
-      [d3, '09:00:02', 'system', '▶ 기동', 'order', null, '▶ 자동매매 시작 — 대기 매수 7건 · 매도 조건 9건 · [매수] 켬'],
+      [d3, '09:00:02', 'system', '▶ 기동', 'order', null, '▶ 주문 프로그램 시작 — 대기 매수 7건 · 매도 조건 9건 · [매수] 켬'],
       [d3, '11:03:27', 'trade', '📤 본절 발사', 'trade', '미르소재', '📤 미르소재 본절 발사 · 23,600원 · 80주 시장가'],
-      [d5, '09:00:02', 'system', '▶ 기동', 'order', null, '▶ 자동매매 시작 — 대기 매수 6건 · 매도 조건 8건 · [매수] 켬'],
+      [d5, '09:00:02', 'system', '▶ 기동', 'order', null, '▶ 주문 프로그램 시작 — 대기 매수 6건 · 매도 조건 8건 · [매수] 켬'],
       [d5, '15:40:05', 'theme', '★ 주요테마·업종', 'theme', null, '★ 주요테마 «전력설비» 오늘 +5.2% · 등락률 TOP10 1위']
     ].map(function (a) {
       var o = { ts: tsAt(a[0], a[1]), fn: 'send_' + a[2], ch: a[4], ch_label: ({ trade: '매매', error: '에러', theme: '관심테마', order: '알림' })[a[4]] || '',
@@ -622,10 +622,10 @@
     b = b || {};
     if (p === '/api/bot/watch') {
       ST.switchOn = b.mode === 'on';
-      return J({ ok: true, msg: ST.switchOn ? '주문 [켬] — 장이 열리면 자동매수가 나갑니다' : '주문 [끔] — 자동매수가 안 나갑니다 (매도는 그대로 나갑니다)' });
+      return J({ ok: true, msg: ST.switchOn ? '주문 [켬] — 장이 열리면 예약 매수가 나갑니다' : '주문 [끔] — 예약 매수가 안 나갑니다 (매도는 그대로 나갑니다)' });
     }
-    if (p === '/api/bot/estop') { ST.stopped = true; addAlert('system', '⏹ 종료', 'order', null, '⏹ 자동매매를 전부 멈췄습니다 (폰에서 요청)'); return J({ ok: true, msg: '🛑 자동매매를 전부 멈췄습니다 — 매수·매도가 안 나갑니다' }); }
-    if (p === '/api/bot/eresume') { ST.stopped = false; addAlert('system', '▶ 기동', 'order', null, '▶ 자동매매를 다시 시작했습니다 (폰에서 요청)'); return J({ ok: true, msg: '▶ 자동매매를 다시 시작했습니다' }); }
+    if (p === '/api/bot/estop') { ST.stopped = true; addAlert('system', '⏹ 종료', 'order', null, '⏹ 주문 프로그램을 전부 멈췄습니다 (폰에서 요청)'); return J({ ok: true, msg: '🛑 주문 프로그램을 전부 멈췄습니다 — 매수·매도가 안 나갑니다' }); }
+    if (p === '/api/bot/eresume') { ST.stopped = false; addAlert('system', '▶ 기동', 'order', null, '▶ 주문 프로그램을 다시 시작했습니다 (폰에서 요청)'); return J({ ok: true, msg: '▶ 주문 프로그램을 다시 시작했습니다' }); }
     if (p === '/api/bot/shutdown') {
       ST.pcOffAt = Date.now() + 30000;
       return J({ ok: true, msg: '💻 30초 뒤 컴퓨터를 끕니다\n(체험판: 가상 컴퓨터는 1분 뒤 다시 켜집니다)' });
@@ -900,7 +900,7 @@
       if (m[1] === 'orders') return J({ label: '📋 전체 주문', text: ordersText() });
       if (m[1] === 'status') {
         var off = pcOff();
-        return J({ label: '🟢 봇 상태', text: (off ? '🔴' : '🟢') + ' 📊 분석 서버(main.py): ' + (off ? '꺼짐' : '가동') + '\n' + (ST.stopped || off ? '🔴' : '🟢') + ' ⚙ 자동매수 워커: ' + (ST.stopped || off ? '꺼짐' : '가동') + '\n' + (off ? '🔴' : '🟢') + ' 📈 주식봇 (텔레그램): ' + (off ? '꺼짐' : '가동') });
+        return J({ label: '🟢 봇 상태', text: (off ? '🔴' : '🟢') + ' 📊 분석 서버(main.py): ' + (off ? '꺼짐' : '가동') + '\n' + (ST.stopped || off ? '🔴' : '🟢') + ' ⚙ 예약 매수 워커: ' + (ST.stopped || off ? '꺼짐' : '가동') + '\n' + (off ? '🔴' : '🟢') + ' 📈 주식봇 (텔레그램): ' + (off ? '꺼짐' : '가동') });
       }
       return J({ label: m[1], text: '(체험판에는 이 글이 없습니다)' });
     }
