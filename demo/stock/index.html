@@ -55,6 +55,9 @@
   .tag.s { background:#fef2f2; color:#b91c1c; }
   .tag.g { background:#f0fdf4; color:#15803d; }
   
+  .tag.pend { background:#fff4e5; color:#c2410c; box-shadow:inset 0 0 0 1.2px #fdba74; font-weight:800; font-size:12px; }
+  .mk-sub.tg { margin-top:3px; }
+  
   .tag.ok { background:#dcfce7; color:#166534; font-weight:700; }
   .tag.h  { background:#f3f4f6; color:#9ca3af; }
   .card.healed .nm, .card.healed .albody, .card.healed .rt { color:#9ca3af; }
@@ -1678,13 +1681,23 @@ function renderMarketGroup(first) {
   var sel = MK.sel, url = mkGroupUrl(sel);
   if (first && hasCache(url)) first = false;
   if (first) BD.textContent = '불러오는 중…';
-  getJSONc(url).catch((function(e) {
+  Promise.all([ getJSONc(url).catch((function(e) {
     return {
       __err: e
     };
-  })).then((function(d) {
+  })), getJSONc('/api/orders?active=1').catch((function(e) {
+    return {
+      __err: e
+    };
+  })), getJSONc('/api/balance').catch((function(e) {
+    return {
+      __err: e
+    };
+  })) ]).then((function(res) {
+    var d = res[0];
     if (TAB !== 'market' || MK.sel !== sel) return;
     d = d || {};
+    var _am = amtMaps(res[1], res[2]);
     var f = document.createDocumentFragment();
     live(true, '');
     var bar = el('div', 'backbar'), bk = el('button', 'btn', '◀ 시장 개요');
@@ -1733,11 +1746,14 @@ function renderMarketGroup(first) {
       k.setAttribute('data-mks', s.code || '');
       var r = el('div', 'mk-row'), m = el('div', 'mk-mid');
       m.appendChild(el('div', 'mk-nm', s.name));
-      var tg = [];
-      if (s.held) tg.push('보유');
-      if (s.pending_n) tg.push('대기 ' + s.pending_n + '건');
-      if (anyLive && s.chg_src === 'final') tg.push('지난 거래일 값');
-      if (tg.length) m.appendChild(el('div', 'mk-sub', tg.join(' · ')));
+      var sub = el('div', 'mk-sub'), _k = nc(s.code);
+      if (s.held) sub.appendChild(heldTag(_am.h[_k]));
+      if (s.pending_n) sub.appendChild(pendTag(s.pending_n, _am.w[_k]));
+      if (anyLive && s.chg_src === 'final') sub.appendChild(document.createTextNode('지난 거래일 값'));
+      if (sub.childNodes.length) {
+        if (s.held || s.pending_n) sub.classList.add('tg');
+        m.appendChild(sub);
+      }
       r.appendChild(m);
       r.appendChild(el('span', 'mk-cg ' + mkCls(s.chg), mkPct(s.chg)));
       r.appendChild(mkStarBtn(!!s.major, (function(b) {
@@ -9675,6 +9691,30 @@ function manWon(n) {
   return Math.abs(n) >= 1e4 ? fmt(n / 1e4) + '만원' : fmt(n) + '원';
 }
 
+function amtMaps(ordRes, balRes) {
+  var w = {}, h = {};
+  (ordRes && !ordRes.__err && (ordRes.orders || ordRes.items) || []).forEach((function(o) {
+    var k = nc(o.code);
+    w[k] = (w[k] || 0) + Number(o.total_amount || o.base_amount || 0);
+  }));
+  (balRes && !balRes.__err && balRes.holdings || []).forEach((function(x) {
+    var k = nc(x['종목코드']);
+    h[k] = (h[k] || 0) + Number(x['매입금액'] || 0);
+  }));
+  return {
+    w: w,
+    h: h
+  };
+}
+
+function pendTag(n, amt) {
+  return el('span', 'tag pend', '⏳ 매수 대기중' + (Number(n) > 1 ? ' ' + n + '건' : '') + (amt > 0 ? ' · ' + manWon(amt) : ''));
+}
+
+function heldTag(amt) {
+  return el('span', 'tag g', '보유' + (amt > 0 ? ' ' + manWon(amt) : ''));
+}
+
 var MJ_CHIP = '', MJ_CHIPQ = '';
 
 var MJ_HELP = '칩 = 주요종목 3개 이상이 같이 든 테마·업종 · 위 칩을 누르면 그 묶음만 봅니다';
@@ -9705,15 +9745,7 @@ function renderMajor(first) {
     };
   })) ]).then((function(res) {
     if (TAB !== 'major') return;
-    var _wAmt = {}, _hAmt = {};
-    (res[2] && !res[2].__err && (res[2].orders || res[2].items) || []).forEach((function(o) {
-      var k = nc(o.code);
-      _wAmt[k] = (_wAmt[k] || 0) + Number(o.total_amount || o.base_amount || 0);
-    }));
-    (res[3] && !res[3].__err && res[3].holdings || []).forEach((function(h) {
-      var k = nc(h['종목코드']);
-      _hAmt[k] = (_hAmt[k] || 0) + Number(h['매입금액'] || 0);
-    }));
+    var _am = amtMaps(res[2], res[3]), _wAmt = _am.w, _hAmt = _am.h;
     var d = res[0] || {};
     var f = document.createDocumentFragment();
     live(true, '');
@@ -9793,8 +9825,8 @@ function renderMajor(first) {
       k.appendChild(el('span', 'nm', x.name));
       if (_chLive && x.chg_src === 'final' && ch != null) k.appendChild(el('span', 'tag', '지난 거래일'));
       var _ck = nc(x.code);
-      if (x.held) k.appendChild(el('span', 'tag g', '보유' + (_hAmt[_ck] > 0 ? ' ' + manWon(_hAmt[_ck]) : '')));
-      if (x.pending) k.appendChild(el('span', 'tag', '대기 ' + x.pending_n + '건' + (_wAmt[_ck] > 0 ? ' · ' + manWon(_wAmt[_ck]) : '')));
+      if (x.held) k.appendChild(heldTag(_hAmt[_ck]));
+      if (x.pending) k.appendChild(pendTag(x.pending_n, _wAmt[_ck]));
       var tl = thmChipLine(x.code, x.groups || [], MJ_HELP);
       var _rt = x.held || x.pending ? (thmMap()[x.code] || {}).route || [] : [];
       if (_rt.length) {
