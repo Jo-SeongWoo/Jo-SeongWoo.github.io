@@ -4891,6 +4891,14 @@ function renderAutoRules() {
   }));
 }
 
+function chSavedPeriod() {
+  try {
+    return localStorage.getItem('m_chart_period') === 'weekly' ? 'weekly' : 'daily';
+  } catch (e) {
+    return 'daily';
+  }
+}
+
 var CH = {
   code: '',
   name: '',
@@ -4918,13 +4926,8 @@ var CH = {
   idxNote: '',
   idxSrc: '',
   idxTry: 0,
-  period: function() {
-    try {
-      return localStorage.getItem('m_chart_period') === 'weekly' ? 'weekly' : 'daily';
-    } catch (e) {
-      return 'daily';
-    }
-  }(),
+  ftd: null,
+  period: chSavedPeriod(),
   n: 120,
   end: 0,
   cross: null,
@@ -4942,7 +4945,9 @@ var CH = {
       avg: 1,
       ma21: 1,
       ma50: 1,
-      vma50: 1
+      vma50: 1,
+      ftd: 1,
+      ma20: 1
     };
     try {
       var _o = JSON.parse(localStorage.getItem('m_chart_on') || 'null') || {};
@@ -5045,6 +5050,7 @@ function chLoad(code, name, keep) {
   CH.code = code;
   CH.name = name || code;
   CH.idx = chIsIdx(code);
+  CH.period = CH.idx ? 'daily' : chSavedPeriod();
   CH.busy = true;
   if (!keep) {
     CH.bars = [];
@@ -5167,7 +5173,42 @@ function chLoadIdx(code, keep, per) {
       CH.idxTry = Date.now();
     }
     drawPhoneChart();
+    chLoadFtd(code);
   }));
+}
+
+function chLoadFtd(code) {
+  if (!CH.on.ftd || !chIsIdx(code)) return;
+  var key = code === 'KS11' ? 'kospi' : 'kosdaq';
+  function fail(why) {
+    if (CH.code !== code) return;
+    var old = CH.ftd && CH.ftd.code === code ? CH.ftd.marks : null;
+    CH.ftd = {
+      code: code,
+      marks: old,
+      err: why || '응답 없음'
+    };
+    drawPhoneChart();
+  }
+  getJSON('/api/index_ftd_markers').then((function(j) {
+    if (CH.code !== code) return;
+    if (j && j.ok && j[key]) {
+      CH.ftd = {
+        code: code,
+        marks: j[key],
+        err: ''
+      };
+      drawPhoneChart();
+    } else fail(j && j.error);
+  })).catch((function(e) {
+    fail(e && e.message);
+  }));
+}
+
+function chFtdMarks() {
+  if (!CH.idx || !CH.on.ftd) return null;
+  var f = CH.ftd;
+  return f && f.code === CH.code && f.marks ? f.marks : null;
 }
 
 function chToday() {
@@ -5246,18 +5287,6 @@ function chIdxLive(base, lv) {
     v: +lv.v || 0,
     live: true
   };
-  if (CH.period === 'weekly' && chSameWeek(ld, d)) {
-    if (d > ld && !chIdxCanAppend(d)) return null;
-    return base.slice(0, -1).concat([ {
-      date: d,
-      o: last.o,
-      h: Math.max(last.h, nb.h),
-      l: Math.min(last.l, nb.l),
-      c: c,
-      v: last.v,
-      live: true
-    } ]);
-  }
   if (d === ld) return base.slice(0, -1).concat([ nb ]);
   if (!chIdxCanAppend(d)) return null;
   return base.concat([ nb ]);
@@ -5289,6 +5318,7 @@ function chSameWeek(a, b) {
 }
 
 function chSetPeriod(p) {
+  if (CH.idx) return;
   p = p === 'weekly' ? 'weekly' : 'daily';
   if (CH.period === p) return;
   CH.period = p;
@@ -5518,7 +5548,8 @@ var CH_COL = {
   grid: '#eef1f5',
   axis: '#8b94a1',
   vma50: '#7b61a8',
-  split: '#8f9bab'
+  split: '#8f9bab',
+  ma20: '#00BFFF'
 };
 
 var CH_PR = 46;
@@ -5672,15 +5703,16 @@ function drawPhoneChart() {
     e2 = total;
   }
   var vis = ALL.slice(s2, e2), visAcc = ACC.slice(s2, e2);
-  var m21 = CH.on.ma21 ? chMA(ALL, chMaDays(21)).slice(s2, e2) : null;
-  var m50 = CH.on.ma50 ? chMA(ALL, chMaDays(50)).slice(s2, e2) : null;
+  var m21 = !CH.idx && CH.on.ma21 ? chMA(ALL, chMaDays(21)).slice(s2, e2) : null;
+  var m50 = !CH.idx && CH.on.ma50 ? chMA(ALL, chMaDays(50)).slice(s2, e2) : null;
+  var m20 = CH.idx && CH.on.ma20 ? chMA(ALL, 20).slice(s2, e2) : null;
   var hi = -1e18, lo = 1e18, vmax = 0;
   vis.forEach((function(b) {
     if (b.h > hi) hi = b.h;
     if (b.l < lo) lo = b.l;
     if (b.v > vmax) vmax = b.v;
   }));
-  [ m21, m50 ].forEach((function(mm) {
+  [ m21, m50, m20 ].forEach((function(mm) {
     if (!mm) return;
     mm.forEach((function(v) {
       if (v == null) return;
@@ -5703,6 +5735,12 @@ function drawPhoneChart() {
   hi += pad;
   lo -= pad;
   var PH = H - VH - GAP - PT - PB;
+  var FM = chFtdMarks();
+  if (FM) {
+    var _mt = 26, _mb = 28, _ih = Math.max(40, PH - _mt - _mb), _k = (hi - lo) / _ih;
+    hi += _mt * _k;
+    lo -= _mb * _k;
+  }
   var IW = W - PL - PR, step = IW / vis.length;
   function x(i) {
     return PL + (i + .5) * step;
@@ -5741,7 +5779,9 @@ function drawPhoneChart() {
     g2.beginPath();
     var _vgap = Math.max(2, step * .25), _vbw = Math.max(1, step - _vgap);
     vis.forEach((function(b, i) {
-      if ((b.c >= b.o ? 'up' : 'dn') !== side || !(b.v > 0)) return;
+      var _pv = CH.idx ? s2 + i > 0 ? ALL[s2 + i - 1] : null : null;
+      var _vs = CH.idx ? _pv && b.v < _pv.v ? 'dn' : 'up' : b.c >= b.o ? 'up' : 'dn';
+      if (_vs !== side || !(b.v > 0)) return;
       g2.rect(x(i) - _vbw / 2, vy(b.v), _vbw, Math.max(1, PT + PH + GAP + VH - vy(b.v)));
     }));
     g2.stroke();
@@ -5763,7 +5803,7 @@ function drawPhoneChart() {
     g2.fill();
     g2.restore();
   }
-  if (CH.on.vma50) {
+  if (CH.on.vma50 && !CH.idx) {
     var _vm = chVMA(ALL, chMaDays(50)).slice(s2, e2);
     g2.save();
     g2.strokeStyle = CH_COL.vma50;
@@ -5805,6 +5845,106 @@ function drawPhoneChart() {
   }
   maPath(m21, CH_COL.ma21);
   maPath(m50, CH_COL.ma50);
+  maPath(m20, CH_COL.ma20);
+  if (FM) {
+    var _di = {};
+    vis.forEach((function(b, i) {
+      _di[String(b.date)] = i;
+    }));
+    var _nd = function(d) {
+      return String(d || '').replace(/-/g, '');
+    };
+    var _cut = _nd(FM.trough_date);
+    (FM.corr10 || []).forEach((function(c) {
+      var t = _nd(c.trough_date);
+      if (t > _cut) _cut = t;
+    }));
+    var _ok = function(d) {
+      return !_cut || _nd(d) >= _cut;
+    };
+    var _fi = function(d) {
+      var k = _nd(d);
+      return k in _di ? _di[k] : -1;
+    };
+    var mtx = function(str, xc, yy, col, size, bold, dir) {
+      g2.save();
+      g2.font = (bold ? '700 ' : '') + size + 'px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+      var w = g2.measureText(str).width, al = 'center';
+      if (xc - w / 2 < PL) {
+        al = 'left';
+        xc = PL + 1;
+      } else if (xc + w / 2 > W - PR) {
+        al = 'right';
+        xc = W - PR - 1;
+      }
+      var x0 = al === 'left' ? xc : al === 'right' ? xc - w : xc - w / 2, x1 = x0 + w;
+      var hit = function(yv) {
+        var t0 = yv - size * .85, t1 = yv + size * .2;
+        return _placed.some((function(p) {
+          return x0 < p[1] + 1 && x1 > p[0] - 1 && t0 < p[3] && t1 > p[2];
+        }));
+      };
+      for (var _n = 0; dir && _n < 6 && hit(yy); _n++) yy += dir * (size + 1);
+      _placed.push([ x0, x1, yy - size * .85, yy + size * .2 ]);
+      g2.textAlign = al;
+      g2.lineWidth = 3;
+      g2.strokeStyle = '#fff';
+      g2.lineJoin = 'round';
+      g2.strokeText(str, xc, yy);
+      g2.fillStyle = col;
+      g2.fillText(str, xc, yy);
+      g2.restore();
+    };
+    var _placed = [];
+    var _pct = function(p) {
+      p = Number(p) || 0;
+      return (p >= 0 ? '+' : '') + p.toFixed(1) + '%';
+    };
+    var _items = [];
+    [ [ 'ftd_conf', '#00AA55' ], [ 'dd', '#D42020' ] ].forEach((function(kd) {
+      (FM[kd[0]] || []).forEach((function(mk) {
+        if (!_ok(mk.date)) return;
+        var i = _fi(mk.date);
+        if (i < 0) return;
+        _items.push({
+          i: i,
+          col: kd[1],
+          mk: mk,
+          dd: kd[0] === 'dd'
+        });
+      }));
+    }));
+    _items.sort((function(a, b) {
+      return a.i - b.i;
+    }));
+    _items.forEach((function(it) {
+      mtx('▼', x(it.i), y(vis[it.i].h) - 8, it.col, 13, true, 0);
+    }));
+    _items.forEach((function(it) {
+      mtx(_pct(it.mk.pct), x(it.i), y(vis[it.i].l) + 15, it.col, 11, false, 1);
+    }));
+    var _low = [];
+    [ [ 'day1', 'Day1', '#0066CC' ], [ 'reset_points', 'Reset', '#D42020' ] ].forEach((function(kd) {
+      (FM[kd[0]] || []).forEach((function(mk) {
+        if (!_ok(mk.date)) return;
+        var i = _fi(mk.date);
+        if (i < 0) return;
+        _low.push({
+          i: i,
+          t: kd[1],
+          col: kd[2]
+        });
+      }));
+    }));
+    _low.sort((function(a, b) {
+      return a.i - b.i;
+    }));
+    _low.forEach((function(it) {
+      mtx(it.t, x(it.i), y(vis[it.i].l) + 24, it.col, 9.5, true, 1);
+    }));
+  } else if (CH.idx && CH.on.ftd && CH.ftd && CH.ftd.code === CH.code && CH.ftd.err) {
+    text('⚠ FTD/DD 표시를 못 읽었습니다', PL + 4, PT + 12, '#e8730a', 10, true);
+  }
   var latest = ALL[ALL.length - 1];
   var _now = latest.c;
   if (CH.on.order) CH.lines.forEach((function(L) {
@@ -6068,17 +6208,19 @@ function renderChartTab() {
 
 function chMenu() {
   var _wk = CH.period === 'weekly';
-  var items = [ [ 'accum', '▽ 매집봉' ], [ 'ma21', _wk ? '초록선 4주 이동평균(21일선)' : '초록선 21일 이동평균' ], [ 'ma50', _wk ? '분홍선 10주 이동평균(50일선)' : '분홍선 50일 이동평균' ], [ 'vma50', _wk ? '보라선 거래량 10주 평균' : '보라선 거래량 50일 평균' ], [ 'order', '주황 점선 주문선' ], [ 'avg', '초록 실선 매수선(평단)' ] ].filter((function(p) {
-    return !CH.idx || [ 'accum', 'order', 'avg' ].indexOf(p[0]) < 0;
+  var items = [ [ 'accum', '▽ 매집봉' ], [ 'ma21', _wk ? '초록선 4주 이동평균(21일선)' : '초록선 21일 이동평균' ], [ 'ma50', _wk ? '분홍선 10주 이동평균(50일선)' : '분홍선 50일 이동평균' ], [ 'vma50', _wk ? '보라선 거래량 10주 평균' : '보라선 거래량 50일 평균' ], [ 'order', '주황 점선 주문선' ], [ 'avg', '초록 실선 매수선(평단)' ], [ 'ma20', '청록선 20일 이동평균' ], [ 'ftd', '📈 FTD·DD 표시' ] ].filter((function(p) {
+    if (p[0] === 'ftd' || p[0] === 'ma20') return CH.idx;
+    return !CH.idx || [ 'accum', 'order', 'avg', 'ma21', 'ma50', 'vma50' ].indexOf(p[0]) < 0;
   })).map((function(p) {
     return [ (CH.on[p[0]] ? '✅ ' : '⬜ ') + p[1], function() {
       CH.on[p[0]] = CH.on[p[0]] ? 0 : 1;
       chSave();
       chDraw();
+      if (p[0] === 'ftd' && CH.on.ftd && !chFtdMarks()) chLoadFtd(CH.code);
       setTimeout(chMenu, 120);
     } ];
   }));
-  items.unshift([ _wk ? '📅 일봉으로 보기' : '📅 주봉으로 보기', function() {
+  if (!CH.idx) items.unshift([ _wk ? '📅 일봉으로 보기' : '📅 주봉으로 보기', function() {
     chSetPeriod(_wk ? 'daily' : 'weekly');
   } ]);
   items.push([ '🔎 처음 크기로 (120봉)', function() {
@@ -6179,7 +6321,7 @@ function renderChartView() {
   bar.appendChild(bb);
   bar.appendChild(nm);
   bar.appendChild(pr);
-  bar.appendChild(pb);
+  if (!CH.idx) bar.appendChild(pb);
   bar.appendChild(mb);
   f.appendChild(bar);
   var _ctl = thmLine(CH.code);
