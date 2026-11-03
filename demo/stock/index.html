@@ -62,6 +62,7 @@
   .tag.h  { background:#f3f4f6; color:#9ca3af; }
   .card.healed .nm, .card.healed .albody, .card.healed .rt { color:#9ca3af; }
   .healnote { font-size:11.5px; font-weight:700; color:#15803d; margin-left:6px; white-space:nowrap; }
+  .healnote.closed { color:#9ca3af; }                  
   .row { display:flex; gap:7px; margin-bottom:9px; }
   .btn { flex:1; background:#fff; border:none; border-radius:11px;
         padding:13px 0; font:inherit; font-size:14px; font-weight:700; color:#374151; }
@@ -122,6 +123,7 @@
   .sec.fold .fsum .fdot { color:#94a3b8; white-space:pre; }   
   .sec.fold .fsum .fhit { color:#dc2626; font-weight:800; }
   .sec.fold .fsum .fbad { color:#b45309; font-weight:800; }
+  .sec.fold .fsum .fpast { color:#64748b; font-weight:700; }   
   .sec.fold .ftg { margin-left:auto; flex:0 0 auto; font-size:13px; font-weight:700; color:#1a5490; padding:0 8px 0 10px; }
   
   .sec.fold .ftg.fbl { order:1; }
@@ -399,6 +401,12 @@
   .rskp.rskp-b { color:#b45309; background:#fff7ed; }
   .rskn.tap .rskp { text-decoration:underline; text-underline-offset:3px; }
   
+  .rskpast { margin-top:8px; padding-top:7px; border-top:1px dashed #d5dbe1; }
+  .rskpast > .rskpt { font-size:12.5px; font-weight:700; color:#64748b; }
+  .rskpast > .rskd { font-size:12.5px; font-weight:700; color:#374151; margin-top:7px; padding:2px 0 1px; }
+  .rskpast > .rskd + .strow, .rskpast > .rskd + .sgrp > .strow:first-child, .rskpast > .rskd + .ddrow { border-top:none; }
+  .ddrow .dday { font-size:11.5px; font-weight:700; color:#475569; background:#f1f5f9; border-radius:6px; padding:0 5px; }
+  
   .thm { font-size:11.5px; font-weight:500; color:#8b94a1; line-height:1.5; letter-spacing:0;
         word-break:keep-all; overflow-wrap:anywhere; }
   .thm .thk { color:#9aa3af; margin-right:3px; }
@@ -437,6 +445,9 @@
   #dlg-msg .biosub { display:block; font-size:12px; font-weight:600; color:#6b7280; margin-top:3px; word-break:keep-all; }
   .chips button.bio { background:#f3e5f5; border-color:#ce93d8; color:#6a1b9a; }
   .chips button.bio.on { background:#6a1b9a; border-color:#4a148c; color:#fff; }
+  
+  .chips button.tn { background:#e8f5e9; border-color:#66bb6a; color:#1b5e20; font-weight:700; }
+  .chips button.tn.on { background:#1b5e20; border-color:#1b5e20; color:#fff; }
   .ddrow { display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; padding:8px 2px;
         border-top:1px solid #f1f3f6; cursor:pointer; }
   .ddrow:active { background:#f3f4f6; }
@@ -572,6 +583,8 @@
   
   .card .albody { white-space:pre-wrap; word-break:break-word; }
   .card .al-fold { margin-top:4px; }
+  
+  .card .alopen { font-size:11px; color:#b45309; margin-top:3px; }
   .newdot { display:inline-block; font-size:9.5px; font-weight:800; color:#fff; background:#111827;
         border-radius:4px; padding:1px 5px; margin-right:5px; vertical-align:1px; letter-spacing:.3px; }
   
@@ -676,7 +689,7 @@
   .hcup { background:#fff; border-radius:14px; padding:10px 13px; margin:0 0 12px; font-size:13.5px; line-height:1.8; }
   .hcup .d { font-weight:800; color:#b71c1c; margin-right:6px; }
   
-  .gsrow .btn.r { padding:14px 8px; word-break:keep-all; overflow-wrap:anywhere; line-height:1.4; }
+  .gsrow .btn { padding:14px 8px; word-break:keep-all; overflow-wrap:anywhere; line-height:1.4; }   
   #dlg-pick .gslist { max-height:40vh; overflow-y:auto; margin:4px 16px 0; }
   .gsit { display:flex; align-items:center; gap:10px; padding:10px 2px; border-top:1px solid #eef1f5; font-size:14px; }
   .gsit:first-child { border-top:none; }
@@ -685,8 +698,6 @@
   .gsit .gs { font-size:12px; color:#6b7280; line-height:1.45; word-break:keep-all; overflow-wrap:anywhere; }
   .gsit .gs.bad { color:#b91c1c; }
   
-  .gsnote { margin:8px 16px 4px; padding:10px 12px; border-radius:10px; background:#fef2f2; color:#b91c1c;
-        font-size:12.5px; line-height:1.6; white-space:pre-wrap; word-break:keep-all; overflow-wrap:anywhere; }
   .gsbadge { flex:0 0 auto; font-size:12px; font-weight:800; border-radius:7px; padding:4px 8px; background:#eef1f5; color:#4b5563; }
   .gsbadge.ok { background:#ecfdf3; color:#15803d; } .gsbadge.bad { background:#fef2f2; color:#b91c1c; }
   .gsbadge.go { background:#fffbeb; color:#b45309; } .gsbadge.unk { background:#fff7ed; color:#c2410c; }
@@ -694,24 +705,24 @@
   .gshd.bad { color:#b91c1c; font-weight:700; }
   .gsbar { height:5px; border-radius:3px; background:#eef1f5; margin:4px 16px 6px; overflow:hidden; }
   .gsbar i { display:block; height:100%; background:#111827; border-radius:3px; }
-  #dlg.sheet .btns button.gsok.r { background:#dc2626; color:#fff; }
-  #dlg.sheet .btns button.gsok.p { background:#111827; color:#fff; }
+  #dlg.sheet .btns button.gsok.p { background:#111827; color:#fff; }   
   
   .gspct { display:flex; align-items:center; gap:10px; margin:8px 16px 0; padding:9px 12px; border:1.5px solid #d3d9e2;
         border-radius:10px; background:#fff; }
   .gspct label { flex:1; min-width:0; font-size:14px; font-weight:700; color:#111827; word-break:keep-all; }
   .gspct .gspin { flex:0 0 auto; display:flex; align-items:center; gap:4px; }
-  .gspct input { width:76px; padding:8px 10px; font-size:17px; font-weight:800; text-align:right; color:#111827; background:#fff;
+  
+  #dlg-pick .gspct input { margin:0; width:76px; padding:8px 10px; font-size:17px; font-weight:800; text-align:right; color:#111827; background:#fff;
         border:1.5px solid #9ca3af; border-radius:8px; outline:none; }
-  .gspct input:focus { border-color:#111827; }
-  .gspct input:disabled { background:#f3f4f6; color:#9ca3af; }
+  #dlg-pick .gspct input:focus { border-color:#111827; }
+  #dlg-pick .gspct input:disabled { background:#f3f4f6; color:#9ca3af; }
   .gspct b { font-size:15px; color:#374151; }
   .gspwhy { margin:5px 16px 2px; font-size:12px; color:#6b7280; line-height:1.5; word-break:keep-all; overflow-wrap:anywhere; }
   .gspwhy.bad { color:#b91c1c; font-weight:700; }
+  .gspwhy:empty { display:none; }      
   .gsbody.load .gslist { opacity:.5; }
   #dlg.sheet .btns button.gsok.gsoff { opacity:.45; }
   
-  #dlg.sheet .msg .gsub { display:block; font-size:12px; font-weight:600; color:#6b7280; letter-spacing:0; margin-top:1px; }
   
   #dlg.sheet.gssel .msg { flex:0 0 auto; }
   #dlg.sheet.gssel #dlg-pick { flex:1 1 auto; min-height:0; }
@@ -719,35 +730,23 @@
   #dlg.sheet.gssel #dlg-pick > .gsbody { flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; }
   #dlg.sheet.gssel #dlg-pick .gslist { max-height:none; overflow:visible; }
   #dlg.sheet.gssel .btns { flex:0 0 auto; }
-  #dlg-pick .gsqk { display:flex; gap:6px; overflow-x:auto; margin:8px 16px 0; padding-bottom:2px; -webkit-overflow-scrolling:touch; }
-  #dlg-pick .gsqk::-webkit-scrollbar { display:none; }
-  #dlg-pick .gsqk button { flex:0 0 auto; display:inline-block; width:auto; border:1.5px solid #d3d9e2; background:#fff;
-        border-radius:999px; padding:6px 12px; font-size:12.5px; font-weight:700; color:#374151; white-space:nowrap; }
-  #dlg-pick .gsqk button.on { background:#111827; border-color:#111827; color:#fff; }
-  #dlg-pick .gsqk button:active { background:#f3f4f6; }
-  #dlg-pick .gsqk button.on:active { background:#111827; }
   #dlg-pick .gsclist { margin-top:4px; }
-  .gsc { display:flex; gap:10px; margin:6px 0; padding:9px 11px; border-radius:11px; border:1.5px solid #d3d9e2; background:#fff;
-        cursor:pointer; align-items:flex-start; }
-  .gsc.on { border-color:#dc2626; background:#fff5f5; }
+  .gstip { margin:12px 16px 0; font-size:12px; font-weight:700; color:#6b7280; word-break:keep-all; overflow-wrap:anywhere; }
+  .gsfine { margin:12px 16px 4px; font-size:12px; color:#6b7280; line-height:1.5; word-break:keep-all; overflow-wrap:anywhere; }
+  .gsfine.bad { color:#111827; font-weight:700; }      
+  .gsc { display:flex; align-items:center; gap:10px; margin:6px 0; padding:9px 11px; border-radius:11px; border:1.5px solid #e5e7eb;
+        background:#f9fafb; cursor:pointer; }
+  .gsc.on { border-color:#374151; background:#fff; }
   .gsc.lock { cursor:default; }
-  .gsc .dotk { flex:0 0 auto; width:22px; height:22px; border-radius:11px; border:2px solid #9aa3af; margin-top:1px; box-sizing:border-box;
+  .gsc .dotk { flex:0 0 auto; width:22px; height:22px; border-radius:11px; border:2px solid #9aa3af; box-sizing:border-box;
         display:flex; align-items:center; justify-content:center; color:#fff; font-size:13px; font-weight:900; }
-  .gsc.on .dotk { background:#dc2626; border-color:#dc2626; }
-  .gsc .gl { flex:1; min-width:0; }
-  .gsc .gn { font-size:14.5px; font-weight:700; color:#111827; letter-spacing:-.3px; word-break:keep-all; overflow-wrap:anywhere; }
-  .gsc .dchg { margin-top:1px; font-size:12px; font-weight:700; color:#6b7280; white-space:nowrap; }
-  .gsc .dchg.up { color:#dc2626; } .gsc .dchg.dn { color:#2563eb; }
-  .gsc .thm.thmc { display:flex; flex-wrap:wrap; gap:4px; margin-top:4px; }
-  .gsc .gr { flex:0 0 auto; max-width:46%; text-align:right; }
-  .gsc .gp { font-size:14.5px; font-weight:800; color:#111827; }
-  .gsc .gp.up { color:#dc2626; } .gsc .gp.dn { color:#2563eb; }
-  .gsc .gq { font-size:11.5px; color:#6b7280; margin-top:1px; word-break:keep-all; overflow-wrap:anywhere; }
-  .gsc.skip .gq { color:#b91c1c; }
-  .gsc:not(.on) .gn, .gsc:not(.on) .gp, .gsc:not(.on) .gp.up, .gsc:not(.on) .gp.dn { color:#9aa3af; }   
-  #dlg.sheet .btns button.gsok.gsk { flex:1.7; line-height:1.3; }
-  #dlg.sheet .btns button.gsok.gsk .gsk1 { display:block; }
-  #dlg.sheet .btns button.gsok.gsk .gsk2 { display:block; font-size:11.5px; font-weight:600; opacity:.9; margin-top:1px; }
+  .gsc.on .dotk { background:#111827; border-color:#111827; }
+  .gsc .gn { flex:1; min-width:0; font-size:15px; font-weight:700; color:#111827; letter-spacing:-.3px; word-break:keep-all; overflow-wrap:anywhere; }
+  .gsc:not(.on) .gn { color:#9ca3af; }      
+  .gsc .gr { flex:0 0 auto; text-align:right; }
+  .gsc .gp { font-size:15px; font-weight:700; color:#111827; white-space:nowrap; }
+  .gsc .gp.up { color:#d23b3b; } .gsc .gp.dn { color:#2f6fd6; }
+  .gsc .gq { font-size:11.5px; font-weight:700; color:#6b7280; margin-top:1px; white-space:nowrap; }   
   #dlg.sheet .btns button.gsok.gsnone { pointer-events:none; }
   
   .balsort button.obkbtn { margin-right:auto; border-color:#111827; color:#111827; }
@@ -814,6 +813,27 @@
   #dlg-pick .obkunit button:first-child { border-radius:16px 0 0 16px; }
   #dlg-pick .obkunit button:last-child { border-radius:0 16px 16px 0; border-left:none; }
   #dlg-pick .obkunit button.on { background:#111827; border-color:#111827; color:#fff; }
+  
+  .card.pbc .bb { display:inline-block; font-size:10.5px; font-weight:700; padding:0 6px; border-radius:5px; margin-left:5px;
+        vertical-align:1px; line-height:1.6; white-space:nowrap; }
+  .card.pbc .bb.def { background:#e8f0fb; color:#1a5490; }
+  .card.pbc .bb.cap { background:#fff4dc; color:#9a5b00; }
+  
+  #dlg-pick .obkdef { display:flex; align-items:center; justify-content:center; gap:6px; margin:2px 0 2px; }
+  #dlg-pick .obkdef .obkdl { font-size:14px; font-weight:800; color:#1a5490; }
+  #dlg-pick .obkdef input { width:76px; padding:6px 8px; font-size:17px; font-weight:800; text-align:right; color:#111827;
+        border:1.5px solid #9ca3af; border-radius:9px; outline:none; background:#fff; }
+  #dlg-pick .obkdef input:focus { border-color:#1a5490; }
+  #dlg-pick .obkdef small { font-size:13px; font-weight:700; color:#374151; }
+  #dlg-pick .obkdef button { flex:0 0 auto; width:auto; gap:0; padding:7px 14px; border:none; border-radius:9px;
+        background:#1a5490; color:#fff; font-size:13.5px; font-weight:800; justify-content:center; }
+  #dlg-pick .obkdef button:disabled { opacity:.35; }
+  #dlg-pick .obkdsub { text-align:center; font-size:12px; color:#6b7280; margin:2px 0 8px; padding-bottom:8px; border-bottom:1px solid #eef0f3;
+        word-break:keep-all; overflow-wrap:anywhere; }
+  #dlg-pick .obkdsub.bad { color:#b91c1c; font-weight:700; }
+  #dlg-pick .obkwith { display:flex; align-items:center; justify-content:center; gap:7px; margin:8px 0 0; font-size:13.5px;
+        font-weight:700; color:#1a5490; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  #dlg-pick .obkwith input { width:18px; height:18px; margin:0; accent-color:#1a5490; }
 </style>
 </head>
 <body>
@@ -836,6 +856,7 @@
     <input id="dlg-in" style="display:none">
     
     <div id="dlg-pick" style="display:none"></div>
+    
     <div class="btns"><button id="dlg-no">취소</button><button id="dlg-ok" class="p">확인</button></div>
   </div></div>
   
@@ -867,8 +888,28 @@
   .mk-ic .c { font-size:13px; font-weight:700; white-space:nowrap; }
   .mk-ic .j { margin-top:7px; font-size:12px; font-weight:700; color:#16324f; background:#e7ecf3; border-radius:7px;
         padding:4px 7px; line-height:1.45; word-break:keep-all; }
-  .mk-ic .j.live { background:#fff4e5; color:#9a3412; }
+  
+  
+  .mk-ic .jl { margin-top:7px; margin-bottom:2px; font-size:11px; font-weight:600; color:#b08968; }
+  .mk-ic .jl.fin { color:#8a94a6; }
+  .mk-ic .j.live, .mk-ic .j.fin { margin-top:0; font-size:13px; font-weight:800; background:#f1f5f9; color:#334155; }
+  .mk-ic .j.ftd { background:#fee2e2; color:#b91c1c; }
+  .mk-ic .j.dd { background:#dbeafe; color:#1d4ed8; }
   .mk-ic .j.none { background:#f3f4f6; color:#9aa3af; font-weight:600; }
+  
+  .mk-ic.st-good { background:#d9ecd9; }
+  .mk-ic.st-good .n, .mk-ic.st-good .v, .mk-ic.st-good .c { color:#2d6a2d; }
+  .mk-ic.st-semi { background:#e8e0c8; }
+  .mk-ic.st-semi .n, .mk-ic.st-semi .v, .mk-ic.st-semi .c { color:#6e5a1a; }
+  .mk-ic.st-bad { background:#e8c8c8; }
+  .mk-ic.st-bad .n, .mk-ic.st-bad .v, .mk-ic.st-bad .c { color:#832222; }
+  .mk-ic.st-neutral { background:#e0e6ed; }
+  .mk-ic.st-neutral .n, .mk-ic.st-neutral .v, .mk-ic.st-neutral .c { color:#555; }
+  .mk-ic.st-none .n, .mk-ic.st-none .v, .mk-ic.st-none .c { color:#9aa3af; }
+  .mk-ic[class*="st-"]:active { filter:brightness(.95); }
+  
+  .mk-ic.st-good, .mk-ic.st-semi, .mk-ic.st-bad, .mk-ic.st-neutral { box-shadow:inset 0 0 0 1px rgba(15,23,42,.08); }
+  .mk-ic .j.pre { background:#eef2ff; color:#3730a3; }   
   .mk-row { display:flex; align-items:center; gap:8px; }
   .mk-rk { flex:0 0 20px; font-size:12px; font-weight:800; color:#9aa3af; text-align:center; }
   .mk-mid { flex:1; min-width:0; }
@@ -892,6 +933,10 @@
         box-shadow:inset 3px 0 0 #f97316; line-height:1.55; word-break:keep-all; }
   .mk-warn-t { font-size:13px; font-weight:700; }
   .mk-warn-w { font-size:11.5px; color:#b45309; margin-top:2px; word-break:break-all; }
+  
+  .mk-majf { margin:10px 0 2px; }
+  .mk-majf-on { color:#b45309; font-weight:700; font-size:12.5px; margin:0 2px 6px; }
+  .mk-majf-none { white-space:pre-line; }
 </style>
 <script>
 'use strict';
@@ -903,6 +948,32 @@ var MK = {
   sel: null,
   seq: 0
 };
+
+MK.majOnly = function() {
+  try {
+    return localStorage.getItem('m_mk_major_only') === '1';
+  } catch (e) {
+    return false;
+  }
+}();
+
+MK.pendOnly = function() {
+  try {
+    return localStorage.getItem('m_mk_pend_only') === '1';
+  } catch (e) {
+    return false;
+  }
+}();
+
+function mkSetFilt(maj, pend) {
+  MK.majOnly = !!maj;
+  MK.pendOnly = !!pend;
+  try {
+    localStorage.setItem('m_mk_major_only', maj ? '1' : '0');
+    localStorage.setItem('m_mk_pend_only', pend ? '1' : '0');
+  } catch (e) {}
+  if (TAB === 'market' && MK.sel) renderMarketGroup(false);
+}
 
 function mkPct(v) {
   return v == null || !isFinite(Number(v)) ? '—' : (v > 0 ? '+' : '') + Number(v).toFixed(2) + '%';
@@ -1148,29 +1219,54 @@ function mkStarBtn(on, fn) {
   return b;
 }
 
+function mkStCls(it) {
+  if (!it || !it.judge) return 'st-none';
+  var s = it.state !== undefined ? it.state : String(it.judge).split('(')[0];
+  s = String(s || '').toUpperCase().replace(/[\s-]/g, '');
+  if (!s) return 'st-none';
+  if (s === 'FTD' || s === 'DAY1') return 'st-good';
+  if (s === 'SEMIFTD') return 'st-semi';
+  if (s === 'DD') return 'st-bad';
+  return 'st-neutral';
+}
+
+function mkJudgeCls(j) {
+  return /^FTD\b/i.test(j || '') ? ' ftd' : /^DD\b/i.test(j || '') ? ' dd' : '';
+}
+
 function mkIndexCards(ix) {
   var f = document.createDocumentFragment();
-  var g = el('div', 'mk-idx'), live_ = ix.mode === 'intraday';
+  var g = el('div', 'mk-idx'), live_ = ix.mode === 'intraday', pre_ = ix.mode === 'pre';
   (ix.items || []).forEach((function(it) {
-    var c = el('div', 'mk-ic');
+    var stc = mkStCls(it);
+    var c = el('div', 'mk-ic ' + stc);
     c.setAttribute('data-ix', it.key || '');
+    c.setAttribute('data-st', stc);
     c.appendChild(el('div', 'n', it.name || ''));
-    c.appendChild(el('div', 'v', mkNum(it.value)));
-    var pts = it.value != null && it.prev != null ? it.value - it.prev : null;
-    c.appendChild(el('div', 'c ' + mkCls(it.chg_pct), (it.chg_pct == null ? '—' : (it.chg_pct > 0 ? '▲ ' : it.chg_pct < 0 ? '▼ ' : '') + mkPct(it.chg_pct)) + (pts == null ? '' : '  ' + (pts > 0 ? '+' : '') + pts.toFixed(2))));
+    c.appendChild(el('div', 'v', pre_ ? '—' : mkNum(it.value)));
+    var pts = !pre_ && it.value != null && it.prev != null ? it.value - it.prev : null;
+    c.appendChild(el('div', 'c' + (pre_ ? ' mut' : ''), (pre_ || it.chg_pct == null ? '—' : (it.chg_pct > 0 ? '▲ ' : it.chg_pct < 0 ? '▼ ' : '') + mkPct(it.chg_pct)) + (pts == null ? '' : '  ' + (pts > 0 ? '+' : '') + pts.toFixed(2))));
     var jt, jc = 'j';
-    if (!it.judge) {
+    if (pre_) {
+      jt = '장 전 · 09:00 시작';
+      jc += ' pre';
+    } else if (!it.judge) {
       jt = '판정을 못 읽었습니다';
       jc += ' none';
     } else if (live_) {
-      jt = '마감예상 ' + it.judge;
-      jc += ' live';
+      jt = it.judge;
+      jc += ' live' + mkJudgeCls(it.judge);
     } else {
-      jt = '확정 · ' + it.judge;
+      jt = it.judge;
+      jc += ' fin' + mkJudgeCls(it.judge);
       if (it.day != null && !/^Day ?1\b/i.test(it.judge)) jt += ' · Day ' + it.day;
     }
     var jb = el('div', jc, jt);
     function why() {
+      if (pre_) {
+        say([ it.name + '  —', '', '⏳ 장 전 (09:00 시작)', '', '장 열리는 날 08:00~09:00 에는 어제 값을 지우고 비워 둡니다.', '09:00 에 장이 열리면 마감예상 판정으로 바뀝니다.' ].join('\n'));
+        return;
+      }
       var L = [ it.name + ' ' + mkNum(it.value) + '  ' + mkPct(it.chg_pct), '' ];
       if (live_) {
         L.push('⏱ 마감예상 ' + (it.judge || '—') + ' (아직 확정 아님)');
@@ -1188,6 +1284,7 @@ function mkIndexCards(ix) {
       e.stopPropagation();
       why();
     };
+    if (!pre_ && it.judge) c.appendChild(live_ ? el('div', 'jl', '마감예상') : el('div', 'jl fin', '확정'));
     c.appendChild(jb);
     c.onclick = function() {
       var cd = CH_IDX[it.key];
@@ -1200,7 +1297,7 @@ function mkIndexCards(ix) {
     g.appendChild(c);
   }));
   f.appendChild(g);
-  var note = live_ ? '⏱ 장중 — 마감예상 판정' + (ix.asof ? ' · ' + ix.asof + ' 기준' : '') : '확정 판정' + (ix.ref ? ' · ' + mkMd(ix.ref) + ' 종가 기준' : '');
+  var note = pre_ ? '⏳ 장 전 — 09:00 부터 마감예상 판정' : live_ ? '⏱ 장중 — 마감예상 판정' + (ix.asof ? ' · ' + ix.asof + ' 기준' : '') : '확정 판정' + (ix.ref ? ' · ' + mkMd(ix.ref) + ' 종가 기준' : '');
   f.appendChild(infoLine('mut', note, '칸 = 지수 차트 · 판정 글자 = ' + (live_ ? '근거' : '설명') + ' (누르면 열립니다)'));
   (ix.errors || []).slice(0, 3).forEach((function(m) {
     f.appendChild(el('div', 'mut', '⚠ ' + m));
@@ -1240,9 +1337,9 @@ var STG = {};
 
 var STG_MAX = 6e4;
 
-function stgItem(code, nm) {
+function stgItem(code, nm, back) {
   return [ '🏷 이 종목의 테마·업종 보기', function() {
-    stgSheet(code, nm);
+    stgSheet(code, nm, back);
   } ];
 }
 
@@ -1266,9 +1363,10 @@ function stgLoad(code) {
   }));
 }
 
-function stgSheet(code, nm) {
+function stgSheet(code, nm, back) {
   code = nc(code);
   askPick('🏷 «' + nm + '» 의 테마·업종', []);
+  dlgBackTo(back);
   var my = PICK_SEQ, box = el('div', 'stg-list');
   box.id = 'stg-list';
   box.appendChild(el('div', 'empty', '불러오는 중…'));
@@ -1295,6 +1393,7 @@ function stgSheet(code, nm) {
           DLG_PICK.style.display = 'none';
           DLG_OK.style.display = '';
           DLG.classList.remove('on', 'sheet');
+          dlgBackTo(null);
           dlgRun((function() {
             MK.sel = {
               dim: r.dim,
@@ -1645,7 +1744,11 @@ function renderMarket(first, open) {
       top.forEach((function(r) {
         grp.appendChild(mkGroupRow(r, r.rank));
       }));
-      if (!top.length) f.appendChild(el('div', 'empty', '테마·업종 등락률이 아직 없습니다'));
+      if (gs.pre) {
+        var pe = el('div', 'empty', '⏳ 장 전 — 09:00 부터 순위');
+        pe.setAttribute('data-mk-pre', '');
+        f.appendChild(pe);
+      } else if (!top.length) f.appendChild(el('div', 'empty', '테마·업종 등락률이 아직 없습니다'));
     }
     if (grp.childNodes.length) f.appendChild(grp);
     for (var mi = mk0; mi < f.childNodes.length; mi++) f.childNodes[mi].setAttribute('data-mk-main', '');
@@ -1653,7 +1756,7 @@ function renderMarket(first, open) {
     qr.id = 'mk-q-res';
     qr.style.display = 'none';
     f.appendChild(qr);
-    f.appendChild(infoLine('mut', MK._live ? '등락률 = 오늘 실시간(네이버' + (gs.asof ? ' · ' + gs.asof : '') + ')' : '등락률 = 마지막 분석 값(최종거래일)', '테마와 업종을 한 줄로 셉니다 · 줄을 누르면 그 종목들 · ☆ 를 누르면 주요테마업종 표시(컴퓨터와 같은 목록)'));
+    f.appendChild(infoLine('mut', gs.pre ? '등락률 = 장 전이라 0.00% (09:00 부터 오늘 실시간)' : MK._live ? '등락률 = 오늘 실시간(네이버' + (gs.asof ? ' · ' + gs.asof : '') + ')' : '등락률 = 마지막 분석 값(최종거래일)', '테마와 업종을 한 줄로 셉니다 · 줄을 누르면 그 종목들 · ☆ 를 누르면 주요테마업종 표시(컴퓨터와 같은 목록)'));
     (d.errors || []).slice(0, 3).forEach((function(m) {
       f.appendChild(el('div', 'mut', '⚠ ' + m));
     }));
@@ -1696,6 +1799,10 @@ function renderMarketGroup(first) {
   })) ]).then((function(res) {
     var d = res[0];
     if (TAB !== 'market' || MK.sel !== sel) return;
+    if (mjTapping()) {
+      MJ_LATE = true;
+      return;
+    }
     d = d || {};
     var _am = amtMaps(res[1], res[2]);
     var f = document.createDocumentFragment();
@@ -1719,7 +1826,9 @@ function renderMarketGroup(first) {
     nm.appendChild(document.createTextNode(d.name || sel.name));
     mid.appendChild(nm);
     var hs = [ (d.stocks || []).length + '종목' ];
-    if (d.src === 'live') {
+    if (d.pre || d.src === 'pre') {
+      hs.push('장 전 — 09:00 부터 등락률');
+    } else if (d.src === 'live') {
       hs.push('등락률 오늘 실시간');
       if (d.carried) hs.push((mkHm(d.live_at) || '앞 회차') + ' 값');
     } else if (d.src === 'final') {
@@ -1741,7 +1850,36 @@ function renderMarketGroup(first) {
     hd.appendChild(w);
     f.appendChild(hd);
     var st = d.stocks || [], grp = el('div', 'grp'), anyLive = (d.chg_live || 0) > 0;
-    st.forEach((function(s) {
+    var majOnly = !!MK.majOnly, pendOnly = !!MK.pendOnly, anyF = majOnly || pendOnly;
+    var isMaj = function(s) {
+      return !!s.major;
+    }, isPend = function(s) {
+      return Number(s.pending_n) > 0;
+    };
+    var view = anyF ? st.filter((function(s) {
+      return majOnly && isMaj(s) || pendOnly && isPend(s);
+    })) : st;
+    var fName = [ majOnly ? '★ 주요종목' : '', pendOnly ? '⏳ 매수 대기중' : '' ].filter(Boolean).join(' · ');
+    var majOk = d.major_ok !== false, pendOk = d.pending_ok !== false;
+    var fBad = [ majOnly && !majOk ? '★ 주요종목' : '', pendOnly && !pendOk ? '⏳ 매수 대기중' : '' ].filter(Boolean).join(' · ');
+    if (st.length) {
+      var fc = el('div', 'chips mk-majf mk-pendf');
+      [ [ 'all', !anyF, '전체 ' + st.length, function() {
+        mkSetFilt(false, false);
+      } ], [ 'major', majOnly, '★ 주요종목 ' + (majOk ? st.filter(isMaj).length : '?'), function() {
+        mkSetFilt(!majOnly, pendOnly);
+      } ], [ 'pend', pendOnly, '⏳ 매수 대기중 ' + (pendOk ? st.filter(isPend).length : '?'), function() {
+        mkSetFilt(majOnly, !pendOnly);
+      } ] ].forEach((function(p) {
+        var b = el('button', p[1] ? 'on' : '', p[2]);
+        b.setAttribute('data-mkf', p[0]);
+        b.onclick = p[3];
+        fc.appendChild(b);
+      }));
+      f.appendChild(fc);
+      if (anyF && view.length) f.appendChild(el('div', 'mut mk-majf-on', fName + '만 보는 중 — ' + st.length + '종목 중 ' + view.length + '종목' + (fBad ? ' · ' + fBad + '을(를) 못 읽어 빠진 종목이 있을 수 있습니다' : '')));
+    }
+    view.forEach((function(s) {
       var k = el('div', 'card tap');
       k.setAttribute('data-mks', s.code || '');
       var r = el('div', 'mk-row'), m = el('div', 'mk-mid');
@@ -1765,8 +1903,8 @@ function renderMarketGroup(first) {
       };
       grp.appendChild(k);
     }));
-    if (st.length) f.appendChild(grp); else f.appendChild(el('div', 'empty', '이 묶음에 든 종목이 없습니다'));
-    f.appendChild(infoLine('mut', anyLive ? '종목 등락률 = 오늘 실시간(' + (d.at || '') + ' 기준)' : '종목 등락률 = 최종거래일 종가 기준', '종목을 누르면 차트 보기 · 이 종목의 테마·업종 보기 · ☆ = 주요개별종목'));
+    if (view.length) f.appendChild(grp); else if (st.length) f.appendChild(el('div', 'empty mk-majf-none', (fBad ? fBad + '을(를) 못 읽었습니다 — 있는지 없는지 모릅니다' : '이 묶음엔 ' + (majOnly && pendOnly ? '★ 주요종목도 ⏳ 매수 대기중 종목도 없습니다' : majOnly ? '★ 주요종목이 없습니다' : '⏳ 매수 대기중 종목이 없습니다')) + ' — ' + st.length + '종목 모두 숨김\n[전체] 를 누르면 다 나옵니다')); else f.appendChild(el('div', 'empty', '이 묶음에 든 종목이 없습니다'));
+    f.appendChild(infoLine('mut', d.pre ? '종목 등락률 = 장 전이라 0.00% (09:00 부터 오늘 실시간)' : anyLive ? '종목 등락률 = 오늘 실시간(' + (d.at || '') + ' 기준)' : '종목 등락률 = 최종거래일 종가 기준', '종목을 누르면 차트 보기 · 이 종목의 테마·업종 보기 · ☆ = 주요개별종목'));
     (d.errors || []).slice(0, 3).forEach((function(m2) {
       f.appendChild(el('div', 'mut', '⚠ ' + m2));
     }));
@@ -1923,16 +2061,16 @@ function tdSumBox(d) {
   return box;
 }
 
-var TD_PSUM_HOW = '맨 위 실현손익은 증권사 «일자별 실현손익» 값입니다([잔고] 오늘 실현손익과 같은 값). ' + '종목 줄 손익은 증권사 «당일매매일지» 값이고, 종목 합은 그 합입니다. ' + '증권사의 두 조회가 수수료·세금과 매입 원가를 서로 다르게 잡아 합이 다를 수 있습니다(매도금액은 같음). ' + '차이 = 종목 합 − 실현손익.';
+var TD_PSUM_HOW = '맨 위 실현손익은 증권사 «일자별 실현손익» 값입니다([잔고] 오늘 실현손익과 같은 값). ' + '종목 줄 손익은 증권사 «체결별 실현손익» 값(수수료·세금 뺀 실제 손익)이고, 종목 합은 그 합입니다. ' + '둘 다 증권사 실현손익이라 보통 같고, 두 조회의 시각이 다르거나 증권사 두 조회의 셈이 다르면 차이가 날 수 있습니다. ' + '차이 = 종목 합 − 실현손익.';
 
 function tdPnlSumLine(ps, rzOk) {
   if (!ps || tdNum(ps.amount) === null) return null;
-  var diff = tdNum(ps.diff), est = !!ps.est, parts;
-  if (rzOk && diff === 0) parts = [ '종목 합과 같음' + (est ? ' · 어림' : '') ]; else {
-    parts = [ '종목 합 ' + tdSigned(ps.amount) + (est ? ' 어림' : '') ];
+  var diff = tdNum(ps.diff), parts;
+  if (rzOk && diff === 0) parts = [ '종목 합과 같음' ]; else {
+    parts = [ '종목 합 ' + tdSigned(ps.amount) ];
     if (rzOk && diff !== null) parts.push('차이 ' + tdSigned(diff));
   }
-  var full = TD_PSUM_HOW + (est ? ' «어림» = 일지에 아직 안 담긴 종목이 있어 그 종목은 리포트 셈으로 어림한 값이 섞였습니다.' : '');
+  var full = TD_PSUM_HOW;
   var ln = el('div', 'psum');
   parts.forEach((function(p, i) {
     if (i) ln.appendChild(document.createTextNode(' · '));
@@ -1940,7 +2078,7 @@ function tdPnlSumLine(ps, rzOk) {
     if (i === parts.length - 1) sp.appendChild(infoBtn(full));
     ln.appendChild(sp);
   }));
-  ln.setAttribute('data-tdpsum', est ? 'est' : rzOk && diff === 0 ? 'same' : 'diff');
+  ln.setAttribute('data-tdpsum', rzOk && diff === 0 ? 'same' : 'diff');
   return ln;
 }
 
@@ -1962,17 +2100,22 @@ function tdRow(r) {
     if (v !== null) {
       pl.className = 'td-pl ' + tdCls(v);
       pl.appendChild(document.createTextNode(tdSigned(v)));
-      pl.appendChild(el('span', 'k', (one !== null ? '손익' : '종목 합 · 매도 ' + (r.n_sells || 0) + '건') + (r.pnl_est ? ' · 어림' : '')));
+      pl.appendChild(el('span', 'k', one !== null ? '손익' : '종목 합 · 매도 ' + (r.n_sells || 0) + '건'));
       pl.setAttribute('data-tdpl', String(v));
     }
   }
   w.appendChild(pl);
   k.appendChild(w);
-  if (sell && tdNum(r.pnl) === null && tdNum(r.pnl_stock) === null && r.pnl_why && /못 읽었/.test(r.pnl_why)) {
-    k.appendChild(el('div', 'td-why', '손익 — ' + r.pnl_why));
+  if (sell && tdNum(r.pnl) === null && tdNum(r.pnl_stock) === null && r.pnl_err) {
+    var why = el('div', 'td-why', TD_PL_MISS);
+    why.setAttribute('data-tderr', '1');
+    if (r.pnl_why) why.appendChild(infoBtn(TD_PL_MISS + ' — ' + r.pnl_why));
+    k.appendChild(why);
   }
   return k;
 }
+
+var TD_PL_MISS = '손익 못 받음(증권사 오류)';
 
 function tdGroup(rows) {
   var by = {}, out = [];
@@ -1989,8 +2132,7 @@ function tdGroup(rows) {
         nb: 0,
         ns: 0,
         pl: null,
-        est: false,
-        bad: false,
+        err: false,
         last: '',
         i: i
       };
@@ -2003,11 +2145,8 @@ function tdGroup(rows) {
       s.ns++;
       var v = tdNum(r.pnl);
       if (v === null) v = tdNum(r.pnl_stock);
-      if (v !== null && s.pl === null) {
-        s.pl = v;
-        s.est = !!r.pnl_est;
-      }
-      if (v === null && r.pnl_why && /못 읽었/.test(r.pnl_why)) s.bad = true;
+      if (v !== null && s.pl === null) s.pl = v;
+      if (v === null && r.pnl_err) s.err = true;
     } else {
       s.buy += a;
       s.nb++;
@@ -2015,7 +2154,7 @@ function tdGroup(rows) {
     if (t !== '—' && t > s.last) s.last = t;
   }));
   out.forEach((function(s) {
-    if (s.pl !== null) s.bad = false;
+    if (s.pl !== null) s.err = false;
   }));
   out.sort((function(a, b) {
     return (a.last < b.last ? 1 : a.last > b.last ? -1 : 0) || a.i - b.i;
@@ -2031,11 +2170,11 @@ function tdStRow(s) {
   k.appendChild(el('span', 'td-c0', s.name));
   k.appendChild(el('span', 'td-c1' + (s.nb ? '' : ' mut'), s.nb ? manWon(s.buy) : '—'));
   k.appendChild(el('span', 'td-c2' + (s.ns ? '' : ' mut'), s.ns ? manWon(s.sell) : '—'));
-  var p = s.pl !== null ? el('span', 'td-c3 ' + tdCls(s.pl), tdSigned(s.pl)) : el('span', 'td-c3 mut', s.bad ? '못 읽음' : '—');
+  var p = s.pl !== null ? el('span', 'td-c3 ' + tdCls(s.pl), tdSigned(s.pl)) : el('span', 'td-c3 mut', s.err ? '못 받음' : '—');
   if (s.pl !== null) p.setAttribute('data-tdpl', String(s.pl));
-  if (s.pl !== null && s.est) {
-    p.setAttribute('data-tdest', '1');
-    p.appendChild(el('span', 'k', '어림'));
+  if (s.pl === null && s.err) {
+    p.setAttribute('data-tderr', '1');
+    p.appendChild(el('span', 'k', '증권사 오류'));
   }
   k.appendChild(p);
   k.onclick = function() {
@@ -2057,7 +2196,7 @@ function tdSheetFind(d, code) {
 }
 
 function tdSheetSub(s) {
-  return '매수 ' + s.nb + '건 ' + tdWon(s.buy) + ' · 매도 ' + s.ns + '건 ' + tdWon(s.sell) + ' · 손익 ' + (s.pl !== null ? tdSigned(s.pl) : s.bad ? '못 읽음' : '—') + ' · 🕘 = 주문 낸 시각';
+  return '매수 ' + s.nb + '건 ' + tdWon(s.buy) + ' · 매도 ' + s.ns + '건 ' + tdWon(s.sell) + ' · ' + (s.pl !== null ? '손익 ' + tdSigned(s.pl) : s.err ? TD_PL_MISS : '손익 —') + ' · 🕘 = 주문 낸 시각';
 }
 
 function tdSheet(code) {
@@ -2073,7 +2212,9 @@ function tdSheet(code) {
     ls.appendChild(tdRow(r));
   }));
   DLG_PICK.appendChild(ls);
-  DLG_PICK.appendChild(pickRow(stgItem(code, s.name)));
+  DLG_PICK.appendChild(pickRow(stgItem(code, s.name, (function() {
+    tdSheet(code);
+  }))));
   TD.sheet = {
     code: code,
     seq: PICK_SEQ,
@@ -2112,7 +2253,7 @@ function tdFill(f, d) {
   }
   TD.last = d;
   f.appendChild(tdSumBox(d));
-  f.appendChild(infoLine('td-note', '종목별 합 · 누르면 건별', '종목마다 오늘 매수 금액 합 · 매도 금액 합 · 그 종목 매도 손익(증권사 값 그대로 · 매도가 없거나 증권사가 안 주면 «—») · ' + '마지막 거래가 최근인 종목이 위 · 줄을 누르면 그 종목 건별 체결이 뜹니다 · ' + '🕘 건별 시각 = 주문 낸 시각입니다(증권사 당일 체결 내역엔 체결 시각이 따로 없습니다)'));
+  f.appendChild(infoLine('td-note', '종목별 합 · 누르면 건별', '종목마다 오늘 매수 금액 합 · 매도 금액 합 · 그 종목 매도 손익(증권사 «체결별 실현손익» 값 그대로 = 수수료·세금 뺀 실제 손익 · ' + '매도가 없거나 막 판 매도가 아직 증권사에 안 담겼으면 «—» · 한 번 더 물어도 증권사에서 못 받으면 «못 받음 · 증권사 오류») · ' + '마지막 거래가 최근인 종목이 위 · 줄을 누르면 그 종목 건별 체결이 뜹니다 · ' + '🕘 건별 시각 = 주문 낸 시각입니다(증권사 당일 체결 내역엔 체결 시각이 따로 없습니다)'));
   f.appendChild(findBox(FIND_TD));
   var g = el('div', 'grp td-tbl'), hd = el('div', 'td-hd');
   hd.appendChild(el('span', 'td-c0', '종목'));
@@ -2356,7 +2497,15 @@ function getJSON0(url, ac) {
   };
   if (ac && typeof AbortController === 'function') opt.signal = ac.signal;
   var p = fetch(url, opt).then((function(r) {
-    if (!r.ok) throw new Error('HTTP ' + r.status);
+    if (!r.ok) return r.json().catch((function() {
+      return null;
+    })).then((function(b) {
+      if (url === BIO_URL && b && b.ready === false && Array.isArray(b.groups)) BIO_NR_GROUPS = b.groups;
+      var e = new Error('HTTP ' + r.status);
+      e.status = r.status;
+      e.body = b;
+      throw e;
+    }));
     return r.json();
   })).then((function(d) {
     var c = JC[url];
@@ -2628,6 +2777,22 @@ var DLG_NO = document.getElementById('dlg-no'), DLG_CB = null;
 
 var DLG_PICK = document.getElementById('dlg-pick');
 
+var DLG_BACK = null;
+
+function dlgBackTo(fn) {
+  DLG_BACK = typeof fn === 'function' ? fn : null;
+}
+
+function dlgStepBack() {
+  var fn = DLG_BACK;
+  if (!fn || !DLG.classList.contains('on')) return false;
+  DLG.classList.remove('on', 'sheet', 'gssel', 'chm');
+  DLG_CB = null;
+  dlgBackTo(null);
+  dlgRun(fn);
+  return true;
+}
+
 var DLG_RUN = null;
 
 function scrKey() {
@@ -2817,6 +2982,7 @@ function dlgClose(val) {
   DLG.classList.remove('on', 'sheet', 'gssel', 'chm');
   var cb = DLG_CB;
   DLG_CB = null;
+  dlgBackTo(null);
   if (cb) dlgRun(cb, val);
 }
 
@@ -2834,6 +3000,7 @@ DLG.onclick = function(e) {
 
 function say(msg, cb) {
   DLG_CB = cb || null;
+  dlgBackTo(null);
   DLG_PICK.style.display = 'none';
   DLG_OK.style.display = '';
   DLG.classList.remove('sheet');
@@ -2864,6 +3031,7 @@ function ask(msg, cb, danger) {
   DLG_CB = function(v) {
     if (v) cb();
   };
+  dlgBackTo(null);
   DLG_PICK.style.display = 'none';
   DLG_OK.style.display = '';
   DLG.classList.remove('sheet');
@@ -2911,6 +3079,7 @@ function pickRow(it) {
     DLG_PICK.style.display = 'none';
     DLG_OK.style.display = '';
     DLG.classList.remove('on', 'sheet');
+    dlgBackTo(null);
     dlgRun((function() {
       it[1]();
     }));
@@ -2921,6 +3090,7 @@ function pickRow(it) {
 function askPick(title, items, code) {
   PICK_SEQ++;
   DLG_CB = null;
+  dlgBackTo(null);
   DLG_MSG.textContent = title;
   sellKindPaint(DLG_MSG);
   if (code) {
@@ -2944,6 +3114,7 @@ function askVal(msg, preset, cb, numeric) {
   DLG_CB = function(v) {
     if (v != null && String(v).trim() !== '') cb(String(v).trim());
   };
+  dlgBackTo(null);
   DLG_PICK.style.display = 'none';
   DLG_OK.style.display = '';
   DLG.classList.remove('sheet');
@@ -2979,6 +3150,11 @@ function setWatch(to) {
       return r.json();
     })).then((function(j) {
       dropCache();
+      if (to === 'off' && j && j.ok) {
+        toast(j.msg || '[매수] 를 껐습니다', 4e3, true);
+        go(TAB);
+        return;
+      }
       say(j.msg || j.error || '바꿨습니다', (function() {
         go(TAB);
       }));
@@ -3139,9 +3315,11 @@ function bioPctTxt(v) {
   return v == null || !isFinite(Number(v)) ? '' : Number(v).toFixed(1) + '%';
 }
 
+var BIO_NR_GROUPS = null;
+
 function bioGroup(key) {
-  var d = bioData();
-  return !!(d && (d.groups || []).indexOf(String(key || '')) >= 0);
+  var d = bioData(), g = d && d.groups || BIO_NR_GROUPS || [];
+  return g.indexOf(String(key || '')) >= 0;
 }
 
 function bioBadge(code, kind) {
@@ -3151,7 +3329,19 @@ function bioBadge(code, kind) {
   return el('span', 'bio', '바이오' + (p != null ? ' ' + bioPctTxt(p) : ''));
 }
 
+var BIO_NR_MSG = '서버가 아직 바이오 자료를 못 읽었습니다 — 잠시 뒤 다시';
+
+function bioNotReady(res) {
+  if (!res) return '';
+  if (res.ready === false) return String(res.error || BIO_NR_MSG);
+  var e = res.__err, b = e && e.body;
+  if (b && b.ready === false) return String(b.error || BIO_NR_MSG);
+  return '';
+}
+
 function bioLine(res) {
+  var nr = bioNotReady(res);
+  if (nr) return el('div', 'mut bioln', '🧪 바이오 못 셈 — ' + nr);
   if (!res || res.__err) return el('div', 'mut bioln', '🧪 바이오 비중을 못 읽었습니다' + (res && res.__err ? ' — ' + res.__err.message : ''));
   var h = res.hold || {}, w = res.wait || {};
   var t = '🧪 바이오 — 보유 ' + fmt(h.amount) + '원' + (h.pct != null ? ' (순자산의 ' + bioPctTxt(h.pct) + ')' : '') + ' · 대기 주문 ' + fmt(w.amount) + '원' + (w.pct != null ? ' (' + bioPctTxt(w.pct) + ')' : '');
@@ -3168,6 +3358,15 @@ function bioCard(res, bal) {
   k.appendChild(el('span', 'bic', '🧪'));
   var m = el('div', 'bim');
   k.appendChild(m);
+  var nr = bioNotReady(res);
+  if (nr) {
+    k.className = 'biocard off';
+    k.setAttribute('data-bio-nr', '1');
+    m.appendChild(el('div', 'bit', '바이오'));
+    m.appendChild(el('div', 'biv', '못 셈'));
+    m.appendChild(el('div', 'biw', nr));
+    return k;
+  }
   if (!res || res.__err) {
     k.className = 'biocard off';
     m.appendChild(el('div', 'bit', '바이오'));
@@ -3386,7 +3585,7 @@ function applyChipFind(wrapId, which) {
   if (!wrap) return;
   var q = (_chipQ(which) || '').trim().toLowerCase(), shown = 0;
   [].forEach.call(wrap.querySelectorAll('button'), (function(b, i) {
-    if (i === 0) {
+    if (i === 0 || b.hasAttribute('data-fixed')) {
       b.style.display = '';
       return;
     }
@@ -3455,8 +3654,11 @@ function ordActSub(o) {
   return p.join(' · ');
 }
 
-function orderActions(o) {
+function orderActions(o, back) {
   var nm = o.name || o.code;
+  var me = function() {
+    orderActions(o, back);
+  };
   askPick('«' + nm + '» ' + fmt(o.trigger_price) + '원 닿으면', [ [ '📈 차트 보기', function() {
     chOpen(o.code, nm);
   } ], [ '💰 매수금액 수정', function() {
@@ -3466,20 +3668,26 @@ function orderActions(o) {
         man: v
       });
     }), true);
+    dlgBackTo(me);
   } ], [ '🗑 이 주문 삭제', function() {
     ask('«' + nm + '» 주문을 지웁니다.\n되살리려면 컴퓨터 주문창의 [↩ 되돌리기] 가 필요합니다.', (function() {
       botPost('/api/orders/' + encodeURIComponent(o.order_id), null, '지웠습니다', 'DELETE');
     }), true);
-  }, true ], stgItem(o.code, nm) ], o.code);
+    dlgBackTo(me);
+  }, true ], stgItem(o.code, nm, me) ], o.code);
   DLG_MSG.appendChild(el('span', 'oasub', ordActSub(o)));
+  dlgBackTo(back);
 }
 
 function ordPickOf(g, perRoute) {
   var rows = g.rows || [];
+  var me = function() {
+    ordPickOf(g, perRoute);
+  };
   var items = rows.map((function(o) {
     var sub = (o.payment_type === 'credit' ? '신용' : '현금') + ' · ' + fmt(o.quantity) + '주' + (perRoute && o.src_label ? ' · ' + o.src_label : '');
     return [ '🛒 ' + fmt(o.trigger_price) + '원 · ' + fmt(o.total_amount || o.base_amount) + '원', function() {
-      orderActions(o);
+      orderActions(o, me);
     }, false, {
       sub: sub
     } ];
@@ -3491,8 +3699,9 @@ function ordPickOf(g, perRoute) {
         value: g.code
       });
     }), true);
+    dlgBackTo(me);
   }, true ]);
-  items.push(stgItem(g.code, g.name));
+  items.push(stgItem(g.code, g.name, me));
   askPick('«' + g.name + '» 대기 매수 ' + rows.length + '건 — 어느 주문?', items, g.code);
 }
 
@@ -3583,7 +3792,318 @@ function obkNames(a) {
   return n.length > 4 ? n.slice(0, 4).join(', ') + ' 외 ' + (n.length - 4) : n.join(', ');
 }
 
-function ordBulkSheet(rows, label) {
+var OBK_DEF_MIN = 8e5;
+
+var ORD_CAPS = {};
+
+var ORD_CAP_TTL = 3e4;
+
+function ordBetKind(o, defV) {
+  var op = Number(o && o.order_price) || 0, q = Number(o && o.quantity) || 0;
+  if (!(defV > 0) || !(op > 0) || !(q > 0)) return '';
+  var dq = obkDefQ(op, defV);
+  if (q === dq) return 'def';
+  if (q > dq) return '';
+  var c = ORD_CAPS[o.code];
+  if (!c || !c.at) return 'cap?';
+  return c.known && c.held && c.cap > 0 && dq * op > c.cap ? 'cap' : '';
+}
+
+function ordCapFetch(codes, then) {
+  var now = Date.now(), need = [];
+  codes.forEach((function(c) {
+    var x = ORD_CAPS[c];
+    if (c && need.indexOf(c) < 0 && !(x && x.busy) && (!x || !x.at || now - x.at > ORD_CAP_TTL)) need.push(c);
+  }));
+  if (!need.length) return;
+  need.forEach((function(c) {
+    ORD_CAPS[c] = Object.assign({
+      at: 0
+    }, ORD_CAPS[c] || {}, {
+      busy: true
+    });
+  }));
+  Promise.all(need.map((function(c) {
+    return fetch('/api/addon_cap?code=' + encodeURIComponent(c), {
+      cache: 'no-store'
+    }).then((function(r) {
+      return r.ok ? r.json() : null;
+    })).catch((function() {
+      return null;
+    })).then((function(j) {
+      ORD_CAPS[c] = {
+        at: Date.now(),
+        known: !!(j && j.known),
+        held: !!(j && j.held),
+        cap: Number(j && (j.cap != null ? j.cap : j.principal)) || 0
+      };
+    }));
+  }))).then((function() {
+    if (then) then();
+  }));
+}
+
+function obkFollowPick(list, oldDef, newDef) {
+  var out = [];
+  (list || []).forEach((function(o) {
+    var op = Number(o.order_price) || 0, t = Number(o.total_amount) || 0, q = Number(o.quantity) || 0;
+    if (!(op > 0) || !(q > 0) || !(newDef > 0) || newDef === oldDef) return;
+    if (t > obkDefQ(op, oldDef) * op + .5) return;
+    var nq = obkDefQ(op, newDef);
+    if (newDef < oldDef ? !(nq < q) : !(nq > q)) return;
+    out.push(o);
+  }));
+  return out;
+}
+
+function obkPlan(rows, delta, defV, pct) {
+  var nd = obkNewAmt({
+    total_amount: defV
+  }, delta, pct);
+  var fol = obkFollowPick(rows, defV, nd), fs = {};
+  fol.forEach((function(o) {
+    fs[String(o.order_id)] = 1;
+  }));
+  var up = pct == null ? delta > 0 : pct > 0, sum = 0, est = 0, inSet = {};
+  var same = [];
+  var rest = rows.filter((function(o) {
+    if (fs[String(o.order_id)]) return false;
+    if (up) {
+      var op = Number(o.order_price) || 0, t = Number(o.total_amount) || 0, q = Number(o.quantity) || 0;
+      if (op > 0 && q > 0 && t <= obkDefQ(op, defV) * op + .5) {
+        same.push(o);
+        return false;
+      }
+    }
+    return true;
+  }));
+  var sp = obkSplit(rest, delta, nd, pct);
+  sp.ids.forEach((function(id) {
+    inSet[id] = 1;
+  }));
+  rows.forEach((function(o) {
+    var op = Number(o.order_price) || 0, t = Number(o.total_amount || o.base_amount || 0);
+    sum += t;
+    if (fs[String(o.order_id)]) {
+      est += op > 0 ? obkDefQ(op, nd) * op : t;
+      return;
+    }
+    if (!inSet[String(o.order_id)]) {
+      est += t;
+      return;
+    }
+    var na = obkNewAmt(o, delta, pct);
+    if (!up && op > 0) na = Math.min(Math.max(na, obkDefQ(op, nd) * op), t);
+    est += na;
+  }));
+  return {
+    nd: nd,
+    up: up,
+    fol: fol,
+    same: same,
+    sp: sp,
+    sum: sum,
+    est: est,
+    low: nd < OBK_DEF_MIN
+  };
+}
+
+function obkSkipTxt(j) {
+  var s = '', cap = j && j.capped || [], sk = j && j.skipped || [];
+  if (cap.length) s += ' · ' + cap.length + '건은 추가 매수 한도까지만';
+  if (sk.length) s += ' · ' + sk.length + '건 건너뜀(' + sk.map((function(x) {
+    var nm = String(x.name || x.order_id || ''), rs = String(x.reason || '');
+    if (nm && rs.indexOf(nm + ' — ') === 0) rs = rs.slice(nm.length + 3);
+    return nm + ' — ' + rs;
+  })).join(' / ') + ')';
+  return s;
+}
+
+function obkDefApply(oldDef, nd) {
+  var head = '기본 베팅액 ' + manWon(oldDef) + ' → ' + manWon(nd);
+  function lost(why) {
+    return fetch('/api/default_bet', {
+      cache: 'no-store'
+    }).then((function(r) {
+      return r.ok ? r.json() : null;
+    })).catch((function() {
+      return null;
+    })).then((function(g) {
+      var gv = g ? Number(g.value) : NaN;
+      if (gv === nd) return follow(' (저장 답을 못 받아 서버 값을 다시 읽어 확인함)');
+      if (g && isFinite(gv) && gv > 0) return {
+        ok: false,
+        head: '기본 베팅액을 못 바꿨습니다 — ' + why + ' · 서버 기본은 ' + manWon(gv) + ' 그대로 · 아무것도 바꾸지 않았습니다'
+      };
+      return {
+        ok: false,
+        head: '⚠ 기본 베팅액이 바뀌었는지 모릅니다 — ' + why + ' · 기본 크기 주문은 따라가지 않았습니다 — 컴퓨터 주문 총괄의 기본 칸과 목록을 확인하고 필요하면 [⬇ 선택 기본액]'
+      };
+    }));
+  }
+  return fetch('/api/default_bet', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      value: nd
+    })
+  }).then((function(r) {
+    return r.json().then((function(j) {
+      return {
+        r: r,
+        j: j
+      };
+    }), (function() {
+      return {
+        r: r,
+        j: null
+      };
+    }));
+  })).then((function(x) {
+    if (!x.j || x.r.status >= 500 && x.j.ok !== false) {
+      if (!x.j && x.r.status >= 400 && x.r.status < 500) return {
+        ok: false,
+        head: '기본 베팅액을 못 바꿨습니다 — 응답 ' + x.r.status + ' · 아무것도 바꾸지 않았습니다'
+      };
+      return lost(x.j ? '서버 오류 ' + x.r.status : '답을 읽지 못함 · 응답 ' + x.r.status);
+    }
+    if (!x.r.ok || x.j.verify_skip || Number(x.j.value) !== nd) {
+      return {
+        ok: false,
+        head: '기본 베팅액을 못 바꿨습니다 — ' + (x.j.error || (x.j.verify_skip ? '서버가 저장을 건너뜀(검증 요청)' : x.r.ok ? '서버가 ' + manWon(x.j.value) + '(으)로 답함' : '응답 ' + x.r.status)) + ' · 아무것도 바꾸지 않았습니다'
+      };
+    }
+    return follow('');
+  }), (function(e) {
+    return lost(e && e.message || '연결 실패');
+  }));
+  function follow(note) {
+    return fetch('/api/orders?active=1', {
+      cache: 'no-store'
+    }).then((function(r) {
+      return r.json();
+    })).then((function(od) {
+      var list = od && (od.orders || od.items) || [];
+      var tg = obkFollowPick(list, oldDef, nd);
+      if (!tg.length) return {
+        ok: true,
+        head: head + ' 저장' + note + ' · 따라갈 기본 크기 주문 없음',
+        followed: []
+      };
+      var ex = {};
+      tg.forEach((function(o) {
+        ex[String(o.order_id)] = Number(o.total_amount);
+      }));
+      return fetch('/api/orders/bulk_adjust', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          order_ids: tg.map((function(o) {
+            return String(o.order_id);
+          })),
+          delta_won: -1e12,
+          min_amount: nd,
+          expect: ex
+        })
+      }).then((function(r) {
+        return r.json().catch((function() {
+          return {};
+        })).then((function(j) {
+          return {
+            r: r,
+            j: j || {}
+          };
+        }));
+      })).then((function(y) {
+        if (!y.r.ok) return {
+          ok: false,
+          head: head + ' 저장' + note + ' · ⚠ 기본 크기 주문 따라가기 실패 — ' + (y.j.error || '응답 ' + y.r.status)
+        };
+        var up = y.j.updated || [];
+        return {
+          ok: true,
+          head: head + ' 저장' + note + ' · 기본 크기 주문 ' + up.length + '건 따라감' + obkSkipTxt(y.j),
+          followed: up.map(String)
+        };
+      }));
+    })).catch((function(e) {
+      return {
+        ok: false,
+        head: head + ' 저장' + note + ' · ⚠ 기본 크기 주문 따라가기 실패 — ' + (e && e.message || '연결 실패')
+      };
+    }));
+  }
+}
+
+function obkDefSave(rows, label, oldDef, nd) {
+  var n = obkFollowPick(rows, oldDef, nd).length;
+  var big = nd * 2 >= oldDef * 5;
+  ask((big ? '⚠ 지금 기본의 2.5배 이상입니다 — 오타가 아닌지 확인하세요\n' : '') + '기본 베팅액을 ' + manWon(oldDef) + ' → ' + manWon(nd) + '(으)로 바꿉니다.\n' + '· 기본 크기로 걸린 주문이 새 기본으로 따라갑니다' + (label !== '전체' ? '(칩 밖 주문도)' : '') + ' — 이 목록에서 ' + n + '건\n' + '· 기본보다 크게 건 주문은 그대로 · ' + (nd < oldDef ? '기본보다 작은 주문(«한도↓» 등)을 키우지 않습니다' : '보유 종목은 추가 매수 한도까지만 올립니다') + '\n' + '컴퓨터 주문 총괄의 기본도 이 값으로 바뀝니다.', (function() {
+    if (BOT.busy) return;
+    BOT.busy = true;
+    obkDefApply(oldDef, nd).then((function(res) {
+      BOT.busy = false;
+      dropCache();
+      say(res.head, (function() {
+        go(TAB);
+      }));
+    }));
+  }), nd < oldDef);
+}
+
+function obkGoWith(rows, label, delta, defV, pct) {
+  var isP = pct != null, pl = obkPlan(rows, delta, defV, pct);
+  var amt = isP ? '각 베팅액의 ' + Math.abs(pct) + '%만큼' : Math.abs(delta) / 1e4 + '만원씩';
+  if (pl.low) {
+    say('기본 베팅액은 ' + manWon(OBK_DEF_MIN) + ' 밑으로 못 내립니다 (지금 ' + manWon(defV) + ' → ' + manWon(pl.nd) + ') — 아무것도 바꾸지 않았습니다', (function() {
+      ordBulkSheet(rows, label, true);
+    }));
+    return;
+  }
+  var lines = [ '· 기본 베팅액 ' + manWon(defV) + ' → ' + manWon(pl.nd) + (pl.up && pl.nd * 2 >= defV * 5 ? ' (⚠ 2.5배 이상)' : ''), '· 기본 크기 주문은 새 기본으로 따라갑니다' + (label !== '전체' ? '(칩 밖 주문도)' : '') + ' — 이 목록에서 ' + pl.fol.length + '건', '· 나머지 ' + pl.sp.ids.length + '건은 ' + amt + ' ' + (pl.up ? '올립니다' : '내립니다') + (isP ? '(만원 단위로 반올림)' : '') ];
+  if (pl.same.length) lines.push('· 기본 크기 주문 ' + pl.same.length + '건은 새 기본에서도 수량이 같아 그대로 둡니다 (' + obkNames(pl.same) + ')');
+  if (pl.sp.below.length) lines.push('· 새 기본(' + manWon(pl.nd) + ') 미만 ' + pl.sp.below.length + '건은 감액하지 않습니다 (' + obkNames(pl.sp.below) + ')');
+  if (pl.sp.stop.length) lines.push('· ' + pl.sp.stop.length + '건은 새 기본에서 멈춥니다 (' + obkNames(pl.sp.stop) + ')');
+  if (pl.up) lines.push('· 보유 종목은 추가 매수 한도까지만 올립니다');
+  var expect = {};
+  rows.forEach((function(o) {
+    if (o.total_amount != null && o.total_amount !== '') expect[String(o.order_id)] = Number(o.total_amount);
+  }));
+  ask('«' + label + '» 대기 매수 — 기본 금액도 같이 ' + (pl.up ? '올립니다.' : '내립니다.') + '\n' + lines.join('\n') + '\n컴퓨터 주문 총괄의 기본도 이 값으로 바뀝니다 · 되돌리려면 컴퓨터 주문창의 [↩ 되돌리기] (따라가기·일괄 한 번씩).', (function() {
+    if (BOT.busy) return;
+    BOT.busy = true;
+    obkDefApply(defV, pl.nd).then((function(res) {
+      BOT.busy = false;
+      dropCache();
+      if (!res.ok) {
+        say(res.head, (function() {
+          go(TAB);
+        }));
+        return;
+      }
+      var fd = {};
+      (res.followed || []).forEach((function(id) {
+        fd[id] = 1;
+      }));
+      var ids = pl.sp.ids.filter((function(id) {
+        return !fd[String(id)];
+      }));
+      if (!ids.length) {
+        say(res.head + '\n나머지 일괄: 바꿀 주문 없음', (function() {
+          go(TAB);
+        }));
+        return;
+      }
+      obkRun(ids, delta, pl.nd, expect, isP ? pct : null, res.head);
+    }));
+  }), !pl.up);
+}
+
+function ordBulkSheet(rows, label, keepWith) {
   var def = {
     v: null,
     err: ''
@@ -3592,6 +4112,100 @@ function ordBulkSheet(rows, label) {
   var my = PICK_SEQ;
   DLG_MSG.appendChild(el('small', 'obksub', '대상 = 지금 보이는 대기 매수 ' + rows.length + '건 (칩 «' + label + '»)'));
   var w = el('div', 'obk');
+  var drow = el('div', 'obkdef');
+  drow.id = 'obk-def';
+  drow.appendChild(el('span', 'obkdl', '기본'));
+  var dinp = document.createElement('input');
+  dinp.id = 'obk-def-man';
+  dinp.type = 'text';
+  dinp.setAttribute('inputmode', 'numeric');
+  dinp.setAttribute('autocomplete', 'off');
+  dinp.maxLength = 5;
+  dinp.setAttribute('data-orig', '');
+  drow.appendChild(dinp);
+  drow.appendChild(el('small', '', '만원'));
+  var dsave = el('button', '', '저장');
+  dsave.id = 'obk-def-save';
+  dsave.disabled = true;
+  drow.appendChild(dsave);
+  var dsub = el('div', 'obkdsub', '기본 베팅액 읽는 중…');
+  dsub.id = 'obk-def-sub';
+  w.appendChild(drow);
+  w.appendChild(dsub);
+  function dman() {
+    var v = parseInt(String(dinp.value).replace(/[^0-9]/g, ''), 10);
+    return v > 0 ? v : 0;
+  }
+  function paintDef() {
+    dsub.className = 'obkdsub';
+    if (!def.v) {
+      dsave.disabled = true;
+      if (def.err) {
+        dsub.textContent = '기본 베팅액을 못 읽었습니다 — ' + def.err;
+        dsub.className += ' bad';
+      }
+      return;
+    }
+    var nv = dman() * 1e4;
+    if (String(dinp.value) === dinp.getAttribute('data-orig')) {
+      dsave.disabled = true;
+      dsub.textContent = '바꾸고 [저장] 하면 기본 크기로 걸린 주문이 새 기본을 따라갑니다';
+      return;
+    }
+    dsave.disabled = true;
+    if (!nv) {
+      dsub.textContent = '금액을 넣어 주세요 (만원 단위)';
+      dsub.className += ' bad';
+      return;
+    }
+    if (nv < OBK_DEF_MIN) {
+      dsub.textContent = '기본은 ' + manWon(OBK_DEF_MIN) + ' 밑으로 못 내립니다';
+      dsub.className += ' bad';
+      return;
+    }
+    if (nv === def.v) {
+      dsub.textContent = '지금 기본과 같습니다';
+      return;
+    }
+    dsave.disabled = false;
+    dsub.textContent = manWon(def.v) + ' → ' + manWon(nv) + ' · 이 목록의 기본 크기 주문 ' + obkFollowPick(rows, def.v, nv).length + '건이 따라갑니다';
+  }
+  dinp.oninput = function() {
+    paintDef();
+  };
+  dsave.onclick = function(e) {
+    e.stopPropagation();
+    if (dsave.disabled) return;
+    obkDefSave(rows, label, def.v, dman() * 1e4);
+  };
+  var wrow = el('label', 'obkwith');
+  wrow.id = 'obk-with';
+  var wcb = document.createElement('input');
+  wcb.type = 'checkbox';
+  wcb.id = 'obk-with-cb';
+  wcb.checked = !!keepWith;
+  wrow.appendChild(wcb);
+  wrow.appendChild(el('span', '', '기본 금액도 같이 올리고 내리기'));
+  wrow.onclick = function(e) {
+    e.stopPropagation();
+  };
+  wcb.onchange = function() {
+    paint();
+  };
+  function prevWith(d, p) {
+    var pu = obkPlan(rows, d, def.v, p == null ? null : p), pd = obkPlan(rows, -d, def.v, p == null ? null : -p);
+    if (p == null || p <= 100) prev.appendChild(el('div', '', '증액하면 기본 ' + manWon(def.v) + ' → ' + manWon(pu.nd) + ' · 합계 ' + manWon(pu.sum) + ' → 약 ' + manWon(pu.est))); else prev.appendChild(el('div', 'bad', OBK_PCT_UP_WHY));
+    var dnOk = false;
+    if (p != null && p >= 100) prev.appendChild(el('div', 'bad', OBK_PCT_DOWN_WHY)); else if (pd.low) prev.appendChild(el('div', 'bad', '감액하면 기본이 ' + manWon(pd.nd) + ' — ' + manWon(OBK_DEF_MIN) + ' 밑으로는 못 내립니다')); else {
+      prev.appendChild(el('div', '', '감액하면 기본 ' + manWon(def.v) + ' → ' + manWon(pd.nd) + ' · 합계 ' + manWon(pd.sum) + ' → 약 ' + manWon(pd.est)));
+      dnOk = true;
+    }
+    prev.appendChild(el('div', 'mut', '기본 크기 주문은 새 기본으로 · 나머지는 같은 ' + (p == null ? '만원' : '%') + '만큼 · 감액은 새 기본에서 멈춤' + (pd.sp.below.length ? '(새 기본 미만 ' + pd.sp.below.length + '건은 뺌)' : '') + ' · 보유 종목은 추가 매수 한도까지만 · 컴퓨터 주문 총괄의 기본도 바뀝니다'));
+    return {
+      dnOk: dnOk,
+      upOk: p == null || p <= 100
+    };
+  }
   var urow = el('div', 'obkunit');
   urow.id = 'obk-unit';
   var ubtn = {};
@@ -3636,6 +4250,7 @@ function ordBulkSheet(rows, label) {
   w.appendChild(urow);
   w.appendChild(step);
   w.appendChild(quick);
+  w.appendChild(wrow);
   w.appendChild(prev);
   w.appendChild(acts);
   DLG_PICK.appendChild(w);
@@ -3719,6 +4334,10 @@ function ordBulkSheet(rows, label) {
     var upOk = false, dnOk = false;
     if (c.why) {
       prev.appendChild(el('div', 'bad', c.why));
+    } else if (wcb.checked && def.v) {
+      var _pw = prevWith(0, p);
+      upOk = _pw.upOk;
+      dnOk = _pw.dnOk;
     } else {
       var usum = sum;
       rows.forEach((function(o) {
@@ -3772,8 +4391,11 @@ function ordBulkSheet(rows, label) {
       sum += Number(o.total_amount || o.base_amount || 0);
     }));
     prev.textContent = '';
+    var _pw = null;
     if (!m) {
       prev.appendChild(el('div', 'bad', '금액을 넣어 주세요 (만원 단위 · 예 50)'));
+    } else if (wcb.checked && def.v) {
+      _pw = prevWith(d, null);
     } else {
       prev.appendChild(el('div', '', '증액하면 합계 ' + manWon(sum) + ' → 약 ' + manWon(sum + rows.length * d) + ' (+' + manWon(rows.length * d) + ')'));
       if (def.v) {
@@ -3804,15 +4426,21 @@ function ordBulkSheet(rows, label) {
     bDn.disabled = !ready;
     bUp.classList.remove('dim');
     bDn.classList.remove('dim');
+    if (_pw && !_pw.dnOk) bDn.classList.add('dim');
   }
   function pctGo(down) {
     var c = obkPctOf(inp.value, down ? -1 : 1);
     var why = c.why || ((down ? c.v >= 100 : c.v > 100) ? obkPctWhyFull(c.v, down) : '');
+    var kw = wcb.checked;
     if (why) {
       OBK_PCT = String(inp.value);
       say(why, (function() {
-        ordBulkSheet(rows, label);
+        ordBulkSheet(rows, label, kw);
       }));
+      return;
+    }
+    if (kw) {
+      obkGoWith(rows, label, 0, def.v, down ? -c.v : c.v);
       return;
     }
     obkGo(rows, label, 0, def.v, down ? -c.v : c.v);
@@ -3824,6 +4452,10 @@ function ordBulkSheet(rows, label) {
       pctGo(false);
       return;
     }
+    if (wcb.checked) {
+      obkGoWith(rows, label, man() * 1e4, def.v);
+      return;
+    }
     obkGo(rows, label, man() * 1e4, def.v);
   };
   bDn.onclick = function(e) {
@@ -3831,6 +4463,10 @@ function ordBulkSheet(rows, label) {
     if (bDn.disabled) return;
     if (unit === 'pct') {
       pctGo(true);
+      return;
+    }
+    if (wcb.checked) {
+      obkGoWith(rows, label, -man() * 1e4, def.v);
       return;
     }
     obkGo(rows, label, -man() * 1e4, def.v);
@@ -3846,7 +4482,14 @@ function ordBulkSheet(rows, label) {
   })).catch((function(e) {
     def.err = e && e.message || '연결 실패';
   })).then((function() {
-    if (alive()) paint();
+    if (!alive()) return;
+    if (def.v) {
+      var _dm = String(Math.round(def.v / 1e4));
+      dinp.value = _dm;
+      dinp.setAttribute('data-orig', _dm);
+    }
+    paintDef();
+    paint();
   }));
 }
 
@@ -3855,9 +4498,13 @@ function obkGo(rows, label, delta, defBet, pct) {
   var m = Math.abs(delta) / 1e4, up = isP ? pct > 0 : delta > 0;
   var sp = obkSplit(rows, delta, defBet, isP ? pct : null);
   var why = [];
+  var sheet = function() {
+    ordBulkSheet(rows, label);
+  };
   if (sp.below.length) why.push('· 이미 기본(' + manWon(defBet) + ') 미만 ' + sp.below.length + '건은 감액하지 않습니다 (' + obkNames(sp.below) + ')');
   if (!sp.ids.length) {
     say('감액할 것이 없습니다\n' + why.join('\n') + '\n기본보다 적게는 보유 종목의 추가 매수 한도에 걸릴 때만 걸 수 있습니다.');
+    dlgBackTo(sheet);
     return;
   }
   if (sp.stop.length) why.push('· ' + sp.stop.length + '건은 기본 베팅액(' + manWon(defBet) + ')에서 멈춥니다 (' + obkNames(sp.stop) + ')');
@@ -3869,6 +4516,7 @@ function obkGo(rows, label, delta, defBet, pct) {
   ask('«' + label + '» 대기 매수 ' + sp.ids.length + '건을 ' + (isP ? '각 베팅액의 ' + Math.abs(pct) + '%만큼' : m + '만원씩') + ' ' + (up ? '올립니다.' : '내립니다.') + (isP ? '\n· 새 금액은 만원 단위로 반올림합니다' : '') + (why.length ? '\n' + why.join('\n') : '') + '\n되돌리려면 컴퓨터 주문창의 [↩ 되돌리기] 가 필요합니다.', (function() {
     obkRun(sp.ids, delta, defBet, expect, isP ? pct : null);
   }), !up);
+  dlgBackTo(sheet);
 }
 
 function obkPost(ids, delta, defBet, extra, pct) {
@@ -3898,7 +4546,8 @@ function obkPost(ids, delta, defBet, extra, pct) {
   }));
 }
 
-function obkRun(ids, delta, defBet, expect, pct) {
+function obkRun(ids, delta, defBet, expect, pct, head) {
+  var hd = head ? head + '\n' : '';
   if (BOT.busy) return;
   BOT.busy = true;
   var isP = pct != null;
@@ -3912,12 +4561,12 @@ function obkRun(ids, delta, defBet, expect, pct) {
     BOT.busy = false;
     dropCache();
     if (isP && x.j && /delta_won required/.test(String(x.j.error || ''))) {
-      say(OBK_PCT_OLD, (function() {
+      say(hd + OBK_PCT_OLD, (function() {
         go(TAB);
       }));
       return;
     }
-    say('일괄 처리 실패 — ' + (x.j && (x.j.msg || x.j.error) || '응답 ' + x.r.status), (function() {
+    say(hd + '일괄 처리 실패 — ' + (x.j && (x.j.msg || x.j.error) || '응답 ' + x.r.status), (function() {
       go(TAB);
     }));
   }
@@ -3926,7 +4575,7 @@ function obkRun(ids, delta, defBet, expect, pct) {
     dropCache();
     if (!x.r.ok) return fail(x);
     var j = x.j, nUpd = (j.updated || []).length + pre.upd.length, nDel = (j.deleted || []).length;
-    var msg = '일괄 ' + lbl + ' 적용 (' + nUpd + '건)' + (delZero ? ' · ' + nDel + '건 삭제' : cancelled ? ' · 0이하 삭제 취소' : '');
+    var msg = hd + '일괄 ' + lbl + ' 적용 (' + nUpd + '건)' + (delZero ? ' · ' + nDel + '건 삭제' : cancelled ? ' · 0이하 삭제 취소' : '');
     var cap = (j.capped || []).concat(pre.cap);
     if (cap.length) msg += ' · ' + cap.length + '건은 추가 매수 한도까지만';
     var sk = (j.skipped || []).concat(pre.skip);
@@ -3994,29 +4643,32 @@ function obkRun(ids, delta, defBet, expect, pct) {
           done(x, !!v, !v);
         })).catch((function(e) {
           BOT.busy = false;
-          say('실패 — ' + e.message);
+          say(hd + '실패 — ' + e.message);
         }));
       };
     }));
   })).catch((function(e) {
     BOT.busy = false;
     dropCache();
-    say('실패 — ' + e.message, (function() {
+    say(hd + '실패 — ' + e.message, (function() {
       go(TAB);
     }));
   }));
 }
 
-function sellRuleActions(r, kind) {
+function sellRuleActions(r, kind, back) {
   if (kind !== 'balance') {
-    holdRuleActions(r);
+    holdRuleActions(r, back);
     return;
   }
+  var me = function() {
+    sellRuleActions(r, kind, back);
+  };
   var flds = [ [ 'base_pct', '매입가 대비 %' ], [ 'qty_pct', '수량(%)' ] ];
   var items = flds.map((function(f) {
     return [ '✏️ ' + f[1] + ' 고치기', function() {
       if (f[0] === 'base_pct') {
-        balPctEdit(r);
+        balPctEdit(r, me);
         return;
       }
       askVal('«' + r.label + '»\n' + f[1] + ' 새 값 (숫자만)', '', (function(v) {
@@ -4024,6 +4676,7 @@ function sellRuleActions(r, kind) {
         body[f[0]] = v;
         botPost('/api/sell/rules/' + encodeURIComponent(r.rule_id), body, '고쳤습니다', 'PUT');
       }), true);
+      dlgBackTo(me);
     } ];
   }));
   items.push([ '🗑 이 매도조건 삭제', function() {
@@ -4033,8 +4686,10 @@ function sellRuleActions(r, kind) {
         value: r.rule_id
       });
     }), true);
+    dlgBackTo(me);
   }, true ]);
   askPick('«' + r.label + '»', items);
+  dlgBackTo(back);
 }
 
 function ruleTapSub(r) {
@@ -4045,8 +4700,11 @@ function ruleTapSub(r) {
   return '보기만 — 누르면 까닭' + (r.add_ok ? ' · ＋ 익절 조건 추가' : '');
 }
 
-function holdRuleActions(r) {
+function holdRuleActions(r, back) {
   var items = [];
+  var me = function() {
+    holdRuleActions(r, back);
+  };
   var known = r.app_edit !== undefined && r.app_edit !== null;
   var OLD = '컴퓨터 서버를 새로 켠 뒤에 다시 열어 주세요';
   if (!known) {
@@ -4061,15 +4719,15 @@ function holdRuleActions(r) {
     } ]);
   } else {
     items.push([ '✏️ 목표가(원) 고치기', function() {
-      holdTargetEdit(r);
+      holdTargetEdit(r, me);
     }, false, {
       sub: r.be_line ? '본절선 ' + fmt(r.be_line) + '원보다 위로만' : null
     } ]);
     items.push([ '✏️ 매수가 대비 % 로 고치기', function() {
-      holdPctEdit(r);
+      holdPctEdit(r, me);
     } ]);
     items.push([ '✏️ 수량(%) 고치기', function() {
-      holdQtyEdit(r);
+      holdQtyEdit(r, me);
     } ]);
   }
   if (!known) {
@@ -4085,6 +4743,7 @@ function holdRuleActions(r) {
           value: r.rule_id
         });
       }), true);
+      dlgBackTo(me);
     }, true ]);
   } else {
     items.push([ '🗑 이 매도조건 삭제', null, true, {
@@ -4093,11 +4752,12 @@ function holdRuleActions(r) {
     } ]);
   }
   if (r.add_ok) items.push([ '＋ 이 종목에 익절 조건 추가', function() {
-    sellAddPick(r);
+    sellAddPick(r, me);
   }, false, {
     sub: '아래로·위로 익절 · 본절선 ' + fmt(r.be_line) + '원 위에만'
   } ]);
   askPick('«' + r.label + '»', items);
+  dlgBackTo(back);
 }
 
 function appFloorBlock(r, price, add) {
@@ -4107,69 +4767,92 @@ function appFloorBlock(r, price, add) {
   return (add ? r.add_floor_msg : r.app_floor_msg) || '목표가가 본절선(' + fmt(fl) + '원)보다 위여야 합니다';
 }
 
-function holdTargetEdit(r) {
-  askVal('«' + r.label + '»\n목표가(원) 새 값 (숫자만)' + (r.be_line ? '\n본절선 ' + fmt(r.be_line) + '원보다 위여야 합니다' : ''), '', (function(v) {
+function holdTargetEdit(r, back, pre) {
+  askVal('«' + r.label + '»\n목표가(원) 새 값 (숫자만)' + (r.be_line ? '\n본절선 ' + fmt(r.be_line) + '원보다 위여야 합니다' : ''), pre || '', (function(v) {
     var _bm = appFloorBlock(r, parseFloat(String(v).replace(/[,\s원]/g, '')));
     if (_bm) {
       say(_bm);
+      dlgBackTo((function() {
+        holdTargetEdit(r, back, v);
+      }));
       return;
     }
     botPost('/api/sell/rules/' + encodeURIComponent(r.rule_id), {
       target_price: v
     }, '고쳤습니다', 'PUT');
   }), true);
+  dlgBackTo(back);
 }
 
-function holdQtyEdit(r) {
-  askVal('«' + r.label + '»\n수량(%) 새 값 (숫자만)', '', (function(v) {
+function holdQtyEdit(r, back, pre) {
+  askVal('«' + r.label + '»\n수량(%) 새 값 (숫자만)', pre || '', (function(v) {
     botPost('/api/sell/rules/' + encodeURIComponent(r.rule_id), {
       qty_pct: v
     }, '고쳤습니다', 'PUT');
   }), true);
+  dlgBackTo(back);
 }
 
-function sellAddPick(r) {
+function sellAddPick(r, back) {
   var nm = r.name || r.code || '', fl = Number(r.be_line) || 0, avg = Number(r.be_avg) || 0, cur = Number(r._cur) || 0;
-  function go(dir, mode) {
+  var me = function() {
+    sellAddPick(r, back);
+  };
+  function go(dir, mode, pre) {
     var dn = dir === 'down';
     var what = dn ? '⬇ 아래로 익절' : '⬆ 위로 익절';
-    askVal('«' + nm + '» ' + what + '\n' + (mode === 'won' ? '목표가(원)를 넣으세요 (숫자만)' : '매수가보다 몇 % 위로 할까요? (숫자만 · 예: 5)') + '\n' + '본절선 ' + fmt(fl) + '원보다 위' + (cur > 0 ? ' · 지금 ' + fmt(cur) + '원' : ''), '', (function(v) {
+    askVal('«' + nm + '» ' + what + '\n' + (mode === 'won' ? '목표가(원)를 넣으세요 (숫자만)' : '매수가보다 몇 % 위로 할까요? (숫자만 · 예: 5)') + '\n' + '본절선 ' + fmt(fl) + '원보다 위' + (cur > 0 ? ' · 지금 ' + fmt(cur) + '원' : ''), pre || '', (function(v) {
+      var again = function() {
+        go(dir, mode, v);
+      };
       var n = parseFloat(String(v).replace(/[,\s원%]/g, '').replace(/[−–]/g, '-'));
       if (!isFinite(n) || !(n > 0)) {
         say('0 보다 큰 숫자를 넣어 주세요.');
+        dlgBackTo(again);
         return;
       }
       var tp = mode === 'won' ? n : avg > 0 ? avg * (1 + n / 100) : 0;
       var _bm = tp > 0 ? appFloorBlock(r, tp, true) : '';
       if (_bm) {
         say(_bm);
+        dlgBackTo(again);
         return;
       }
       var _hitWarn = cur > 0 && tp > 0 && (dn ? cur <= tp : cur >= tp) ? '⚠ 화면에 보이는 지금 값(' + fmt(cur) + '원) 기준으로는 걸자마자 팔릴 수 있습니다 — 보내면 컴퓨터가 지금 시세로 다시 보고 ' + '곧바로 팔릴 값이면 거절합니다(' + (dn ? '아래로 익절은 지금 값보다 아래' : '위로 익절은 지금 값보다 위') + '여야 합니다).' : '';
-      askVal('«' + nm + '» ' + what + '\n몇 % 팔까요? (1~100 · 그때 남은 보유 기준)', '100', (function(q) {
-        var qp = parseFloat(String(q).replace(/[%\s]/g, ''));
-        if (!isFinite(qp) || !(qp > 0) || qp > 100) {
-          say('1~100 사이 숫자를 넣어 주세요.');
-          return;
-        }
-        var body = {
-          kind: 'holding',
-          direction: dir,
-          code: r.code,
-          name: nm,
-          qty_pct: qp
-        };
-        if (mode === 'won') body.target_price = n; else {
-          body.ref_pct = n;
-          body.ref_basis = 'avg';
-          if (avg > 0) body.ref_price = avg;
-        }
-        if (cur > 0) body.cur_price = cur;
-        ask('«' + nm + '» 에 매도 조건을 추가합니다.\n\n' + '· ' + what + ' — ' + (mode === 'won' ? fmt(n) + '원' : '매수가 +' + n + '%' + (tp > 0 ? ' (약 ' + fmt(Math.round(tp)) + '원)' : '')) + '\n' + '· 수량 ' + qp + '% · 시장가\n' + '· ' + (dn ? '값이 내려와 목표가에 닿으면 팝니다' : '값이 올라 목표가에 닿으면 팝니다') + '\n\n' + '본절선 ' + fmt(fl) + '원 위라서 앱에서 걸 수 있습니다.' + (_hitWarn ? '\n\n' + _hitWarn : ''), (function() {
-          botPost('/api/sell/rules', body, '조건을 추가했습니다');
-        }));
-      }), true);
+      qtyAsk('100');
+      function qtyAsk(qpre) {
+        askVal('«' + nm + '» ' + what + '\n몇 % 팔까요? (1~100 · 그때 남은 보유 기준)', qpre, (function(q) {
+          var qagain = function() {
+            qtyAsk(q);
+          };
+          var qp = parseFloat(String(q).replace(/[%\s]/g, ''));
+          if (!isFinite(qp) || !(qp > 0) || qp > 100) {
+            say('1~100 사이 숫자를 넣어 주세요.');
+            dlgBackTo(qagain);
+            return;
+          }
+          var body = {
+            kind: 'holding',
+            direction: dir,
+            code: r.code,
+            name: nm,
+            qty_pct: qp
+          };
+          if (mode === 'won') body.target_price = n; else {
+            body.ref_pct = n;
+            body.ref_basis = 'avg';
+            if (avg > 0) body.ref_price = avg;
+          }
+          if (cur > 0) body.cur_price = cur;
+          ask('«' + nm + '» 에 매도 조건을 추가합니다.\n\n' + '· ' + what + ' — ' + (mode === 'won' ? fmt(n) + '원' : '매수가 +' + n + '%' + (tp > 0 ? ' (약 ' + fmt(Math.round(tp)) + '원)' : '')) + '\n' + '· 수량 ' + qp + '% · 시장가\n' + '· ' + (dn ? '값이 내려와 목표가에 닿으면 팝니다' : '값이 올라 목표가에 닿으면 팝니다') + '\n\n' + '본절선 ' + fmt(fl) + '원 위라서 앱에서 걸 수 있습니다.' + (_hitWarn ? '\n\n' + _hitWarn : ''), (function() {
+            botPost('/api/sell/rules', body, '조건을 추가했습니다');
+          }));
+          dlgBackTo(qagain);
+        }), true);
+        dlgBackTo(again);
+      }
     }), true);
+    dlgBackTo(me);
   }
   askPick('«' + nm + '» 익절 조건 추가 — 본절선 ' + fmt(fl) + '원 위만', [ [ '⬇ 아래로 익절 — 목표가(원)', function() {
     go('down', 'won');
@@ -4184,9 +4867,10 @@ function sellAddPick(r) {
   } ], [ '⬆ 위로 익절 — 매수가 +%', function() {
     go('up', 'pct');
   } ] ]);
+  dlgBackTo(back);
 }
 
-function balPctEdit(r) {
+function balPctEdit(r, back, pre) {
   fetch('/api/sell/rules?kind=balance', {
     headers: {
       Accept: 'application/json'
@@ -4201,35 +4885,46 @@ function balPctEdit(r) {
     }))[0];
     if (!rule || rule.direction !== 'down' && rule.direction !== 'up') {
       say('이 규칙을 못 찾았습니다 — [매도 목록] 을 다시 연 뒤 해 주세요.');
+      dlgBackTo(back);
       return;
     }
     var down = rule.direction === 'down', now = Number(rule.base_pct);
-    askVal('«' + r.label + '»\n' + (down ? '손절 — 매입가보다 몇 % 아래에서 팔까요?' : '익절 — 매입가보다 몇 % 위에서 팔까요?') + '\n' + '숫자만 넣으세요 (5 → ' + (down ? '−5%' : '+5%') + ')' + (isFinite(now) && now !== 0 ? '\n지금: ' + (now > 0 ? '+' : '−') + Math.abs(now) + '%' : ''), '', (function(v) {
+    askVal('«' + r.label + '»\n' + (down ? '손절 — 매입가보다 몇 % 아래에서 팔까요?' : '익절 — 매입가보다 몇 % 위에서 팔까요?') + '\n' + '숫자만 넣으세요 (5 → ' + (down ? '−5%' : '+5%') + ')' + (isFinite(now) && now !== 0 ? '\n지금: ' + (now > 0 ? '+' : '−') + Math.abs(now) + '%' : ''), pre || '', (function(v) {
       var n = Math.abs(parseFloat(String(v).replace(/[−–]/g, '-').replace(/[%\s]/g, '')));
       if (!isFinite(n) || !(n > 0)) {
         say('0 보다 큰 숫자를 넣어 주세요.');
+        dlgBackTo((function() {
+          balPctEdit(r, back, v);
+        }));
         return;
       }
       botPost('/api/sell/rules/' + encodeURIComponent(r.rule_id), {
         base_pct: down ? -n : n
       }, '고쳤습니다', 'PUT');
     }), true);
+    dlgBackTo(back);
   })).catch((function(e) {
     say('이 규칙이 손절인지 익절인지 못 읽었습니다 — 잠시 후 다시 해 주세요.\n(' + (e && e.message || e) + ')');
+    dlgBackTo(back);
   }));
 }
 
-function holdPctEdit(r) {
+function holdPctEdit(r, back, pre) {
   var avg = Number(r.be_avg) || 0;
-  askVal('«' + r.label + '»\n매수가보다 몇 % 위로 할까요? (숫자만 · 예: 5)' + (r.be_line ? '\n본절선 ' + fmt(r.be_line) + '원보다 위여야 합니다' : '') + '\n평단은 컴퓨터가 잔고에서 지금 읽습니다', '', (function(v) {
+  askVal('«' + r.label + '»\n매수가보다 몇 % 위로 할까요? (숫자만 · 예: 5)' + (r.be_line ? '\n본절선 ' + fmt(r.be_line) + '원보다 위여야 합니다' : '') + '\n평단은 컴퓨터가 잔고에서 지금 읽습니다', pre || '', (function(v) {
+    var again = function() {
+      holdPctEdit(r, back, v);
+    };
     var n = Math.abs(parseFloat(String(v).replace(/[−–]/g, '-').replace(/[%\s]/g, '')));
     if (!isFinite(n) || !(n > 0)) {
       say('0 보다 큰 숫자를 넣어 주세요.');
+      dlgBackTo(again);
       return;
     }
     var _bm = avg > 0 ? appFloorBlock(r, avg * (1 + n / 100)) : '';
     if (_bm) {
       say(_bm);
+      dlgBackTo(again);
       return;
     }
     botPost('/api/sell/rules/' + encodeURIComponent(r.rule_id), {
@@ -4237,6 +4932,7 @@ function holdPctEdit(r) {
       ref_basis: 'avg'
     }, '고쳤습니다', 'PUT');
   }), true);
+  dlgBackTo(back);
 }
 
 function renderSellList() {
@@ -4331,7 +5027,7 @@ function renderSellList() {
   }));
 }
 
-var AR_COL = [ '#1a5490', '#2a7a2a', '#1f6a94', '#6b3fa0', '#8a6d1f' ];
+var AR_COL = [ '#1a5490', '#2a7a2a', '#1f6a94', '#6b3fa0', '#8a6d1f', '#b03a2e' ];
 
 function arHead(g, n, title, st) {
   var h = el('div', 'arhd');
@@ -4419,7 +5115,7 @@ var AR_SW = {
     get: '/api/ma_switch_config',
     url: '/api/ma_switch_config',
     ask: function(on) {
-      return on ? '익절선 자동 트레일링 전환을 끕니다.\n이미 건 선 매도는 그대로 둡니다.' : '익절선 자동 트레일링 전환을 켭니다.\n오늘 고가가 이평선보다 설정 % 이상 위인 보유종목에 그 선을 따라가는 매도를 겁니다(본절 손절은 그대로).';
+      return on ? '익절선 자동 트레일링 전환을 끕니다.\n이미 건 선 매도는 그대로 둡니다.' : '익절선 자동 트레일링 전환을 켭니다.\n장 마감 뒤 하루 한 번, 그날 고가가 이평선보다 설정 % 이상 위였던 보유종목에 그 선을 따라가는 매도를 겁니다 — 그 선보다 낮게 걸린 다른 매도(본절 제외)는 지우고 바꿉니다(본절 손절은 그대로).';
     },
     danger: function() {
       return false;
@@ -4473,6 +5169,46 @@ var AR_SW = {
         d.enabled = to;
       }));
     }
+  },
+  ev: {
+    name: '🧯 평가손익 전량 매도',
+    get: '/api/eval_sellall_config',
+    url: '/api/eval_sellall_config',
+    ask: function(on) {
+      var c = JC['/api/eval_sellall_config'], th = c && c.data ? c.data.threshold : null;
+      return on ? '평가손익 전량 매도를 끕니다.\n평가손익이 그 금액 아래로 가도 팔지 않습니다.' : '평가손익 전량 매도를 켭니다.\n계좌 평가손익(증권사 값 · 실현손익 제외)이 ' + evWon(th) + ' 이하가 되면 보유 전부를 시장가로 팔고 [매수] 스위치를 끕니다.\n발동하면 이 규칙도 꺼집니다 · 대기 매수는 그대로 둡니다.';
+    },
+    danger: function(on) {
+      return !on;
+    },
+    blocked: function(on) {
+      if (on) return '';
+      var c = JC['/api/eval_sellall_config'];
+      return c && c.data && c.data.threshold == null ? '금액이 비어 있어 켤 수 없습니다.\n아래 [✏️ 금액 수정] 으로 먼저 «평가손익 몇 원 이하» 를 정해 주세요.' : '';
+    },
+    body: function(to) {
+      return {
+        enabled: to
+      };
+    },
+    cur: function(d) {
+      return d && typeof d.enabled === 'boolean' ? d.enabled : null;
+    },
+    srv: function(j) {
+      return j && typeof j.enabled === 'boolean' && 'threshold' in j ? j.enabled : null;
+    },
+    put: function(j) {
+      jcPut('/api/eval_sellall_config', j);
+    },
+    set: function(to) {
+      jcPatch('/api/eval_sellall_config', (function(d) {
+        d.enabled = to;
+      }));
+    },
+    okText: function(j) {
+      return j && j.msg || '';
+    },
+    okMs: 6e3
   }
 };
 
@@ -4520,12 +5256,17 @@ function arTap(key) {
   if (AR_PEND[key]) return;
   var sw = AR_SW[key], on = arCur(key);
   if (on !== true && on !== false) return;
+  var _blk = sw.blocked ? sw.blocked(on) : '';
+  if (_blk) {
+    say(_blk);
+    return;
+  }
   ask(sw.ask(on), (function() {
     arSave(key, !on, on);
   }), sw.danger(on));
 }
 
-function arSave(key, to, was) {
+function arSave(key, to, was, extra) {
   if (AR_PEND[key]) return;
   var sw = AR_SW[key], ended = false, tmo = null, ac = jcCutter();
   var seq = AR_SEQ[key] = (AR_SEQ[key] || 0) + 1;
@@ -4551,11 +5292,21 @@ function arSave(key, to, was) {
         sv = to;
       }
       arPaint(key, sv);
-      if (sv === to) toast(j.msg && /이미/.test(j.msg) ? j.msg : sw.name + ' — ' + (to ? '켰습니다' : '껐습니다'), 2200, true); else toast('⚠ ' + sw.name + ' — 서버 값은 «' + (sv ? '켜짐' : '꺼짐') + '» 입니다' + (j.msg ? ' · ' + j.msg : ''), 6e3, true);
+      var _okt = sw.okText ? sw.okText(j, to) : '';
+      if (sv === to) toast(_okt || (j.msg && /이미/.test(j.msg) ? j.msg : sw.name + ' — ' + (to ? '켰습니다' : '껐습니다')), _okt ? sw.okMs || 4e3 : 2200, true); else toast('⚠ ' + sw.name + ' — 서버 값은 «' + (sv ? '켜짐' : '꺼짐') + '» 입니다' + (j.msg ? ' · ' + j.msg : ''), 6e3, true);
       return;
     }
     if (sv === true || sv === false) sw.put(j);
     arPaint(key, sv === true || sv === false ? sv : was);
+    if (x && x.r.status === 409 && j && j.need_confirm && (!(extra && extra.confirm_below) || j.want_threshold != null && Number(j.want_threshold) !== Number(extra.confirm_threshold))) {
+      ask(j.msg || sw.name + ' — 지금 평가손익이 이미 그 금액 이하라 켜자마자 보유 전부를 시장가로 팝니다.\n계속할까요?', (function() {
+        arSave(key, to, was, {
+          confirm_below: true,
+          confirm_threshold: j.want_threshold
+        });
+      }), true);
+      return;
+    }
     if (x) {
       toast('⚠ ' + sw.name + ' — 못 바꿨습니다: ' + (j.msg || j.error || 'HTTP ' + x.r.status) + ' · 원래대로 둡니다', 6e3, true);
       return;
@@ -4586,12 +5337,14 @@ function arSave(key, to, was) {
     } catch (_e) {}
     end(null, Math.round(AR_SAVE_MAX / 1e3) + '초 넘게 답이 없어 끊었습니다');
   }), AR_SAVE_MAX);
+  var _body = sw.body(to), _k;
+  if (extra) for (_k in extra) if (Object.prototype.hasOwnProperty.call(extra, _k)) _body[_k] = extra[_k];
   var opt = {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify(sw.body(to))
+    body: JSON.stringify(_body)
   };
   if (typeof AbortController === 'function') opt.signal = ac.signal;
   fetch(sw.url, opt).then((function(r) {
@@ -4672,15 +5425,19 @@ function arNum(v, isInt) {
   return r.why ? null : r.n;
 }
 
-function arAskNum(msg, preset, cb, isInt) {
+function arAskNum(msg, preset, cb, isInt, back) {
   askVal(msg, preset, (function(v) {
     var r = arParse(v, isInt);
     if (r.why) {
       say(r.why + '\n저장하지 않았습니다.');
+      dlgBackTo((function() {
+        arAskNum(msg, v, cb, isInt, back);
+      }));
       return;
     }
     cb(r.n);
   }), true);
+  dlgBackTo(back);
 }
 
 function arEsc(s) {
@@ -4695,35 +5452,140 @@ function arEsc(s) {
 }
 
 function arAddBal() {
-  function step2(down) {
-    arAskNum((down ? '손절 — 매입가보다 몇 % 아래에서 팔까요?' : '익절 — 매입가보다 몇 % 위에서 팔까요?') + '\n숫자만 넣으세요 (5 → ' + (down ? '−5%' : '+5%') + ')', '', (function(n) {
+  function step2(down, pre) {
+    arAskNum((down ? '손절 — 매입가보다 몇 % 아래에서 팔까요?' : '익절 — 매입가보다 몇 % 위에서 팔까요?') + '\n숫자만 넣으세요 (5 → ' + (down ? '−5%' : '+5%') + ')', pre == null ? '' : pre, (function(n) {
       n = Math.abs(n);
+      var again = function() {
+        step2(down, n);
+      };
       if (!(n > 0)) {
         say('0 보다 큰 숫자를 넣어 주세요.');
+        dlgBackTo(again);
         return;
       }
-      arAskNum('보유의 몇 % 를 팔까요? (1~100)', 100, (function(q) {
-        if (!(q > 0 && q <= 100)) {
-          say('매도 비율은 1~100% 사이로 넣어 주세요.');
-          return;
-        }
-        var bp = down ? -n : n;
-        ask('새로 산 종목에 거는 매도를 추가합니다.\n매입가 ' + (bp > 0 ? '+' : '−') + n + '% · ' + (down ? '손절' : '익절') + ' · ' + q + '%', (function() {
-          botPost('/api/sell/rules', {
-            kind: 'balance',
-            direction: down ? 'down' : 'up',
-            name: '모든 종목',
-            base_pct: bp,
-            qty_pct: q
-          }, '조건을 추가했습니다');
-        }));
-      }));
-    }));
+      var step3 = function(qpre) {
+        arAskNum('보유의 몇 % 를 팔까요? (1~100)', qpre, (function(q) {
+          var qagain = function() {
+            step3(q);
+          };
+          if (!(q > 0 && q <= 100)) {
+            say('매도 비율은 1~100% 사이로 넣어 주세요.');
+            dlgBackTo(qagain);
+            return;
+          }
+          var bp = down ? -n : n;
+          ask('새로 산 종목에 거는 매도를 추가합니다.\n매입가 ' + (bp > 0 ? '+' : '−') + n + '% · ' + (down ? '손절' : '익절') + ' · ' + q + '%', (function() {
+            botPost('/api/sell/rules', {
+              kind: 'balance',
+              direction: down ? 'down' : 'up',
+              name: '모든 종목',
+              base_pct: bp,
+              qty_pct: q
+            }, '조건을 추가했습니다');
+          }));
+          dlgBackTo(qagain);
+        }), false, again);
+      };
+      step3(100);
+    }), false, arAddBal);
   }
   askPick('새로 산 종목에 거는 매도 — 무엇을 추가할까요?', [ [ '🔻 손절 (매입가 아래)', function() {
     step2(true);
   } ], [ '🔺 익절 (매입가 위)', function() {
     step2(false);
+  } ] ]);
+}
+
+function evWon(n) {
+  if (n === null || n === undefined || n === '') return '(금액 없음)';
+  var v = Number(n);
+  return (v > 0 ? '+' : v < 0 ? '-' : '') + Math.abs(v).toLocaleString('en-US') + '원';
+}
+
+function evPost(body) {
+  if (BOT.busy) return;
+  BOT.busy = true;
+  fetch('/api/eval_sellall_config', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Order-Client': 'phone'
+    },
+    body: JSON.stringify(body || {})
+  }).then((function(r) {
+    return r.json().then((function(j) {
+      return {
+        r: r,
+        j: j
+      };
+    }), (function() {
+      return {
+        r: r,
+        j: null
+      };
+    }));
+  })).then((function(x) {
+    BOT.busy = false;
+    var j = x.j || {};
+    if (x.r.status === 409 && j.need_confirm && (!body.confirm_below || j.want_threshold != null && Number(j.want_threshold) !== Number(body.confirm_threshold))) {
+      ask(j.msg || '지금 평가손익이 이미 그 금액 이하라 바로 보유 전부를 시장가로 팝니다.\n계속할까요?', (function() {
+        var b2 = {}, k;
+        for (k in body) if (Object.prototype.hasOwnProperty.call(body, k)) b2[k] = body[k];
+        b2.confirm_below = true;
+        b2.confirm_threshold = j.want_threshold;
+        evPost(b2);
+      }), true);
+      return;
+    }
+    dropCache();
+    try {
+      jcRefetchAfterSave();
+    } catch (_e) {}
+    if (x.j === null) {
+      say('답을 못 읽었습니다(HTTP ' + x.r.status + ') — 저장됐는지 모릅니다. 다시 열어 확인해 주세요.', (function() {
+        go(TAB);
+      }));
+      return;
+    }
+    say(j.msg || j.error || (x.r.ok ? '고쳤습니다' : '실패했습니다 (HTTP ' + x.r.status + ')'), (function() {
+      go(TAB);
+    }));
+  })).catch((function(e) {
+    BOT.busy = false;
+    say('실패 — ' + e.message + '\n저장됐는지 모릅니다 — 다시 열어 확인해 주세요.');
+  }));
+}
+
+function evEdit(cur) {
+  function step2(sign) {
+    if (sign === 0) {
+      ask('평가손익 0원 이하(본전 아래)가 되면 보유 전부를 팝니다.\n이 금액으로 바꿀까요?', (function() {
+        evPost({
+          threshold: 0
+        });
+      }));
+      return;
+    }
+    var same = cur !== null && cur !== undefined && cur !== 0 && cur < 0 === sign < 0;
+    arAskNum((sign < 0 ? '손실 — 평가손익이 몇 원 «손실» 이 되면 팔까요?' : '이익 — 평가손익 «이익» 이 몇 원까지 줄면 팔까요?') + '\n숫자만 넣으세요 (원 · 예: 5000000 → ' + (sign < 0 ? '-' : '+') + '5,000,000원)' + (cur !== null && cur !== undefined ? '\n지금: ' + evWon(cur) : ''), same ? Math.abs(cur) : '', (function(n) {
+      if (!(n > 0)) {
+        say('0 보다 큰 숫자를 넣어 주세요 (0원은 «0원» 을 고르세요).');
+        return;
+      }
+      var v = sign * n;
+      ask('평가손익 ' + evWon(v) + ' 이하가 되면 보유 전부를 시장가로 팝니다.\n이 금액으로 바꿀까요?', (function() {
+        evPost({
+          threshold: v
+        });
+      }));
+    }), true);
+  }
+  askPick('🧯 평가손익 몇 원 이하에서 전부 팔까요?', [ [ '🔻 손실 (−) — 평가손실이 N원이 되면', function() {
+    step2(-1);
+  } ], [ '🔺 이익 (+) — 평가이익이 N원까지 줄면', function() {
+    step2(1);
+  } ], [ '⚖️ 0원 — 평가손익이 0원 이하가 되면', function() {
+    step2(0);
   } ] ]);
 }
 
@@ -4735,12 +5597,12 @@ function renderAutoRules() {
       };
     }));
   }
-  Promise.all([ getJSONc('/api/bot/edit_targets'), soft('/api/ma_switch_config'), soft('/api/bvc_config'), soft('/api/distday_config') ]).then((function(res) {
+  Promise.all([ getJSONc('/api/bot/edit_targets'), soft('/api/ma_switch_config'), soft('/api/bvc_config'), soft('/api/distday_config'), soft('/api/eval_sellall_config') ]).then((function(res) {
     var box = document.getElementById('ar-box');
     if (!box || TAB !== 'orders' || BOT.pick !== 'auto') return;
-    var ed = res[0] || {}, ms = res[1] || {}, bv = res[2] || {}, dd = res[3] || {};
+    var ed = res[0] || {}, ms = res[1] || {}, bv = res[2] || {}, dd = res[3] || {}, ev = res[4] || {};
     var f = document.createDocumentFragment();
-    f.appendChild(infoLine('mut', '산 종목에 저절로 걸리는 규칙 5가지', '산 종목에 저절로 걸리는 규칙 5가지 — 컴퓨터 주문총괄 [⚙ 기본 매도 규칙] 탭과 같은 설정입니다.'));
+    f.appendChild(infoLine('mut', '산 종목에 저절로 걸리는 규칙 6가지', '산 종목에 저절로 걸리는 규칙 6가지 — 컴퓨터 주문총괄 [⚙ 기본 매도 규칙] 탭과 같은 설정입니다.'));
     var g = el('div', 'grp argrp');
     f.appendChild(g);
     var bal = ed.balance || [];
@@ -4811,27 +5673,28 @@ function renderAutoRules() {
     if (ms.__err || !ms.l21 || !ms.l50) {
       arHead(g, 3, '📈 익절선 자동 트레일링 전환');
       arErr(g, '익절선 자동 트레일링 전환', ms.__err || '설정이 비어 왔습니다');
+    } else if (ms.upper_qty === undefined || ms.upper_qty === null) {
+      arHead(g, 3, '📈 익절선 자동 트레일링 전환');
+      g.appendChild(el('div', 'arerr', '⏳ 익절선 자동 트레일링 전환 — 새 매도 수량 칸(위쪽 선 %)은 서버를 다시 켜면 나옵니다'));
     } else {
       arHead(g, 3, '📈 익절선 자동 트레일링 전환', arPill(!!ms.enabled, null, 'ms'));
-      arBody(g, [ '고가가 21일선보다 <b>' + arEsc(ms.l21.pct) + '%</b> 위 → 21일선 매도 <b>' + arEsc(ms.l21.qty) + '%</b>', '고가가 50일선보다 <b>' + arEsc(ms.l50.pct) + '%</b> 위 → 50일선 매도 <b>' + arEsc(ms.l50.qty) + '%</b>' ]);
-      arBtns(g, [ [ '✏️ 수정', function() {
+      arBody(g, [ '고가가 21일선보다 <b>' + arEsc(ms.l21.pct) + '%</b> 위 → 21일선 매도', '고가가 50일선보다 <b>' + arEsc(ms.l50.pct) + '%</b> 위 → 50일선 매도', '매도 수량: 위쪽 선 <b>' + arEsc(ms.upper_qty) + '%</b> · 아래쪽 선 100%', '<span class="armut">한 선만 걸리면 그 선이 ' + arEsc(ms.upper_qty) + '% · 다른 선이 이미 팔렸으면 남은 선은 100%</span>' ]);
+      arBtns(g, [ [ '✏️ 수정', function pick3() {
         function one(key, q, now) {
           return function() {
             arAskNum(q + '\n지금: ' + now, now, (function(n) {
               var body = {};
               body[key] = n;
               botPost('/api/ma_switch_config', body, '고쳤습니다');
-            }), /^qty/.test(key));
+            }), key === 'upper_qty', pick3);
           };
         }
         askPick('📈 익절선 자동 트레일링 전환 — 무엇을 고칠까요?', [ [ '📏 21일선 — 몇 % 위', one('pct21', '고가가 21일선보다 몇 % 위면 걸까요?', ms.l21.pct), false, {
           sub: '지금 ' + ms.l21.pct + '%'
-        } ], [ '📦 21일선 — 매도 수량 %', one('qty21', '21일선 매도 수량 % (1~100 정수)', ms.l21.qty), false, {
-          sub: '지금 ' + ms.l21.qty + '%'
         } ], [ '📏 50일선 — 몇 % 위', one('pct50', '고가가 50일선보다 몇 % 위면 걸까요?', ms.l50.pct), false, {
           sub: '지금 ' + ms.l50.pct + '%'
-        } ], [ '📦 50일선 — 매도 수량 %', one('qty50', '50일선 매도 수량 % (1~100 정수)', ms.l50.qty), false, {
-          sub: '지금 ' + ms.l50.qty + '%'
+        } ], [ '📦 위쪽 선 — 매도 수량 %', one('upper_qty', '위쪽 선 매도 수량 % (1~100 정수)\n두 선이 다 걸리면 위쪽 선에 이 %, 아래쪽 선은 언제나 100% · 한 선만 걸리면 그 선에 이 % (다른 선이 이미 팔렸으면 남은 선은 100%)', ms.upper_qty), false, {
+          sub: '지금 ' + ms.upper_qty + '% · 아래쪽 선은 100%'
         } ] ]);
       } ] ]);
     }
@@ -4842,13 +5705,13 @@ function renderAutoRules() {
     } else {
       arHead(g, 4, '📉 돌파 거래량 점검', arPill(!!bv.enabled, null, 'bv'));
       arBody(g, [ '15:10 거래량이 50일 평균의 <b>' + arEsc(bv.ratio) + '%</b> 미만 → 보유의 <b>' + arEsc(bv.sell) + '%</b> 시장가 매도', '<span class="armut">돌파로 산 날 · 종목마다 그날 한 번</span>' ]);
-      arBtns(g, [ [ '✏️ 수정', function() {
+      arBtns(g, [ [ '✏️ 수정', function pick4() {
         askPick('📉 돌파 거래량 점검 — 무엇을 고칠까요?', [ [ '📊 거래량 기준 % (50일 평균의)', function() {
           arAskNum('15:10 거래량이 50일 평균의 몇 % 미만이면 팔까요? (1~100 정수)\n지금: ' + bv.ratio, bv.ratio, (function(n) {
             botPost('/api/bvc_config', {
               ratio: n
             }, '고쳤습니다');
-          }), true);
+          }), true, pick4);
         }, false, {
           sub: '지금 ' + bv.ratio + '%'
         } ], [ '📦 팔 수량 % (보유의)', function() {
@@ -4856,7 +5719,7 @@ function renderAutoRules() {
             botPost('/api/bvc_config', {
               sell: n
             }, '고쳤습니다');
-          }), true);
+          }), true, pick4);
         }, false, {
           sub: '지금 ' + bv.sell + '%'
         } ] ]);
@@ -4865,19 +5728,32 @@ function renderAutoRules() {
     arSep(g);
     var tag = el('span', 'armut arinfo', '알림만');
     if (dd.__err || dd.mult == null) {
-      arHead(g, 5, '📢 대량거래 음봉 표시', tag);
-      arErr(g, '대량거래 음봉 표시', dd.__err || '설정이 비어 왔습니다');
+      arHead(g, 5, '📢 대량거래 매도우세 표시', tag);
+      arErr(g, '대량거래 매도우세 표시', dd.__err || '설정이 비어 왔습니다');
     } else {
       var off = !(Number(dd.mult) > 0);
       if (off) tag.textContent = '꺼짐 (배수 0)';
-      arHead(g, 5, '📢 대량거래 음봉 표시', tag);
-      arBody(g, [ off ? '배수가 0 이라 표시하지 않습니다' : '거래량 50일 평균 <b>' + arEsc(dd.mult) + '배</b> 이상 + 음봉 → [시장 개요] 위험신호에 표시', '<span class="armut">보유종목 · 장중 실시간 · 팔지 않습니다</span>' ]);
+      arHead(g, 5, '📢 대량거래 매도우세 표시', tag);
+      arBody(g, [ off ? '배수가 0 이라 표시하지 않습니다' : '거래량 50일 평균 <b>' + arEsc(dd.mult) + '배</b> 이상 + 중간값 이하 마감 → [시장 개요] 위험신호에 표시', '<span class="armut">보유종목 · 장중 실시간 · 팔지 않습니다</span>' ]);
       arBtns(g, [ [ '✏️ 수정', function() {
-        arAskNum('거래량이 50일 평균의 몇 배 이상 + 음봉이면 표시할까요?\n(0 = 끔 · 1 = 50일 평균만 넘으면)\n지금: ' + dd.mult, dd.mult, (function(n) {
+        arAskNum('거래량이 50일 평균의 몇 배 이상 + 중간값 이하 마감이면 표시할까요?\n(0 = 끔 · 1 = 50일 평균만 넘으면)\n지금: ' + dd.mult, dd.mult, (function(n) {
           botPost('/api/distday_config', {
             mult: n
           }, '고쳤습니다');
         }));
+      } ] ]);
+    }
+    arSep(g);
+    if (ev.__err || typeof ev.enabled !== 'boolean') {
+      arHead(g, 6, '🧯 평가손익 전량 매도');
+      arErr(g, '평가손익 전량 매도', ev.__err || '설정이 비어 왔습니다');
+    } else {
+      arHead(g, 6, '🧯 평가손익 전량 매도', arPill(!!ev.enabled, null, 'ev'));
+      var _evl = [ ev.threshold == null ? '금액이 비어 있습니다 — <b>[✏️ 금액 수정]</b> 으로 정하면 켤 수 있습니다' : '계좌 평가손익 <b>' + arEsc(evWon(ev.threshold)) + '</b> 이하 → 보유 전부 시장가 매도 + [매수] 끔', '<span class="armut">증권사 평가손익 합계(실현손익 제외) · 발동하면 이 규칙도 꺼짐 · 대기 매수는 그대로</span>' ];
+      if (ev.fired_text) _evl.push('<span class="armut">🧯 ' + arEsc(ev.fired_text) + '</span>');
+      arBody(g, _evl);
+      arBtns(g, [ [ '✏️ 금액 수정', function() {
+        evEdit(ev.threshold);
       } ] ]);
     }
     box.textContent = '';
@@ -4903,11 +5779,6 @@ var CH = {
   code: '',
   name: '',
   bars: [],
-  acc: [],
-  minAmt: 0,
-  lines: [],
-  avg: null,
-  avgQty: 0,
   busy: false,
   live: null,
   lvVer: 0,
@@ -4929,6 +5800,7 @@ var CH = {
   ftd: null,
   period: chSavedPeriod(),
   n: 120,
+  nOf: {},
   end: 0,
   cross: null,
   filter: function() {
@@ -4940,19 +5812,14 @@ var CH = {
   }(),
   on: function() {
     var _D = {
-      accum: 1,
-      order: 1,
-      avg: 1,
-      ma21: 1,
-      ma50: 1,
       vma50: 1,
       ftd: 1,
       ma20: 1
     };
     try {
-      var _o = JSON.parse(localStorage.getItem('m_chart_on') || 'null') || {};
-      for (var k in _D) if (!(k in _o)) _o[k] = _D[k];
-      return _o;
+      var _o = JSON.parse(localStorage.getItem('m_chart_on') || 'null') || {}, _r = {};
+      for (var k in _D) _r[k] = k in _o ? _o[k] : _D[k];
+      return _r;
     } catch (e) {
       return _D;
     }
@@ -5049,7 +5916,12 @@ function chLoad(code, name, keep) {
   keep = !!(keep && CH.code === code && CH.bars.length);
   CH.code = code;
   CH.name = name || code;
+  var _wasIdx = !!CH.idx;
   CH.idx = chIsIdx(code);
+  if (_wasIdx !== CH.idx) {
+    CH.nOf[_wasIdx ? 'idx' : 'stk'] = CH.n;
+    CH.n = CH.nOf[CH.idx ? 'idx' : 'stk'] || 120;
+  }
   CH.period = CH.idx ? 'daily' : chSavedPeriod();
   CH.busy = true;
   if (!keep) {
@@ -5072,49 +5944,20 @@ function chLoad(code, name, keep) {
     chLoadIdx(code, keep, per);
     return;
   }
-  Promise.all([ getJSON('/api/ohlc/' + encodeURIComponent(code) + '?period=' + per).catch((function() {
+  getJSON('/api/ohlc/' + encodeURIComponent(code) + '?period=' + per).catch((function() {
     return null;
-  })), getJSONc('/api/orders?active=1').catch((function() {
-    return null;
-  })), getJSONc('/api/balance').catch((function() {
-    return null;
-  })) ]).then((function(r) {
+  })).then((function(oh) {
     if (CH.code === code && CH.period !== per) return;
     CH.busy = false;
     if (CH.code !== code) return;
-    var oh = r[0] || {};
-    var bars = oh.bars || [], acc = oh.accum_line || [];
+    oh = oh || {};
+    var bars = oh.bars || [];
     if (keep && !bars.length) {
       drawPhoneChart();
       return;
     }
-    var cut = Math.max(0, bars.length - CH_MAX);
-    CH.bars = bars.slice(cut);
-    CH.acc = acc.slice(cut);
-    CH.minAmt = oh.accum_min_amount || 0;
+    CH.bars = bars.slice(Math.max(0, bars.length - CH_MAX));
     if (oh.name) CH.name = oh.name;
-    var od = r[1] || {};
-    CH.lines = (od.orders || od.items || []).filter((function(o) {
-      return o.code === code;
-    })).map((function(o) {
-      var a = chMetaAnchor(o.src_meta);
-      return {
-        price: Number(o.trigger_price || 0),
-        qty: o.quantity,
-        anchor: a ? a.d : null,
-        anchorPx: a ? a.px : null
-      };
-    })).filter((function(x) {
-      return x.price > 0;
-    }));
-    CH.avg = null;
-    CH.avgQty = 0;
-    ((r[2] || {}).holdings || []).forEach((function(h) {
-      if (String(h['종목코드']) === code && Number(h['매입단가']) > 0) {
-        CH.avg = Number(h['매입단가']);
-        CH.avgQty = Number(h['보유수량']) > 0 ? Number(h['보유수량']) : 0;
-      }
-    }));
     if (bars.length) CH.loadedDay = chToday();
     var sd = oh.live_seed;
     if (sd && !(CH.live && CH.live.code === code)) {
@@ -5160,10 +6003,6 @@ function chLoadIdx(code, keep, per) {
         v: +b.v || 0
       };
     }));
-    CH.acc = [];
-    CH.minAmt = 0;
-    CH.lines = [];
-    CH.avg = null;
     CH.idxStale = !!oh.stale;
     CH.idxRef = String(oh.ref || '');
     CH.idxNote = String(oh.note || '');
@@ -5220,8 +6059,8 @@ var _chV = null;
 
 function chView() {
   var base = CH.bars, lv = CH.live;
-  if (_chV && _chV.src === base && _chV.acc0 === CH.acc && _chV.ver === CH.lvVer && _chV.code === CH.code) return _chV;
-  var bars = base, acc = CH.acc, isLive = false;
+  if (_chV && _chV.src === base && _chV.ver === CH.lvVer && _chV.code === CH.code) return _chV;
+  var bars = base, isLive = false;
   var last = base.length ? base[base.length - 1] : null;
   if (CH.idx) {
     var _ib = chIdxLive(base, lv);
@@ -5238,8 +6077,7 @@ function chView() {
         l: Math.min(last.l, lv.l),
         c: lv.c,
         v: (last.v || 0) + (lv.v || 0),
-        live: true,
-        _base: last
+        live: true
       } ]);
     } else {
       bars = base.concat([ {
@@ -5251,17 +6089,14 @@ function chView() {
         v: lv.v,
         live: true
       } ]);
-      if (acc.length === base.length) acc = acc.concat([ null ]);
     }
     isLive = true;
   }
   _chV = {
     src: base,
-    acc0: CH.acc,
     ver: CH.lvVer,
     code: CH.code,
     bars: bars,
-    acc: acc,
     live: isLive
   };
   return _chV;
@@ -5331,51 +6166,6 @@ function chSetPeriod(p) {
   if (CH.code) chLoad(CH.code, CH.name);
   var b = document.getElementById('ch-per');
   if (b) b.textContent = p === 'weekly' ? '주봉' : '일봉';
-}
-
-function chMetaAnchor(meta) {
-  try {
-    var m = typeof meta === 'string' ? JSON.parse(meta) : meta;
-    var d = m && String(m.anchor || '');
-    if (!/^20\d{6}$/.test(d)) return null;
-    var px = Number(m.anchor_px);
-    return {
-      d: d,
-      px: isFinite(px) && px > 0 ? px : null
-    };
-  } catch (e) {
-    return null;
-  }
-}
-
-function chOrderAnchorIdx(L, bars) {
-  var trig = Number(L && L.price);
-  if (!(trig > 0) || !bars || !bars.length) return -1;
-  function idxOf(d) {
-    for (var i = 0; i < bars.length; i++) if (String(bars[i].date) === d) return i;
-    if (CH.period === 'weekly') for (var j = 0; j < bars.length; j++) if (chSameWeek(bars[j].date, d)) return j;
-    return -1;
-  }
-  if (L.anchor) {
-    if (L.anchorPx != null) {
-      if (Math.round(Number(L.anchorPx)) === Math.round(trig)) {
-        var i1 = idxOf(L.anchor);
-        if (i1 >= 0) return i1;
-      }
-    } else {
-      var i2 = idxOf(L.anchor), b2 = bars[i2];
-      if (b2 && (Math.abs(b2.h - trig) < .005 || Math.abs(b2.c - trig) < .005 || Math.abs(b2.l - trig) < .005)) return i2;
-    }
-  }
-  var found = -1;
-  for (var k = 0; k < bars.length; k++) {
-    var b = bars[k];
-    if (Math.abs(b.h - trig) < .005 || Math.abs(b.c - trig) < .005) {
-      if (found >= 0 && String(bars[found].date) !== String(b.date)) return -1;
-      found = k;
-    }
-  }
-  return found;
 }
 
 function chMaDays(d) {
@@ -5530,22 +6320,17 @@ function chLiveStatus(isLive) {
       color: '#e8730a'
     };
   }
-  var s = (kis ? '● 실시간(보조)' : '● 실시간') + (hms ? ' ' + hms : '');
+  var s = '● 실시간' + (hms ? ' ' + hms : '');
   if (!CH.lvNet) s += ' · 응답 없음'; else if (down && !kis) s += ' · 연결 끊김';
   return {
     text: s,
-    color: !CH.lvNet || down || kis ? '#e8730a' : '#c62828'
+    color: !CH.lvNet || down && !kis ? '#e8730a' : '#c62828'
   };
 }
 
 var CH_COL = {
   up: '#000000',
   dn: '#D42020',
-  ma21: '#16a34a',
-  ma50: '#E91E63',
-  order: '#e58f2a',
-  avg: '#2e7d32',
-  grid: '#eef1f5',
   axis: '#8b94a1',
   vma50: '#7b61a8',
   split: '#8f9bab',
@@ -5553,11 +6338,6 @@ var CH_COL = {
 };
 
 var CH_PR = 46;
-
-function chManAmt(won) {
-  var m = (Number(won) || 0) / 1e4;
-  return (m >= 10 ? Math.round(m).toLocaleString() : (Math.round(m * 10) / 10).toLocaleString()) + '만';
-}
 
 function chMA(bars, n) {
   var out = [], sum = 0;
@@ -5693,7 +6473,7 @@ function drawPhoneChart() {
   var VH = Math.round(H * .22), GAP = 6;
   var PT = 26, PB = 18, PL = 2, PR = CH_PR;
   var TXW = PR - 5;
-  var V = chView(), ALL = V.bars, ACC = V.acc;
+  var V = chView(), ALL = V.bars;
   var total = ALL.length;
   var n = Math.max(15, Math.min(CH.n, total));
   var end = Math.max(0, Math.min(CH.end, total - n));
@@ -5702,9 +6482,7 @@ function drawPhoneChart() {
     s2 = Math.max(0, total - 2);
     e2 = total;
   }
-  var vis = ALL.slice(s2, e2), visAcc = ACC.slice(s2, e2);
-  var m21 = !CH.idx && CH.on.ma21 ? chMA(ALL, chMaDays(21)).slice(s2, e2) : null;
-  var m50 = !CH.idx && CH.on.ma50 ? chMA(ALL, chMaDays(50)).slice(s2, e2) : null;
+  var vis = ALL.slice(s2, e2);
   var m20 = CH.idx && CH.on.ma20 ? chMA(ALL, 20).slice(s2, e2) : null;
   var hi = -1e18, lo = 1e18, vmax = 0;
   vis.forEach((function(b) {
@@ -5712,22 +6490,11 @@ function drawPhoneChart() {
     if (b.l < lo) lo = b.l;
     if (b.v > vmax) vmax = b.v;
   }));
-  [ m21, m50, m20 ].forEach((function(mm) {
-    if (!mm) return;
-    mm.forEach((function(v) {
-      if (v == null) return;
-      if (v > hi) hi = v;
-      if (v < lo) lo = v;
-    }));
+  if (m20) m20.forEach((function(v) {
+    if (v == null) return;
+    if (v > hi) hi = v;
+    if (v < lo) lo = v;
   }));
-  if (CH.on.order) CH.lines.forEach((function(L) {
-    if (L.price > hi) hi = L.price;
-    if (L.price < lo) lo = L.price;
-  }));
-  if (CH.on.avg && CH.avg) {
-    if (CH.avg > hi) hi = CH.avg;
-    if (CH.avg < lo) lo = CH.avg;
-  }
   if (!(hi > lo)) {
     hi = lo + 1;
   }
@@ -5787,22 +6554,6 @@ function drawPhoneChart() {
     g2.stroke();
     g2.restore();
   }));
-  if (CH.on.accum) {
-    g2.save();
-    g2.fillStyle = '#111';
-    g2.beginPath();
-    vis.forEach((function(b, i) {
-      var jb = b._base || b;
-      if (!(visAcc[i] && jb.c >= jb.o && jb.v >= visAcc[i] && jb.c * jb.v >= CH.minAmt)) return;
-      var ty = y(b.h) - 7;
-      g2.moveTo(x(i) - 4, ty - 6);
-      g2.lineTo(x(i) + 4, ty - 6);
-      g2.lineTo(x(i), ty);
-      g2.closePath();
-    }));
-    g2.fill();
-    g2.restore();
-  }
   if (CH.on.vma50 && !CH.idx) {
     var _vm = chVMA(ALL, chMaDays(50)).slice(s2, e2);
     g2.save();
@@ -5843,8 +6594,6 @@ function drawPhoneChart() {
     g2.stroke();
     g2.restore();
   }
-  maPath(m21, CH_COL.ma21);
-  maPath(m50, CH_COL.ma50);
   maPath(m20, CH_COL.ma20);
   if (FM) {
     var _di = {};
@@ -5947,64 +6696,9 @@ function drawPhoneChart() {
   }
   var latest = ALL[ALL.length - 1];
   var _now = latest.c;
-  if (CH.on.order) CH.lines.forEach((function(L) {
-    line(PL, y(L.price), W - PR, y(L.price), CH_COL.order, 1.3, [ 5, 4 ]);
-    text('주문', W - PR + 3, y(L.price) - 3, CH_COL.order, 10, true);
-    var _ai = chOrderAnchorIdx(L, ALL);
-    if (_ai >= 0) {
-      if (_ai >= s2 && _ai < e2) {
-        g2.save();
-        g2.beginPath();
-        g2.arc(x(_ai - s2), y(L.price), 3.2, 0, Math.PI * 2);
-        g2.fillStyle = CH_COL.order;
-        g2.fill();
-        g2.lineWidth = 1.2;
-        g2.strokeStyle = '#fff';
-        g2.stroke();
-        g2.restore();
-      } else {
-        text(_ai < s2 ? '◀' : '▶', _ai < s2 ? PL + 7 : W - PR - 7, y(L.price) + 4, CH_COL.order, 11, true, 'center');
-      }
-    }
-    if (_now > 0) {
-      var d2 = (L.price / _now - 1) * 100;
-      var _t2 = (d2 >= 0 ? '+' : '') + d2.toFixed(1) + '%' + (d2 >= 0 ? ' 남음' : ' 지남');
-      g2.save();
-      g2.font = '800 10.5px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
-      g2.textAlign = 'right';
-      g2.lineWidth = 3;
-      g2.strokeStyle = '#fff';
-      g2.lineJoin = 'round';
-      g2.strokeText(_t2, W - 3, y(L.price) + 10);
-      g2.fillStyle = d2 >= 0 ? '#9c1f12' : '#123a78';
-      g2.fillText(_t2, W - 3, y(L.price) + 10);
-      g2.restore();
-    }
-  }));
-  if (CH.on.avg && CH.avg) {
-    line(PL, y(CH.avg), W - PR, y(CH.avg), CH_COL.avg, 1.4);
-  }
   var last = vis[vis.length - 1];
   var ly = y(last.c);
   line(PL, ly, W - PR, ly, '#9aa3af', 1, [ 2, 3 ]);
-  if (CH.on.avg && CH.avg) {
-    var ay = y(CH.avg), amt = CH.avgQty > 0 ? chManAmt(CH.avg * CH.avgQty) : '';
-    var th = amt ? 25 : 16, ty0 = ay - th / 2;
-    if (Math.abs(ay - ly) < th / 2 + 8.5) {
-      var below = ly + 9, above = ly - 9 - th;
-      ty0 = ay > ly ? below : above;
-      if (ty0 < 1) ty0 = below;
-      if (ty0 + th > PT + PH + GAP) ty0 = above;
-    }
-    g2.save();
-    g2.fillStyle = CH_COL.avg;
-    g2.beginPath();
-    if (g2.roundRect) g2.roundRect(W - PR + 1, ty0, PR - 2, th, 2); else g2.rect(W - PR + 1, ty0, PR - 2, th);
-    g2.fill();
-    g2.restore();
-    fitText(NF(CH.avg), W - PR + 3, ty0 + (amt ? 10.5 : 12), '#fff', 10, true, TXW);
-    if (amt) fitText(amt, W - PR + 3, ty0 + 21.5, '#e6f4e7', 9.5, true, TXW);
-  }
   rect(W - PR + 1, ly - 8, PR - 2, 16, last.c >= last.o ? CH_COL.up : CH_COL.dn);
   fitText(NF(last.c), W - PR + 3, ly + 4, '#fff', 10, true, TXW);
   [ 0, Math.floor(vis.length / 3), Math.floor(vis.length * 2 / 3), vis.length - 1 ].forEach((function(i) {
@@ -6063,9 +6757,9 @@ function drawPhoneChart() {
         text: '⚠ ' + mkMd(_lb && _lb.date) + '에서 멈춤 · 1분마다 다시 받는 중',
         color: '#e8730a'
       };
-    } else if (CH.idx && CH.idxNote) {
+    } else if (CH.idx && CH.idxNote && CH.idxSrc !== 'kis') {
       ls = {
-        text: (CH.idxSrc === 'kis' ? '⚠ 대체 출처 보조 시세' : '⚠ 대체 출처(늦을 수 있음)') + (ls.text ? ' · ' + ls.text : ''),
+        text: '⚠ 대체 출처(늦을 수 있음)' + (ls.text ? ' · ' + ls.text : ''),
         color: '#e8730a'
       };
     }
@@ -6079,10 +6773,15 @@ function drawPhoneChart() {
   }
 }
 
+var CH_TAP_MS = 250, CH_TAP_MOVE = 10, CH_DTAP_MS = 350, CH_DTAP_DIST = 50;
+
+var CH_IDX_DTAP_N = 20;
+
 function chTouch(wrap) {
   if (wrap._chTouchOn) return;
   wrap._chTouchOn = true;
   var mode = '', d0 = 0, n0 = 0, end0 = 0, x0 = 0, anchor = 0, holdT = 0;
+  var tapOk = false, tapT = 0, tapX = 0, tapY = 0, lastTap = null;
   var _raf = 0;
   function draw() {
     if (_raf) return;
@@ -6114,6 +6813,12 @@ function chTouch(wrap) {
     n0 = CH.n;
     end0 = CH.end;
     clearTimeout(holdT);
+    tapOk = ev.touches.length === 1;
+    if (tapOk) {
+      tapT = Date.now();
+      tapX = ev.touches[0].clientX;
+      tapY = ev.touches[0].clientY;
+    }
     if (ev.touches.length === 2) {
       mode = 'zoom';
       d0 = dist(ev.touches);
@@ -6135,6 +6840,7 @@ function chTouch(wrap) {
   wrap.addEventListener('touchmove', (function(ev) {
     if (!CH.bars.length) return;
     if (ev.cancelable) ev.preventDefault();
+    if (tapOk && (ev.touches.length !== 1 || Math.abs(ev.touches[0].clientX - tapX) > CH_TAP_MOVE || Math.abs(ev.touches[0].clientY - tapY) > CH_TAP_MOVE)) tapOk = false;
     if (ev.touches.length === 2 && mode === 'zoom') {
       var r = dist(ev.touches) / (d0 || 1);
       if (!(r > 0)) return;
@@ -6167,13 +6873,33 @@ function chTouch(wrap) {
       x0 = ev.touches[0].clientX;
       n0 = CH.n;
       end0 = CH.end;
+      tapOk = false;
       return;
     }
+    var now = Date.now();
+    var wasTap = tapOk && mode === 'pan' && now - tapT < CH_TAP_MS && !(ev && ev.touches && ev.touches.length) && !(ev && ev.type === 'touchcancel');
+    tapOk = false;
     if (CH.cross != null) {
       CH.cross = null;
       draw();
     }
     mode = '';
+    if (!wasTap) {
+      lastTap = null;
+      return;
+    }
+    if (lastTap && tapT - lastTap.t <= CH_DTAP_MS && Math.abs(tapX - lastTap.x) <= CH_DTAP_DIST && Math.abs(tapY - lastTap.y) <= CH_DTAP_DIST) {
+      lastTap = null;
+      if (CH.idx) CH.n = CH_IDX_DTAP_N;
+      CH.end = 0;
+      draw();
+      return;
+    }
+    lastTap = {
+      t: now,
+      x: tapX,
+      y: tapY
+    };
   }
   wrap.addEventListener('touchend', endT, {
     passive: true
@@ -6186,8 +6912,10 @@ function chTouch(wrap) {
 function renderChartTab() {
   TITLE.textContent = '차트';
   var _need = [];
-  if (!hasCache('/api/orders?active=1')) _need.push(getJSONc('/api/orders?active=1').catch((function() {})));
-  if (!hasCache('/api/balance')) _need.push(getJSONc('/api/balance').catch((function() {})));
+  if (!CH.code) {
+    if (!hasCache('/api/orders?active=1')) _need.push(getJSONc('/api/orders?active=1').catch((function() {})));
+    if (!hasCache('/api/balance')) _need.push(getJSONc('/api/balance').catch((function() {})));
+  }
   if (!hasCache(THM_URL)) _need.push(getJSONc(THM_URL).catch((function() {})));
   if (_need.length) {
     Promise.all(_need).then((function() {
@@ -6208,10 +6936,7 @@ function renderChartTab() {
 
 function chMenu() {
   var _wk = CH.period === 'weekly';
-  var items = [ [ 'accum', '▽ 매집봉' ], [ 'ma21', _wk ? '초록선 4주 이동평균(21일선)' : '초록선 21일 이동평균' ], [ 'ma50', _wk ? '분홍선 10주 이동평균(50일선)' : '분홍선 50일 이동평균' ], [ 'vma50', _wk ? '보라선 거래량 10주 평균' : '보라선 거래량 50일 평균' ], [ 'order', '주황 점선 주문선' ], [ 'avg', '초록 실선 매수선(평단)' ], [ 'ma20', '청록선 20일 이동평균' ], [ 'ftd', '📈 FTD·DD 표시' ] ].filter((function(p) {
-    if (p[0] === 'ftd' || p[0] === 'ma20') return CH.idx;
-    return !CH.idx || [ 'accum', 'order', 'avg', 'ma21', 'ma50', 'vma50' ].indexOf(p[0]) < 0;
-  })).map((function(p) {
+  var items = CH.idx ? [ [ 'ma20', '청록선 20일 이동평균' ], [ 'ftd', '📈 FTD·DD 표시' ] ].map((function(p) {
     return [ (CH.on[p[0]] ? '✅ ' : '⬜ ') + p[1], function() {
       CH.on[p[0]] = CH.on[p[0]] ? 0 : 1;
       chSave();
@@ -6219,15 +6944,13 @@ function chMenu() {
       if (p[0] === 'ftd' && CH.on.ftd && !chFtdMarks()) chLoadFtd(CH.code);
       setTimeout(chMenu, 120);
     } ];
-  }));
-  if (!CH.idx) items.unshift([ _wk ? '📅 일봉으로 보기' : '📅 주봉으로 보기', function() {
+  })) : [ [ _wk ? '📅 일봉으로 보기' : '📅 주봉으로 보기', function() {
     chSetPeriod(_wk ? 'daily' : 'weekly');
-  } ]);
-  items.push([ '🔎 처음 크기로 (120봉)', function() {
-    CH.n = 120;
-    CH.end = 0;
+  } ], [ (CH.on.vma50 ? '✅ ' : '⬜ ') + (_wk ? '보라선 거래량 10주 평균' : '보라선 거래량 50일 평균'), function() {
+    CH.on.vma50 = CH.on.vma50 ? 0 : 1;
+    chSave();
     chDraw();
-  } ]);
+  } ] ];
   items.push([ '◀ 차트 목록으로', function() {
     navBack((function() {
       CH.code = '';
@@ -6347,20 +7070,25 @@ function warnActions(code, nm) {
     }));
   }
   var how = '지금 시장가로 팔거나 다음 거래일 09:00 시가에 팔도록 예약합니다';
+  var me = function() {
+    warnActions(code, nm);
+  };
   askPick('«' + nm + '»', [ [ '📈 차트 보기', function() {
     chOpen(code, nm);
   } ], [ '📤 바로 매도 (지금 · 다음 거래일 시가)', function() {
-    sellNow(code, nm);
+    sellNow(code, nm, me);
   }, true, {
     sub: hq > 0 ? '보유 ' + fmt(hq) + '주 — ' + how : hq === 0 ? '지금 잔고 목록에 없습니다 — 누르면 컴퓨터가 다시 확인합니다' : how + ' (잔고에 없으면 컴퓨터가 알려 드립니다)'
-  } ], stgItem(code, nm) ], code);
+  } ], stgItem(code, nm, me) ], code);
 }
 
 function stockPick(code, nm) {
   nm = nm || code;
   askPick('«' + nm + '»', [ [ '📈 차트 보기', function() {
     chOpen(code, nm);
-  } ], stgItem(code, nm) ], code);
+  } ], stgItem(code, nm, (function() {
+    stockPick(code, nm);
+  })) ], code);
 }
 
 function passedRow(x, done) {
@@ -6503,9 +7231,12 @@ function riskSigFrag(lv) {
   }
   if (_sn) {
     sw.appendChild(stopKindTitle(_stDay, _sn, _st.items || []));
-    stopGroups(_st.items).forEach((function(g) {
+    stopGroupsTo(sw, _st.items, '');
+  }
+  function stopGroupsTo(into, items, day) {
+    stopGroups(items).forEach((function(g) {
       if (g.items.length === 1) {
-        sw.appendChild(stopRow(g.items[0], true));
+        into.appendChild(stopRow(g.items[0], true, day));
         return;
       }
       var gb = el('div', 'sgrp');
@@ -6521,12 +7252,75 @@ function riskSigFrag(lv) {
       };
       gb.appendChild(hd);
       g.items.forEach((function(x) {
-        gb.appendChild(stopRow(x, false));
+        gb.appendChild(stopRow(x, false, day));
       }));
-      sw.appendChild(gb);
+      into.appendChild(gb);
     }));
   }
-  function stopRow(x, withName) {
+  function pastDays(items) {
+    var by = {}, days = [];
+    (items || []).forEach((function(x) {
+      var d = String(x.day || '');
+      if (!by[d]) {
+        by[d] = [];
+        days.push(d);
+      }
+      by[d].push(x);
+    }));
+    days.sort((function(a, b) {
+      return a < b ? 1 : a > b ? -1 : 0;
+    }));
+    return days.map((function(d) {
+      return {
+        day: d,
+        items: by[d]
+      };
+    }));
+  }
+  function wdOf(s) {
+    var m = String(s || '').match(/^(\d{4})-?(\d{2})-?(\d{2})/);
+    if (!m) return String(s || '');
+    var d = new Date(parseInt(m[1], 10), parseInt(m[2], 10) - 1, parseInt(m[3], 10));
+    return mdOf(s) + '(' + '일월화수목금토'.charAt(d.getDay()) + ')';
+  }
+  function pastRange(days) {
+    var a = (days || []).filter(Boolean);
+    return !a.length ? '' : a.length === 1 ? mdOf(a[0]) : mdOf(a[a.length - 1]) + '~' + mdOf(a[0]);
+  }
+  function kindSum(items) {
+    var cnt = {}, ks = [];
+    (items || []).forEach((function(x) {
+      var k = stopKind(x.label) || '기타';
+      if (!cnt[k]) {
+        cnt[k] = 0;
+        ks.push(k);
+      }
+      cnt[k]++;
+    }));
+    ks.sort((function(a, b) {
+      var ia = STOP_KIND_ORDER.indexOf(a), ib = STOP_KIND_ORDER.indexOf(b);
+      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+    }));
+    return ks.map((function(k) {
+      return (k === '기타' && ks.length === 1 ? '손절' : k) + ' ' + cnt[k];
+    })).join(' · ');
+  }
+  var _stp = _stOk && _st.past || null, _spn = _stp ? Number(_stp.n) || 0 : 0;
+  if (_spn && sw) {
+    var spw = el('div', 'rskpast');
+    spw.setAttribute('data-past', 'stops');
+    spw.appendChild(el('div', 'rskpt', '📅 이전 거래일(' + pastRange(_stp.days && _stp.days.length ? _stp.days : pastDays(_stp.items).map((function(g) {
+      return g.day;
+    }))) + ') ' + _spn + '건'));
+    pastDays(_stp.items).forEach((function(g) {
+      var dh = el('div', 'rskd', wdOf(g.day) + ' · ' + kindSum(g.items));
+      dh.setAttribute('data-day', g.day);
+      spw.appendChild(dh);
+      stopGroupsTo(spw, g.items, g.day);
+    }));
+    sw.appendChild(spw);
+  }
+  function stopRow(x, withName, day) {
     var row = el('div', withName ? 'strow' : 'strow sgit');
     row.setAttribute(withName ? 'data-code' : 'data-scode', x.code || '');
     if (x.rule_id) row.setAttribute('data-rule', x.rule_id);
@@ -6535,8 +7329,8 @@ function riskSigFrag(lv) {
     var _kd = stopKind(x.label);
     if (_kd) top.appendChild(el('span', 'tag kd' + stopKindCls(_kd), _kd));
     var _pr = x.pl_rate, _done = /체결완료/.test(String(x.state || ''));
-    if (_pr != null) top.appendChild(el('span', 'gap ' + (_pr > 0 ? 'up' : _pr < 0 ? 'dn' : ''), (_pr > 0 ? '+' : '') + Number(_pr).toFixed(2) + '%' + (x.pl_est ? ' 어림' : ''))); else top.appendChild(el('span', 'gap mut', _done || !x.state ? '—' : String(x.state)));
-    top.appendChild(el('span', 'at', x.at || ''));
+    if (_pr != null) top.appendChild(el('span', 'gap ' + (_pr > 0 ? 'up' : _pr < 0 ? 'dn' : ''), (_pr > 0 ? '+' : '') + Number(_pr).toFixed(2) + '%')); else if (x.pl_err) top.appendChild(el('span', 'gap mut', '손익 못 받음(증권사 오류)')); else top.appendChild(el('span', 'gap mut', _done || !x.state ? '—' : String(x.state)));
+    top.appendChild(el('span', 'at', (day ? mdOf(day) + ' ' : '') + (x.at || '')));
     row.appendChild(top);
     row.onclick = function() {
       warnActions(x.code, x.name || x.code);
@@ -6555,7 +7349,7 @@ function riskSigFrag(lv) {
     du.onclick = _ddUnknownSay;
     into.appendChild(du);
   }
-  var dw = el('div', 'warnbox r rsks'), _ddT = '📢 보유종목 대량 음봉';
+  var dw = el('div', 'warnbox r rsks'), _ddT = '📢 보유종목 대량 매도우세';
   if (!_dd.on) {} else if (_ddOn && !_dn) {
     dw.appendChild(rskHead(_ddT + (_ddFinal ? ' · ' + _ddDay + ' 확정' : ''), '없음', 'rskp-z'));
     _ddUnknownLine(dw);
@@ -6567,23 +7361,73 @@ function riskSigFrag(lv) {
       say(String(_dd.error));
     })));
   }
+  function ddRow(x, day) {
+    var row = el('div', 'ddrow');
+    row.setAttribute('data-code', x.code || '');
+    row.appendChild(el('span', 'nm', x.name || x.code));
+    if (day) row.appendChild(el('span', 'dday', mdOf(day)));
+    var r = Number(x.ratio) || 0, c = Number(x.chg) || 0;
+    var rt = el('span', 'rt', '거래량 50일 평균의 ' + r.toFixed(r >= 10 ? 0 : 2) + '배 · 시가 대비 ');
+    rt.appendChild(el('span', 'gap sm ' + (c < 0 ? 'dn' : 'up'), (c > 0 ? '+' : '') + c.toFixed(2) + '%'));
+    row.appendChild(rt);
+    row.onclick = function() {
+      warnActions(x.code, x.name || x.code);
+    };
+    return row;
+  }
   if (_dn) {
-    dw.appendChild(el('div', 'wt', '📢 보유종목 대량거래 음봉 ' + _dn + '종목' + (_ddFinal ? ' · ' + _ddDay + ' 확정' : '')));
+    dw.appendChild(el('div', 'wt', '📢 보유종목 대량거래 매도우세 ' + _dn + '종목' + (_ddFinal ? ' · ' + _ddDay + ' 확정' : '')));
     (_dd.items || []).forEach((function(x) {
-      var row = el('div', 'ddrow');
-      row.setAttribute('data-code', x.code || '');
-      row.appendChild(el('span', 'nm', x.name || x.code));
-      var r = Number(x.ratio) || 0, c = Number(x.chg) || 0;
-      var rt = el('span', 'rt', '거래량 50일 평균의 ' + r.toFixed(r >= 10 ? 0 : 2) + '배 · 시가 대비 ');
-      rt.appendChild(el('span', 'gap sm ' + (c < 0 ? 'dn' : 'up'), (c > 0 ? '+' : '') + c.toFixed(2) + '%'));
-      row.appendChild(rt);
-      row.onclick = function() {
-        warnActions(x.code, x.name || x.code);
-      };
-      dw.appendChild(row);
+      dw.appendChild(ddRow(x, ''));
     }));
-    dw.appendChild(infoLine('ddnote', '50일 평균 ' + _dd.mult + '배↑ 음봉 · ' + (_ddFinal ? '확정 일봉' : (_dd.at || '') + ' 기준') + ' · 알림만', _ddFinal ? '거래량이 50일 평균의 ' + _dd.mult + '배 이상인 음봉(종가 < 시가) · ' + _ddDay + ' 정규장 확정 일봉 · 알리기만 합니다' : '거래량이 50일 평균의 ' + _dd.mult + '배 이상인 음봉(지금 값 < 오늘 시가) · ' + '오늘 지금까지 거래량 · ' + (_dd.at || '') + ' 기준 · 알리기만 합니다'));
+    dw.appendChild(infoLine('ddnote', '50일 평균 ' + _dd.mult + '배↑ 중간값 이하 · ' + (_ddFinal ? '확정 일봉' : (_dd.at || '') + ' 기준') + ' · 알림만', _ddFinal ? '거래량이 50일 평균의 ' + _dd.mult + '배 이상이고 종가가 고가·저가의 중간값 이하(종가 ≤ (고가+저가)/2) · ' + _ddDay + ' 정규장 확정 일봉 · 하루 종일 한 가격으로 전날보다 오른 날(점상한가)은 뺍니다 · 알리기만 합니다' : '거래량이 50일 평균의 ' + _dd.mult + '배 이상이고 지금 값이 오늘 고가·저가의 중간값 이하(지금 값 ≤ (고가+저가)/2) · ' + '오늘 지금까지 거래량·고가·저가 · ' + (_dd.at || '') + ' 기준 · 지금까지 한 가격으로 전날보다 오른 종목(점상한가)은 뺍니다 · 알리기만 합니다'));
     _ddUnknownLine(dw);
+  }
+  var _ddp = _dd.on && _dd.past || null, _dpn = _ddp && !_ddp.error ? Number(_ddp.n) || 0 : 0;
+  var _dpUnk = _ddp && !_ddp.error ? (_ddp.unknown || []).length + (_ddp.nobar || []).length : 0;
+  if (_ddp && _ddp.error) {
+    var dpe = el('div', 'rskpast');
+    dpe.setAttribute('data-past', 'distday');
+    var dpt = el('div', 'ddnote tap', '⚠ 이전 거래일 대량 매도우세를 못 읽었습니다 — 누르면 까닭');
+    dpt.onclick = function() {
+      say(String(_ddp.error));
+    };
+    dpe.appendChild(dpt);
+    dw.appendChild(dpe);
+  } else if (_dpn || _dpUnk) {
+    var dpw = el('div', 'rskpast');
+    dpw.setAttribute('data-past', 'distday');
+    dpw.appendChild(el('div', 'rskpt', '📅 이전 거래일(' + pastRange(_ddp.days) + ') ' + _dpn + '건 · 확정 일봉'));
+    pastDays(_ddp.items).forEach((function(g) {
+      var dh = el('div', 'rskd', wdOf(g.day) + ' · ' + g.items.length + '종목');
+      dh.setAttribute('data-day', g.day);
+      dpw.appendChild(dh);
+      g.items.forEach((function(x) {
+        dpw.appendChild(ddRow(x, g.day));
+      }));
+    }));
+    if (_dpUnk) {
+      var du2 = el('div', 'ddnote tap', '⚠ 이전 거래일 판정 못 한 ' + _dpUnk + '건 — 누르면 보기');
+      du2.onclick = function() {
+        var by = {}, names = [], lines = [];
+        (_ddp.unknown || []).forEach((function(u) {
+          if (!by[u.name]) {
+            by[u.name] = [];
+            names.push(u.name);
+          }
+          by[u.name].push(mdOf(u.day));
+        }));
+        names.forEach((function(n) {
+          lines.push(n + ' — ' + by[n].join(', '));
+        }));
+        (_ddp.nobar || []).forEach((function(d) {
+          lines.push(mdOf(d) + ' — 그날 일봉이 없습니다(보유 종목 전부)');
+        }));
+        say('이전 거래일 판정 못 한 것\n' + lines.join('\n') + '\n\n50일 거래량이 모자라거나(상장한 지 얼마 안 됨) 그날 일봉이 없는 경우(거래정지·상장 전)입니다.');
+      };
+      dpw.appendChild(du2);
+    }
+    dw.appendChild(dpw);
   }
   if (dw.childNodes.length) card.appendChild(dw);
   if (card.childNodes.length) {
@@ -6629,12 +7473,12 @@ function riskSigFrag(lv) {
   if (_ddOn) {
     if (_dn) {
       _sum.push({
-        t: '대량 음봉 ' + _dn,
+        t: '대량 매도우세 ' + _dn,
         c: 'fhit'
       });
       _zero = false;
     } else _sum.push({
-      t: '대량 음봉 0'
+      t: '대량 매도우세 0'
     });
     if (_dunk.length) {
       _sum.push({
@@ -6645,19 +7489,33 @@ function riskSigFrag(lv) {
     }
   } else if (_dd.on && _dd.pending) {
     _sum.push({
-      t: '대량 음봉 확정 전'
+      t: '대량 매도우세 확정 전'
     });
     _zero = false;
   } else if (_dd.on && _dd.error) {
     _sum.push({
-      t: '대량 음봉 못 읽음',
+      t: '대량 매도우세 못 읽음',
       c: 'fbad'
     });
     _zero = false;
   }
+  var _rc = lv.risk_count || null;
+  var _pastN = _rc && isFinite(Number(_rc.past)) ? Number(_rc.past) : _spn + _dpn;
+  var _pastBad = _ddp && _ddp.error ? {
+    t: '이전 거래일 못 읽음',
+    c: 'fbad'
+  } : _dpUnk ? {
+    t: '이전 거래일 판정 못 함 ' + _dpUnk,
+    c: 'fbad'
+  } : null;
   if (_sum.length && _zero) _sum = [ {
-    t: '없음'
+    t: _pastN || _pastBad ? '최종거래일 없음' : '없음'
   } ];
+  if (_pastBad) _sum.push(_pastBad);
+  if (_pastN) _sum.push({
+    t: '이전 거래일 ' + _pastN,
+    c: 'fpast'
+  });
   return foldSec(fR, 'risk', _sum, null, true);
 }
 
@@ -6870,11 +7728,22 @@ function renderOrders(first) {
     return {
       __err: e
     };
+  })), getJSONc('/api/default_bet').catch((function(e) {
+    return {
+      __err: e
+    };
   })) ]).then((function(res) {
     var _lr = lvRead(res[2]), lv = _lr.lv, _lvBad = _lr.bad, _lvPxBad = _lr.pxBad;
     tdBadgeSet(_lr);
     if (TAB !== 'orders') return;
     var od = res[0], md = res[1];
+    var _defV = res[7] && !res[7].__err ? Number(res[7].value) || 0 : 0;
+    var _capNeed = [];
+    setTimeout((function() {
+      ordCapFetch(_capNeed, (function() {
+        if (TAB === 'orders') renderOrders();
+      }));
+    }), 0);
     BOT.menu = res[3] && res[3].items || BOT.menu || [];
     var f = document.createDocumentFragment();
     live(true, '');
@@ -7067,7 +7936,12 @@ function renderOrders(first) {
           }
         }));
         var _perRoute = _rl.length > 1 || !thmMap()[g.code];
-        box.setAttribute('data-fp', fpOf([ g.rows, _perRoute ]));
+        var _kinds = g.rows.map((function(o) {
+          var k = ordBetKind(o, _defV);
+          if (k !== 'def' && Number(o.quantity) > 0 && Number(o.quantity) < obkDefQ(Number(o.order_price) || 0, _defV)) _capNeed.push(o.code);
+          return k;
+        }));
+        box.setAttribute('data-fp', fpOf([ g.rows, _perRoute, _kinds ]));
         var hd = box;
         hd.className = 'card pbc tap';
         box.appendChild(el('span', 'rt', manWon(g.sum)));
@@ -7092,6 +7966,8 @@ function renderOrders(first) {
           var _tx = el('span', 'tx');
           if (o.payment_type === 'credit') _tx.appendChild(el('span', 'cr', '신용'));
           _tx.appendChild(document.createTextNode(fmt(o.trigger_price) + (HIDE_MONEY ? '원' : '') + ' · ' + fmt(o.quantity) + '주 · ' + manWon(o.total_amount || o.base_amount)));
+          var _bkd = ordBetKind(o, _defV);
+          if (_bkd === 'def') _tx.appendChild(el('span', 'bb def', '기본')); else if (_bkd === 'cap') _tx.appendChild(el('span', 'bb cap', '한도↓'));
           ln.appendChild(_tx);
           var _g2 = ordGap(o);
           if (_g2) {
@@ -7125,13 +8001,17 @@ function renderOrders(first) {
         } else {
           var bd2 = el('button', 'btn rl', '🗑 대기 매수 ' + list.length + '건 전부 삭제');
           bd2.onclick = function() {
-            ask('대기 주문 ' + list.length + '건을 전부 지웁니다.\n' + '되살리려면 컴퓨터 주문창이 필요합니다.', (function() {
-              ask('정말 전부 지울까요?', (function() {
-                botPost('/api/bot/delete', {
-                  kind: 'all'
-                });
+            var first = function() {
+              ask('대기 주문 ' + list.length + '건을 전부 지웁니다.\n' + '되살리려면 컴퓨터 주문창이 필요합니다.', (function() {
+                ask('정말 전부 지울까요?', (function() {
+                  botPost('/api/bot/delete', {
+                    kind: 'all'
+                  });
+                }), true);
+                dlgBackTo(first);
               }), true);
-            }), true);
+            };
+            first();
           };
           rdel.appendChild(bd2);
         }
@@ -7485,6 +8365,7 @@ function renderBalance(first) {
     }
     var _bh = el('div', 'balhead');
     var _netV = res[3] && !res[3].__err && Number(res[3].net) > 0 ? Number(res[3].net) : null;
+    if (_netV == null && bioNotReady(res[3]) && res[3].__err && Number(res[3].__err.body.net) > 0) _netV = Number(res[3].__err.body.net);
     _bh.appendChild(balTopCard(bal, res[5], rk, rkWhy, _netV));
     f.appendChild(_bh);
     var _btn = thmNote(res[2]);
@@ -7545,8 +8426,20 @@ function renderBalance(first) {
       return (bv || 0) - (av || 0) || String(a['종목명'] || '').localeCompare(String(b['종목명'] || ''));
     }));
     var _nAll = (bal.holdings || []).length;
+    var _tnCodes = (bal.holdings || []).filter((function(h) {
+      return h.today_new === true && Number(h['보유수량']) > 0;
+    })).map((function(h) {
+      return nc(h['종목코드']);
+    }));
+    var _tn = _tnCodes.length ? {
+      key: BAL_TN_KEY,
+      label: BAL_TN_LABEL,
+      codes: _tnCodes,
+      tn: true,
+      sum: rk && rk.today_new && rk.today_new.key === BAL_TN_KEY ? rk.today_new : null
+    } : null;
     if (_nAll) f.appendChild(balFindBox());
-    if (_bg.length) {
+    if (_bg.length || _tn) {
       if (_bg.length >= 6) {
         var bqi = document.createElement('input');
         bqi.className = 'find sm';
@@ -7566,6 +8459,16 @@ function renderBalance(first) {
         renderBalance();
       };
       bcw.appendChild(bAll);
+      if (_tn) {
+        var bTn = el('button', (BAL_CHIP === _tn.key ? 'on' : '') + ' tn', _tn.label + ' ' + _tn.codes.length);
+        bTn.id = 'bal-tn';
+        bTn.setAttribute('data-fixed', '1');
+        bTn.onclick = function() {
+          BAL_CHIP = BAL_CHIP === _tn.key ? '' : _tn.key;
+          renderBalance();
+        };
+        bcw.appendChild(bTn);
+      }
       _bg.forEach((function(g) {
         var b = el('button', (BAL_CHIP === g.key ? 'on' : '') + (bioGroup(g.key) ? ' bio' : ''), g.label + ' ' + g.codes.length);
         b.onclick = function() {
@@ -7578,7 +8481,7 @@ function renderBalance(first) {
       f.appendChild(chipNone('bal-chips'));
       _pendChipFind = 'bal';
     }
-    var _bpick = BAL_CHIP ? _bg.filter((function(g) {
+    var _bpick = BAL_CHIP ? (_tn ? [ _tn ] : []).concat(_bg).filter((function(g) {
       return g.key === BAL_CHIP;
     }))[0] : null;
     if (BAL_CHIP && !_bpick) BAL_CHIP = '';
@@ -7679,13 +8582,16 @@ function renderBalance(first) {
 
 var BE_Q_MS = 8e3;
 
-function balActions(hh) {
+function balActions(hh, back) {
   var code = String(hh['종목코드'] || '').replace(/^A/, '');
   var nm = hh['종목명'] || code;
+  var me = function() {
+    balActions(hh);
+  };
   askPick('«' + nm + '»', [ [ '📈 차트 보기', function() {
     chOpen(code, nm);
   } ], [ '📤 바로 매도 (지금 · 다음 거래일 시가)', function() {
-    sellNow(code, nm);
+    sellNow(code, nm, me);
   }, true, {
     sub: '전량 · 보유의 몇 % · 몇 만원어치 — 지금 시장가로 팔거나 다음 거래일 09:00 시가에 팔도록 예약합니다'
   } ], [ '📕 매도조건', null, false, {
@@ -7696,7 +8602,7 @@ function balActions(hh) {
     off: true,
     id: 'pk-be',
     sub: '올릴 수 있는지 컴퓨터에 묻는 중…'
-  } ], stgItem(code, nm) ], code);
+  } ], stgItem(code, nm, me) ], code);
   var my = PICK_SEQ;
   function alive() {
     return my === PICK_SEQ && DLG.classList.contains('on') && DLG_PICK.style.display !== 'none';
@@ -7718,7 +8624,9 @@ function balActions(hh) {
       sub: '이 종목에 걸린 매도 조건이 없습니다'
     } ] ] : rules.map((function(r) {
       return [ '✏️ ' + (r.label || '매도조건'), function() {
-        sellRuleActions(r, 'holding');
+        sellRuleActions(r, 'holding', (function() {
+          balActions(hh, true);
+        }));
       }, false, {
         sub: ruleTapSub(r)
       } ];
@@ -7751,6 +8659,7 @@ function balActions(hh) {
         row.parentNode.insertBefore(k, row);
       }));
       row.parentNode.removeChild(row);
+      if (back) tg.onclick();
       return;
     }
     items.forEach((function(it) {
@@ -7799,19 +8708,19 @@ function balActions(hh) {
     return r.json();
   })).then((function(cd) {
     clearTimeout(tm);
-    put(beItem(cd, code, nm));
+    put(beItem(cd, code, nm, me));
   })).catch((function(e) {
     clearTimeout(tm);
     put(beItem({
       ok: false,
       error: e && e.name === 'AbortError' ? '응답이 없습니다' : e && e.message || String(e)
-    }, code, nm));
+    }, code, nm, me));
   }));
 }
 
 var SN_POLL_MS = 1e3, SN_WAIT_MS = 45e3;
 
-function sellNow(code, nm) {
+function sellNow(code, nm, back) {
   toast('보유 수량을 확인하는 중…', 1500);
   Promise.all([ fetch('/api/bot/sell_now/preview?code=' + encodeURIComponent(code), {
     headers: {
@@ -7825,32 +8734,42 @@ function sellNow(code, nm) {
     var p = res[0], so = res[1];
     if (!p || p.ok === false) {
       say('팔 수 없습니다 — ' + (p && p.error || '답이 비었습니다'));
+      dlgBackTo(back);
       return;
     }
     if (!p.open && !soUsable(so)) {
       say('지금은 팔 수 없습니다 — ' + (p.why || '장 시간이 아닙니다') + '\n\n' + soWhyNot(so));
+      dlgBackTo(back);
       return;
     }
-    snPick(code, p.name || nm, p, so, p.open ? 'now' : 'open');
+    snPick(code, p.name || nm, p, so, p.open ? 'now' : 'open', back);
   })).catch((function(e) {
     say('팔 수 없습니다 — ' + (e && e.message || e));
+    dlgBackTo(back);
   }));
 }
 
-function snNowItems(code, nm2, p) {
+function snNowItems(code, nm2, p, me) {
   var items = [];
   items.push([ '🔴 전량 매도', function() {
     ask('«' + nm2 + '» ' + fmt(p.total_qty) + '주 전량을 지금 시장가로 팝니다.\n(신용분부터)\n\n' + '시장가라 바로 체결되고 되돌릴 수 없습니다.', (function() {
       sellNowSend(code, nm2, 100);
     }), true);
+    dlgBackTo(me);
   }, true, {
     sub: '보유 ' + fmt(p.total_qty) + '주 전부'
   } ]);
   if (p.pct_free) {
-    items.push([ '✏️ % 직접 입력', function() {
-      askVal('매도 비율 (1~100 %)', '', (function(v) {
+    var pctAsk = function(pre) {
+      askVal('매도 비율 (1~100 %)', pre || '', (function(v) {
+        var again = function() {
+          pctAsk(v);
+        };
         var n = snPctOf(v);
-        if (n == null) return;
+        if (n == null) {
+          dlgBackTo(again);
+          return;
+        }
         fetch('/api/bot/sell_now/preview?code=' + encodeURIComponent(code) + '&pct=' + n, {
           headers: {
             Accept: 'application/json'
@@ -7861,16 +8780,23 @@ function snNowItems(code, nm2, p) {
         })).then((function(q) {
           if (!q || q.ok === false || !q.custom_pct) {
             say('몇 주인지 못 셌습니다 — ' + (q && q.error || '답이 비었습니다'));
+            dlgBackTo(again);
             return;
           }
           var cq = q.custom_pct.qty, all = n >= 100 || Number(cq) >= Number(q.total_qty);
           ask('«' + nm2 + '» ' + fmt(cq) + '주를 지금 시장가로 팝니다.\n' + '(보유 ' + fmt(q.total_qty) + '주의 ' + (n >= 100 ? '전량' : n + '%') + (all && n < 100 ? ' = 전량' : '') + ' · 신용분부터)\n\n' + '시장가라 바로 체결되고 되돌릴 수 없습니다.', (function() {
             sellNowSend(code, nm2, n);
           }), true);
+          dlgBackTo(again);
         })).catch((function(e) {
           say('몇 주인지 못 셌습니다 — ' + (e && e.message || e));
+          dlgBackTo(again);
         }));
       }), true);
+      dlgBackTo(me);
+    };
+    items.push([ '✏️ % 직접 입력', function() {
+      pctAsk('');
     }, false, {
       sub: '보유 ' + fmt(p.total_qty) + '주의 몇 %'
     } ]);
@@ -7888,22 +8814,53 @@ function snNowItems(code, nm2, p) {
       sub: '컴퓨터 서버를 다시 켠 뒤에 쓸 수 있습니다 (장 마감 뒤 데이터 업데이트 때 자동)'
     } ]);
   } else if (sp.px > 0) {
-    items.push([ amtLab, function() {
-      askVal('매도 금액 (' + SN_AMT_UNIT.label + ')', '', (function(v) {
+    var wonAsk = function(pre) {
+      askVal('매도 금액 (' + SN_AMT_UNIT.label + ')', pre || '', (function(v) {
+        var again = function() {
+          wonAsk(v);
+        };
         var won = snWonOf(v);
-        if (won == null) return;
-        var s2 = snPxSrc(code, p);
-        if (!(s2.px > 0)) {
-          say('팔지 않습니다 — 지금 값을 못 받아 몇 주인지 셀 수 없습니다\n(받아 둔 잔고 값이 묵었습니다 · % 로 팔거나 창을 다시 열어 주세요)');
+        if (won == null) {
+          dlgBackTo(again);
           return;
         }
-        var q = snWonQty(won, s2.px, p.total_qty, s2.pre);
-        if (q.why) {
-          say(q.why);
-          return;
-        }
-        sellWonAsk(code, nm2, won, q, s2, p.total_qty);
+        var noPx = function(why) {
+          say('팔지 않습니다 — 지금 값을 못 받아 몇 주인지 셀 수 없습니다\n(' + why + ' · % 로 팔거나 창을 다시 열어 주세요)');
+          dlgBackTo(again);
+        };
+        fetch('/api/bot/sell_now/preview?code=' + encodeURIComponent(code), {
+          headers: {
+            Accept: 'application/json'
+          },
+          cache: 'no-store'
+        }).then((function(r) {
+          return r.json();
+        })).then((function(q0) {
+          if (!q0 || q0.ok === false) {
+            noPx(q0 && q0.error || '답이 비었습니다');
+            return;
+          }
+          var s2 = snPxSrc(code, q0);
+          if (!(s2.px > 0)) {
+            noPx('받아 둔 잔고 값이 묵었습니다');
+            return;
+          }
+          var q = snWonQty(won, s2.px, q0.total_qty, s2.pre);
+          if (q.why) {
+            say(q.why);
+            dlgBackTo(again);
+            return;
+          }
+          sellWonAsk(code, nm2, won, q, s2, q0.total_qty);
+          dlgBackTo(again);
+        })).catch((function(e) {
+          noPx(e && e.message || String(e));
+        }));
       }), true);
+      dlgBackTo(me);
+    };
+    items.push([ amtLab, function() {
+      wonAsk('');
     }, false, {
       sub: sp.pre + ' ' + fmt(sp.px) + '원 기준 · 평가 ' + fmt(sp.px * Number(p.total_qty || 0)) + '원 · 예: ' + snAmtEx() + ' (주수는 내림)'
     } ]);
@@ -8109,19 +9066,22 @@ function soWhyNot(so) {
   return '🌅 다음 거래일을 못 찾아 시가 매도 예약을 걸 수 없습니다';
 }
 
-function snPick(code, nm, p, so, mode) {
+function snPick(code, nm, p, so, mode, back) {
   var ok = soUsable(so);
-  askPick('', mode === 'open' ? snOpenItems(code, nm, p, so) : snNowItems(code, nm, p));
+  var me = function() {
+    snPick(code, nm, p, so, mode, back);
+  };
+  askPick('', mode === 'open' ? snOpenItems(code, nm, p, so, me) : snNowItems(code, nm, p, me));
   var head = el('div', 'snhead'), bar = el('div', 'snmode');
   var bNow = el('button', mode === 'now' ? 'on' : '', '📤 지금 팔기');
   var bOpen = el('button', mode === 'open' ? 'on' : '', '🌅 ' + (ok ? soDay(so.run_date) : '다음 거래일') + ' 시가');
   bNow.disabled = !p.open;
   bOpen.disabled = !ok;
   bNow.onclick = function() {
-    if (mode !== 'now') snPick(code, nm, p, so, 'now');
+    if (mode !== 'now') snPick(code, nm, p, so, 'now', back);
   };
   bOpen.onclick = function() {
-    if (mode !== 'open') snPick(code, nm, p, so, 'open');
+    if (mode !== 'open') snPick(code, nm, p, so, 'open', back);
   };
   bar.appendChild(bNow);
   bar.appendChild(bOpen);
@@ -8130,27 +9090,36 @@ function snPick(code, nm, p, so, mode) {
   if (!ok) head.appendChild(el('div', 'snwhy', soWhyNot(so))); else if (mode === 'open') head.appendChild(el('div', 'snwhy', '🌅 ' + SO_HOW));
   DLG_PICK.insertBefore(head, DLG_PICK.firstChild);
   (ok ? so.items || [] : []).forEach((function(it) {
-    if (nc(it.code) === nc(code)) DLG_PICK.appendChild(soLine(it, soAfter));
+    if (nc(it.code) === nc(code)) DLG_PICK.appendChild(soLine(it, soAfter, me));
   }));
+  dlgBackTo(back);
 }
 
-function snOpenItems(code, nm, p, so) {
+function snOpenItems(code, nm, p, so, me) {
   var day = soDay(so.run_date);
   var tail = '\n\n' + SO_HOW + '.\n값은 정할 수 없습니다(시장가). 그 전에는 [잔고] 위 예약 줄에서 지울 수 있습니다.';
   var items = [];
   items.push([ '🔴 전량 매도', function() {
     ask('«' + nm + '» 보유 ' + fmt(p.total_qty) + '주 전량을\n' + day + ' 09:00 시가에 팔도록 예약합니다.\n' + '(신용분부터 · 주수는 그날 보유로 다시 셉니다)' + tail, (function() {
       sellOpenSend(code, nm, {
-        pct: 100
+        pct: 100,
+        run: so.run_date
       });
     }), true);
+    dlgBackTo(me);
   }, true, {
     sub: '보유 ' + fmt(p.total_qty) + '주 전부 · ' + day + ' 시가'
   } ]);
-  items.push([ '✏️ % 직접 입력', function() {
-    askVal(day + ' 시가 매도 비율 (1~100 %)', '', (function(v) {
+  var pctAsk = function(pre) {
+    askVal(day + ' 시가 매도 비율 (1~100 %)', pre || '', (function(v) {
+      var again = function() {
+        pctAsk(v);
+      };
       var n = snPctOf(v);
-      if (n == null) return;
+      if (n == null) {
+        dlgBackTo(again);
+        return;
+      }
       fetch('/api/bot/sell_now/preview?code=' + encodeURIComponent(code) + '&pct=' + n, {
         headers: {
           Accept: 'application/json'
@@ -8165,24 +9134,42 @@ function snOpenItems(code, nm, p, so) {
         var what = n >= 100 ? '보유 전량을' : '보유의 ' + n + '%' + (cq != null ? '(지금 보유 ' + fmt(q.total_qty) + '주 기준 ' + fmt(cq) + '주)' : '') + '를';
         ask('«' + nm + '» ' + what + '\n' + day + ' 09:00 시가에 팔도록 예약합니다.\n' + '(신용분부터 · 주수는 그날 보유로 다시 셉니다)' + tail, (function() {
           sellOpenSend(code, nm, {
-            pct: n
+            pct: n,
+            run: so.run_date
           });
         }), true);
+        dlgBackTo(again);
       }));
     }), true);
+    dlgBackTo(me);
+  };
+  items.push([ '✏️ % 직접 입력', function() {
+    pctAsk('');
   }, false, {
     sub: '보유 ' + fmt(p.total_qty) + '주의 몇 % · ' + day + ' 시가'
   } ]);
-  items.push([ '✏️ 금액 직접 입력 (만원)', function() {
-    askVal(day + ' 시가 매도 금액 (만원)', '', (function(v) {
+  var manAsk = function(pre) {
+    askVal(day + ' 시가 매도 금액 (만원)', pre || '', (function(v) {
+      var again = function() {
+        manAsk(v);
+      };
       var m = snManOf(v);
-      if (m == null) return;
+      if (m == null) {
+        dlgBackTo(again);
+        return;
+      }
       ask('«' + nm + '» ' + fmt(m) + '만원어치를\n' + day + ' 09:00 시가에 팔도록 예약합니다.\n' + '(주수는 그날 주문을 내는 순간 값으로 셉니다 · 보유보다 많으면 전량 · 신용분부터)' + tail, (function() {
         sellOpenSend(code, nm, {
-          amount_man: m
+          amount_man: m,
+          run: so.run_date
         });
       }), true);
+      dlgBackTo(again);
     }), true);
+    dlgBackTo(me);
+  };
+  items.push([ '✏️ 금액 직접 입력 (만원)', function() {
+    manAsk('');
   }, false, {
     sub: '예: 150 = 150만원어치 · 주수는 그날 주문을 내는 순간 값으로 셉니다'
   } ]);
@@ -8201,6 +9188,7 @@ function sellOpenSend(code, nm, amt) {
     name: nm
   };
   if (amt.amount_man) body.amount_man = amt.amount_man; else body.pct = amt.pct;
+  if (amt.run) body.expect_run_date = amt.run;
   fetch(SO_URL, {
     method: 'POST',
     headers: {
@@ -8245,19 +9233,19 @@ function sellOpenSend(code, nm, amt) {
   }));
 }
 
-function soLine(it, after) {
+function soLine(it, after, back) {
   var w = el('div', 'soline');
   w.setAttribute('data-fp', fpOf(it));
   w.appendChild(el('span', '', '🌅 ' + soWhen(it.run_date) + ' 시가 매도 예약: ' + (it.name || it.code) + ' ' + soWhat(it)));
   var b = el('button', '', '지우기');
   b.onclick = function() {
-    soCancel(it, after);
+    soCancel(it, after, back);
   };
   w.appendChild(b);
   return w;
 }
 
-function soCancel(it, after) {
+function soCancel(it, after, back) {
   ask('«' + (it.name || it.code) + '» ' + soDay(it.run_date) + ' 시가 매도 예약(' + soWhat(it) + ')을 지웁니다.\n지우면 그날 팔지 않습니다.', (function() {
     fetch(SO_URL + '/' + encodeURIComponent(it.req_id), {
       method: 'DELETE',
@@ -8289,6 +9277,7 @@ function soCancel(it, after) {
       say('지우지 못했습니다 — ' + (e && e.message || e));
     }));
   }));
+  dlgBackTo(back);
 }
 
 function soBox(d) {
@@ -8408,14 +9397,15 @@ function gsPrevUrl(key) {
 }
 
 function gsRow(g) {
-  var c = GS_CAP[g.key];
-  if (!c || Date.now() - c.ts > GS_CAP_MS) gsProbe(g.key);
+  var pk = g.tn ? GS_ALL_KEY : g.key;
+  var c = GS_CAP[pk];
+  if (!c || Date.now() - c.ts > GS_CAP_MS) gsProbe(pk);
   if (!c || !c.ok) return null;
   var r = el('div', 'row gsrow');
-  var b = el('button', 'btn r', '🔴 «' + g.label + '» 보유 ' + (c.n || g.codes.length) + '종목 전부 매도');
+  var b = el('button', 'btn p', '«' + g.label + '» 보유 ' + (g.tn ? g.codes.length : c.n || g.codes.length) + '종목 전부 매도');
   b.id = 'gs-btn';
   b.onclick = function() {
-    gsOpen(g.key);
+    if (g.tn) gsOpen(GS_ALL_KEY, null, g); else gsOpen(g.key);
   };
   r.appendChild(b);
   return r;
@@ -8435,15 +9425,15 @@ function gaProbe() {
   if (!c || Date.now() - c.ts > GS_CAP_MS) gsProbe(GS_ALL_KEY);
 }
 
-function gaItem(bal) {
+function gaItem(bal, back) {
   gaProbe();
   var c = GS_CAP[GS_ALL_KEY], n = gaCount(bal || {});
   if (!c || !c.ok || !n) return null;
-  return [ '🔴 보유 전체 ' + n + '종목 매도', function() {
-    gsOpen(GS_ALL_KEY);
-  }, true, {
+  return [ '보유 전체 ' + n + '종목 매도', function() {
+    gsOpen(GS_ALL_KEY, back);
+  }, false, {
     id: 'ga-btn',
-    sub: '칩과 상관없이 보유 전체 · 보유의 몇 % 를 지금 시장가 또는 다음 거래일 시가로'
+    sub: '칩과 상관없이 보유 전체 · 보유의 몇 % 를 지금 시장가로'
   } ];
 }
 
@@ -8483,7 +9473,7 @@ function gsProbe(key) {
       why: j && j.ok === false && j.error ? String(j.error) : ''
     };
     GS_CAP[key] = now;
-    if ((!was || was.ok !== now.ok || was.n !== now.n) && TAB === 'balance' && BAL_CHIP === key) renderBalance();
+    if ((!was || was.ok !== now.ok || was.n !== now.n) && TAB === 'balance' && (BAL_CHIP === key || key === GS_ALL_KEY && BAL_CHIP === BAL_TN_KEY)) renderBalance();
   }));
 }
 
@@ -8498,7 +9488,7 @@ function gsCls(v) {
 
 var GS_PICK_KEY = 'pick|*';
 
-function gsOpen(key) {
+function gsOpen(key, back, via) {
   if (BOT.busy) return;
   toast('보유 종목을 확인하는 중…', 1500);
   fetch(gsPrevUrl(key) + '&pick=1', {
@@ -8512,20 +9502,57 @@ function gsOpen(key) {
   })).then((function(p) {
     if (!p || p.ok === false) {
       say('팔 수 없습니다 — ' + (p && p.error || '답이 비었습니다'));
+      dlgBackTo(back);
       return;
     }
     if (!(p.items || []).length) {
       say('팔 수 없습니다 — ' + (p.all ? '팔 수 있는 보유 종목이 없습니다' : '이 칩에 보유 종목이 없습니다'));
+      dlgBackTo(back);
       return;
     }
-    if (!p.open && !p.open_run_date) {
-      say('지금은 팔 수 없습니다 — ' + (p.why || '장 시간이 아닙니다') + '\n\n🌅 다음 거래일을 못 찾아 시가 매도 예약도 걸 수 없습니다');
+    if (!p.open) {
+      say('지금은 팔 수 없습니다 — ' + (p.why || '장 시간이 아닙니다'));
+      dlgBackTo(back);
       return;
     }
-    gsPick(gsState(p, key), p.open ? 'now' : 'open');
+    var S = via ? gsViaState(p, via) : gsState(p, key);
+    if (!S) {
+      dlgBackTo(back);
+      return;
+    }
+    S.back = back || null;
+    gsPick(S);
   })).catch((function(e) {
     say('팔 수 없습니다 — ' + (e && e.message || e));
+    dlgBackTo(back);
   }));
+}
+
+function gsViaState(p, via) {
+  if (!(p && p.pick_ok === true && Array.isArray(p.chips))) {
+    say('팔 수 없습니다 — «' + via.label + '» 종목만 골라 팔기는 컴퓨터 서버를 다시 켠 뒤에 쓸 수 있습니다');
+    return null;
+  }
+  var S = {
+    p: p,
+    entry: GS_ALL_KEY,
+    via: via.label,
+    sel: {},
+    pill: null,
+    miss: '',
+    locked: false
+  }, want = {}, hit = 0;
+  (via.codes || []).forEach((function(x) {
+    want[nc(x)] = 1;
+  }));
+  (p.items || []).forEach((function(it) {
+    if (want[nc(it.code)]) {
+      S.sel[it.code] = true;
+      hit++;
+    }
+  }));
+  if (!hit) S.miss = '«' + via.label + '» 종목이 지금 팔 수 있는 보유에 없습니다 — 팔 종목을 눌러 골라 주세요';
+  return S;
 }
 
 function gsKeyLabel(key) {
@@ -8735,10 +9762,6 @@ function gsBuysNote(sc, pct, p, S) {
   return gsBuysWho(sc, S) + nb + (pct < 100 && p.buys_keep_partial ? '건은 그대로 둡니다' : '건도 지웁니다');
 }
 
-function gsDay(code) {
-  return dayChgEl(DAYCHG_URL, code);
-}
-
 function dayChgEl(url, code) {
   var c = JC[url], d = c && c.data, it = d && d.ok !== false && d.items && d.items[nc(code)];
   if (!it || it.chg == null || it.chg === '') return null;
@@ -8747,76 +9770,38 @@ function dayChgEl(url, code) {
   return el('div', 'dchg ' + (v > 0 ? 'up' : v < 0 ? 'dn' : ''), (it.label || '당일') + ' ' + (v > 0 ? '+' : '') + v.toFixed(2) + '%');
 }
 
-function gsCard(it, on, pct, onTap) {
-  var sq = gsSq(it), skip = !(sq > 0);
+function gsCard(it, on, onTap) {
+  var skip = !(gsSq(it) > 0);
   var r = el('div', 'gsc' + (on ? ' on' : '') + (skip ? ' skip' : '') + (onTap ? '' : ' lock'));
   r.setAttribute('data-code', it.code);
   r.setAttribute('data-on', on ? '1' : '0');
   if (skip) r.setAttribute('data-skip', '1');
   r.appendChild(el('span', 'dotk', on ? '✓' : ''));
-  var l = el('div', 'gl'), rr = el('div', 'gr');
-  l.appendChild(el('div', 'gn', it.name || it.code));
-  var dc = gsDay(it.code);
-  if (dc) l.appendChild(dc);
-  var tl = thmChipLine(nc(it.code));
-  if (tl) l.appendChild(tl);
+  r.appendChild(el('div', 'gn', it.name || it.code));
+  var rr = el('div', 'gr');
   rr.appendChild(el('div', 'gp' + (it.pl_rate != null ? ' ' + gsCls(it.pl_rate) : ''), it.pl_rate != null ? gsPct(it.pl_rate) : '시세 없음'));
-  var q = skip ? fmt(it.qty) + '주 · 0주 — 안 팖' : pct >= 100 ? fmt(it.qty) + '주' : fmt(it.qty) + '주 중 ' + fmt(sq) + '주' + (sq >= Number(it.qty) ? ' (전량)' : '');
-  rr.appendChild(el('div', 'gq', q + (it.eval != null ? ' · ' + manWon(it.eval) : '')));
-  r.appendChild(l);
+  if (skip) rr.appendChild(el('div', 'gq', '0주 — 안 팖'));
   r.appendChild(rr);
   if (onTap) r.onclick = onTap;
   return r;
 }
 
-function gsTotLine(its) {
-  var ev = 0, pl = 0, buy = 0, k = 0, nop = 0;
-  (its || []).forEach((function(it) {
-    if (it.eval == null) {
-      nop++;
-      return;
-    }
-    ev += Number(it.eval) || 0;
-    pl += Number(it.pl) || 0;
-    buy += Number(it.buy) || 0;
-    k++;
-  }));
-  if (!k) return '평가 모름 (시세 없음)';
-  return '평가 ' + manWon(ev) + ' · ' + (pl > 0 ? '+' : '') + fmt(pl) + '원' + (buy > 0 ? ' (' + gsPct(pl * 100 / buy) + ')' : '') + (nop ? ' · 시세 없는 ' + nop + '종목 빼고' : '');
-}
+var GS_FOOT = '지금 시장가로 팝니다 · 되돌릴 수 없습니다';
 
-function gsPick(S, mode, raw) {
+function gsPick(S, raw) {
   var cur = S.p, my = ++GS_PSEQ, timer = null, rq = 0, st = {
     ok: true,
     n: gsPctIs(cur),
     load: false
   };
-  var day = cur.open_run_date ? soDay(cur.open_run_date) : '다음 거래일';
   function setTitle() {
-    DLG_MSG.textContent = S.entry === GS_ALL_KEY ? '보유 전체 일괄 매도' : '«' + gsKeyLabel(S.entry) + '» 일괄 매도';
-    DLG_MSG.appendChild(el('small', 'gsub', S.locked ? '종목 고르기는 컴퓨터 서버를 다시 켠 뒤에 쓸 수 있습니다 — 지금은 이 목록 전부를 팝니다' : '위 칩을 누르면 그 묶음만 골라집니다 · 줄을 눌러 더하고 빼기'));
+    DLG_MSG.textContent = S.via ? '«' + S.via + '» 일괄 매도' : S.entry === GS_ALL_KEY ? '보유 전체 일괄 매도' : '«' + gsKeyLabel(S.entry) + '» 일괄 매도';
   }
   askPick('', []);
+  dlgBackTo(S.back || null);
   DLG.classList.add('gssel');
   setTitle();
-  var head = el('div', 'snhead'), bar = el('div', 'snmode');
-  var bNow = el('button', mode === 'now' ? 'on' : '', '📤 지금 팔기');
-  var bOpen = el('button', mode === 'open' ? 'on' : '', '🌅 ' + day + ' 시가');
-  bNow.disabled = !cur.open;
-  bOpen.disabled = !cur.open_run_date;
-  bNow.onclick = function() {
-    if (mode !== 'now') gsPick(S, 'now', inp.value);
-  };
-  bOpen.onclick = function() {
-    if (mode !== 'open') gsPick(S, 'open', inp.value);
-  };
-  bar.appendChild(bNow);
-  bar.appendChild(bOpen);
-  head.appendChild(bar);
-  if (!cur.open) head.appendChild(el('div', 'snwhy', '📤 지금은 못 팝니다 — ' + (cur.why || '장 시간이 아닙니다')));
-  if (!cur.open_run_date) head.appendChild(el('div', 'snwhy', '🌅 다음 거래일을 못 찾아 시가 매도 예약을 걸 수 없습니다')); else if (mode === 'open') head.appendChild(el('div', 'snwhy', '🌅 ' + SO_HOW));
-  DLG_PICK.appendChild(head);
-  var box = el('div', 'gspct'), lab = el('label', '', '보유의 몇 % 를 팔까요'), spin = el('span', 'gspin');
+  var box = el('div', 'gspct'), lab = el('label', '', '몇 % 팔까요'), spin = el('span', 'gspin');
   var inp = document.createElement('input');
   inp.id = 'gs-pct';
   inp.type = 'text';
@@ -8831,33 +9816,24 @@ function gsPick(S, mode, raw) {
   box.appendChild(spin);
   var why = el('div', 'gspwhy');
   why.id = 'gs-pct-why';
-  var qk = el('div', 'gsqk');
-  qk.id = 'gs-qk';
-  var body = el('div', 'gsbody');
+  var tip = el('div', 'gstip', S.locked ? '종목 고르기는 컴퓨터 서버를 다시 켠 뒤에 쓸 수 있습니다 — 지금은 이 목록 전부를 팝니다' : '눌러서 넣고 빼기');
+  tip.id = 'gs-tip';
+  var body = el('div', 'gsbody'), foot = el('div', 'gsfine');
+  foot.id = 'gs-foot';
   DLG_PICK.appendChild(box);
   DLG_PICK.appendChild(why);
-  DLG_PICK.appendChild(qk);
+  DLG_PICK.appendChild(tip);
   DLG_PICK.appendChild(body);
+  DLG_PICK.appendChild(foot);
   function alive() {
     return my === GS_PSEQ && DLG.classList.contains('on') && document.body.contains(body);
-  }
-  function pick_(k) {
-    var c = k === GS_ALL_KEY || k === 'none' ? null : gsChipOf(cur, k), m = {};
-    if (c) c.codes.forEach((function(x) {
-      m[x] = 1;
-    }));
-    (cur.items || []).forEach((function(it) {
-      S.sel[it.code] = k === GS_ALL_KEY ? true : k === 'none' ? false : !!m[it.code];
-    }));
-    S.pill = k;
-    paint();
   }
   function tap_(code) {
     S.sel[code] = !S.sel[code];
     paint();
   }
   function paint() {
-    var pct = gsPctIs(cur), sc = gsScope(S), send = gsSendItems(sc), n = send.length, nSel = sc.items.length;
+    var pct = gsPctIs(cur), sc = gsScope(S), n = gsSendItems(sc).length, nSel = sc.items.length;
     if (!cur.pct_ok) {
       why.className = 'gspwhy';
       why.textContent = '비율 입력은 컴퓨터 서버를 다시 켠 뒤에 쓸 수 있습니다 — 지금은 전량만 팝니다';
@@ -8872,24 +9848,7 @@ function gsPick(S, mode, raw) {
       why.textContent = S.locked ? '넣은 비율로는 모든 종목이 0주라 팔 것이 없습니다' : '넣은 비율로는 고른 종목이 모두 0주라 팔 것이 없습니다';
     } else {
       why.className = 'gspwhy';
-      why.textContent = '1~100 사이 정수 · 100 = 전량 · 주수는 반올림(1주 미만도 1주)';
-    }
-    var sx = qk.scrollLeft;
-    qk.textContent = '';
-    qk.style.display = S.locked ? 'none' : '';
-    if (!S.locked) {
-      [ [ GS_ALL_KEY, '전체' ] ].concat(gsChips(cur).map((function(c) {
-        return [ c.key, c.label + ' ' + c.codes.length ];
-      }))).concat([ [ 'none', '모두 풀기' ] ]).forEach((function(x) {
-        var on = x[0] === 'none' ? sc.scope === 'none' : (sc.scope === 'all' || sc.scope === 'chip') && sc.key === x[0];
-        var b = el('button', on ? 'on' : '', x[1]);
-        b.setAttribute('data-k', x[0]);
-        b.onclick = function() {
-          pick_(x[0]);
-        };
-        qk.appendChild(b);
-      }));
-      qk.scrollLeft = sx;
+      why.textContent = '';
     }
     var by = body.scrollTop;
     body.className = 'gsbody' + (st.load || !st.ok ? ' load' : '');
@@ -8898,7 +9857,7 @@ function gsPick(S, mode, raw) {
     if (cur.chips_error) body.appendChild(el('div', 'gshd bad', '🏷 ' + cur.chips_error));
     var list = el('div', 'gslist gsclist');
     (cur.items || []).forEach((function(it) {
-      list.appendChild(gsCard(it, !!S.sel[it.code], pct, S.locked ? null : function() {
+      list.appendChild(gsCard(it, !!S.sel[it.code], S.locked ? null : function() {
         tap_(it.code);
       }));
     }));
@@ -8906,20 +9865,12 @@ function gsPick(S, mode, raw) {
     var ex = gsExLine(cur), over = gsOver(cur, n);
     if (ex) body.appendChild(el('div', 'gshd gsex', ex));
     if (over) body.appendChild(el('div', 'gshd bad gsover', over));
-    var who = S.locked ? '' : '고른 종목의 ', what = pct >= 100 ? '보유 전량을' : '보유의 ' + pct + '%를';
-    var note = mode === 'now' ? '· ' + who + what + ' 지금 시장가로 팝니다 · 종목마다 신용분부터\n' + (pct < 100 ? '· 주수는 파는 순간 보유로 다시 셉니다 (반올림 · 1주 미만도 1주)\n' : '') + '· 한 종목씩 차례로 보냅니다 — 화면을 닫아도 컴퓨터가 끝까지 팝니다\n· 바로 체결되고 되돌릴 수 없습니다' : '· ' + day + ' 09:00 시가에 ' + who + what + ' 팝니다 · 종목마다 신용분부터\n' + '· 08:55 장 시작 동시호가에 시장가로 넣습니다 · 주수는 그날 보유로 다시 셉니다\n· 그 전에는 [잔고] 위 예약 줄에서 종목마다 지울 수 있습니다';
-    var bn = gsBuysNote(sc, pct, cur, S);
-    if (bn) note += '\n· ' + bn;
-    if (S.locked && cur.all) note = '· 칩과 상관없이 보유 전체 ' + n + '종목입니다\n' + note;
-    body.appendChild(el('div', 'gsnote', note));
     body.scrollTop = by;
-    var can = (mode === 'now' ? !!cur.open : !!cur.open_run_date) && !over;
-    DLG_OK.style.display = can ? '' : 'none';
-    DLG_OK.className = 'r gsok gsk' + (st.ok && !st.load && n ? '' : ' gsoff') + (nSel ? '' : ' gsnone');
-    var hd = S.locked ? '' : '고른 ';
-    DLG_OK.textContent = '';
-    DLG_OK.appendChild(el('span', 'gsk1', !nSel ? (mode === 'now' ? '🔴' : '🌅') + ' 고를 종목을 눌러 주세요' : mode === 'now' ? pct >= 100 ? '🔴 ' + hd + n + '종목 전량 매도' : '🔴 ' + hd + n + '종목 보유 ' + pct + '% 매도' : pct >= 100 ? '🌅 ' + hd + n + '종목 시가 예약' : '🌅 ' + hd + n + '종목 시가 예약 (보유 ' + pct + '%)'));
-    if (n) DLG_OK.appendChild(el('small', 'gsk2', gsTotLine(send)));
+    foot.className = 'gsfine' + (cur.open ? '' : ' bad');
+    foot.textContent = cur.open ? GS_FOOT : '지금은 못 팝니다 — ' + (cur.why || '장 시간이 아닙니다');
+    DLG_OK.style.display = cur.open && !over ? '' : 'none';
+    DLG_OK.className = 'p gsok' + (st.ok && !st.load && n ? '' : ' gsoff') + (nSel ? '' : ' gsnone');
+    DLG_OK.textContent = !nSel ? '고를 종목을 눌러 주세요' : (S.locked ? '' : '고른 ') + n + '종목 ' + (pct >= 100 ? '전량' : pct + '%') + ' 매도';
   }
   function ask_(n, then) {
     var my_rq = ++rq;
@@ -8938,7 +9889,7 @@ function gsPick(S, mode, raw) {
           why: '몇 주인지 못 셌습니다 — ' + (q && q.error || '답이 비었습니다')
         };
         if (then) {
-          gsPick(S, mode, String(n));
+          gsPick(S, String(n));
           return;
         }
         paint();
@@ -8963,7 +9914,7 @@ function gsPick(S, mode, raw) {
         why: '몇 주인지 못 셌습니다 — ' + (e && e.message || e)
       };
       if (then) {
-        gsPick(S, mode, String(n));
+        gsPick(S, String(n));
         return;
       }
       paint();
@@ -9016,31 +9967,31 @@ function gsPick(S, mode, raw) {
     };
     var nn = gsSendItems(gsScope(S)).length;
     if (r.why || gsOver(cur, nn)) {
-      gsPick(S, mode, inp.value);
+      gsPick(S, inp.value);
       return;
     }
     if (r.n !== gsPctIs(cur)) {
       toast('몇 주인지 세는 중…', 1500);
       ask_(r.n, (function() {
-        gsConfirm(S, mode);
+        gsConfirm(S);
       }));
       return;
     }
     if (!nn) {
-      gsPick(S, mode, inp.value);
+      gsPick(S, inp.value);
       return;
     }
-    gsConfirm(S, mode);
+    gsConfirm(S);
   };
 }
 
-function gsConfirm(S, mode) {
+function gsConfirm(S) {
   var p = S.p, pct = gsPctIs(p), sc = gsScope(S), bn = gsBuysNote(sc, pct, p, S);
   var sel = gsSendItems(sc), skip = sc.items.filter((function(it) {
     return !(gsSq(it) > 0);
   }));
   if (!sel.length || gsOver(p, sel.length)) {
-    gsPick(S, mode);
+    gsPick(S);
     return;
   }
   var lines = sel.map((function(it) {
@@ -9050,12 +10001,15 @@ function gsConfirm(S, mode) {
     return '· ' + (it.name || it.code) + ' 0주 — 안 팖';
   })).join('\n');
   var nm = gsNameN(sc, sel.length);
-  var msg = mode === 'now' ? (pct >= 100 ? nm + ' 전량을 지금 시장가로 팝니다.\n(종목마다 신용분부터 · 한 종목씩 차례로)\n\n' : nm + ' 보유의 ' + pct + '%를 지금 시장가로 팝니다.\n' + '(종목마다 신용분부터 · 한 종목씩 차례로 · 주수는 파는 순간 보유로 다시 셉니다)\n\n') + lines + '\n\n시장가라 바로 체결되고 되돌릴 수 없습니다.\n화면을 닫아도 컴퓨터가 끝까지 팝니다.' : nm + ' ' + (pct >= 100 ? '보유 전량을' : '보유의 ' + pct + '%를') + '\n' + soDay(p.open_run_date) + ' 09:00 시가에 팔도록 예약합니다.\n' + '(종목마다 신용분부터 · 주수는 그날 보유로 다시 셉니다)\n\n' + lines;
+  var msg = (pct >= 100 ? nm + ' 전량을 지금 시장가로 팝니다.\n(종목마다 신용분부터 · 한 종목씩 차례로)\n\n' : nm + ' 보유의 ' + pct + '%를 지금 시장가로 팝니다.\n' + '(종목마다 신용분부터 · 한 종목씩 차례로 · 주수는 파는 순간 보유로 다시 셉니다)\n\n') + lines + '\n\n시장가라 바로 체결되고 되돌릴 수 없습니다.\n화면을 닫아도 컴퓨터가 끝까지 팝니다.';
   if (gsExLine(p) && (sc.scope === 'all' || sc.scope === 'locked')) msg += '\n\n' + gsExLine(p);
   if (bn) msg += '\n\n' + bn + '.';
   ask(msg, (function() {
-    gsSend(S, mode, sc);
-  }), true);
+    gsSend(S, sc);
+  }));
+  dlgBackTo((function() {
+    gsPick(S);
+  }));
 }
 
 function gsExLine(p) {
@@ -9072,14 +10026,14 @@ function gsOver(p, n) {
   return '⛔ 팔 종목이 ' + n + '개라 한 번에 팔 수 있는 ' + mx + '종목을 넘습니다 — 아무것도 보내지 않습니다\n' + '칩으로 나눠 팔거나 종목마다 «바로 매도» 로 팔아 주세요';
 }
 
-function gsSend(S, mode, sc) {
+function gsSend(S, sc) {
   if (BOT.busy) return;
   BOT.busy = true;
-  var p = S.p, none = mode === 'now' ? '팔지 않았습니다' : '예약하지 않았습니다';
+  var p = S.p, none = '팔지 않았습니다';
   var send = gsSendItems(sc);
   var body = {
     key: sc.key,
-    mode: mode,
+    mode: 'now',
     items: send.map((function(it) {
       return {
         code: it.code,
@@ -9135,7 +10089,7 @@ function gsSend(S, mode, sc) {
       return;
     }
     dropCache();
-    if (mode === 'now') gsBoard(j.batch_id, bp, j); else gsOpenDone(bp, j);
+    gsBoard(j.batch_id, bp, j);
   })).catch((function(e) {
     BOT.busy = false;
     gsUnsure(e && e.message || e);
@@ -9157,9 +10111,6 @@ function gsBoardRow(it) {
   } else if (st === 'done') {
     b = [ 'ok', '✅ 접수' ];
     sub = fmt(q) + '주 시장가 매도 접수';
-  } else if (st === 'open_ok') {
-    b = [ 'ok', '✅ 예약' ];
-    sub = it.message || '';
   } else if (st === 'unknown') {
     b = [ 'unk', '⚠ 모름' ];
     sub = it.message || '접수 여부를 모릅니다';
@@ -9290,40 +10241,11 @@ function gsBoard(bid, p, first) {
   })();
 }
 
-function gsOpenDone(p, j) {
-  var res = j.results || [], day = soDay(j.run_date);
-  var pct = j.pct >= 1 && j.pct <= 100 ? Number(j.pct) : gsPctIs(p);
-  askPick('🌅 ' + gsNameN(p, res.length) + ' 중 ' + (j.n_ok || 0) + '종목 ' + day + ' 시가 매도 예약' + (pct < 100 ? '(보유 ' + pct + '%)' : '') + '을 걸었습니다', []);
-  var w = el('div', 'gswrap');
-  var bl = gsBuysLine(j.buys, p);
-  if (bl) w.appendChild(bl);
-  var list = el('div', 'gslist');
-  res.forEach((function(x) {
-    list.appendChild(gsBoardRow({
-      code: x.code,
-      name: x.name,
-      status: x.ok ? 'open_ok' : 'failed',
-      message: x.ok ? gsHow(pct) + ' · ' + day + ' 09:00 시가' : x.error || '못 걸었습니다'
-    }));
-  }));
-  w.appendChild(list);
-  DLG_PICK.appendChild(w);
-  DLG_NO.style.display = 'none';
-  DLG_OK.style.display = '';
-  DLG_OK.className = 'p gsok';
-  DLG_OK.textContent = '확인';
-  DLG_CB = function() {
-    DLG_NO.style.display = '';
-    delete JC[SO_URL];
-    soAfter();
-  };
-}
-
-function beItem(cd, code, nm) {
+function beItem(cd, code, nm, back) {
   if (!cd || cd.ok === false) {
     var why = cd && cd.error || '답이 비었습니다';
     return [ '🛡 본전 상향', function() {
-      beAsk(null, code, nm, why);
+      beAsk(null, code, nm, why, undefined, back);
     }, false, {
       id: 'pk-be',
       sub: '가능한지 못 읽었습니다 (' + why + ') — 눌러도 컴퓨터가 그 자리에서 다시 확인합니다'
@@ -9345,14 +10267,14 @@ function beItem(cd, code, nm) {
   var tk = cd.ticks != null ? cd.ticks : '?';
   var _bn = it.be_note || '매수가 +' + tk + '틱';
   return [ '🛡 본전 상향', function() {
-    beAsk(it, code, nm, '', tk);
+    beAsk(it, code, nm, '', tk, back);
   }, false, {
     id: 'pk-be',
     sub: '손절을 ' + fmt(it.breakeven) + '원(' + _bn + ')으로 올립니다'
   } ];
 }
 
-function beAsk(it, code, nm, why, tk) {
+function beAsk(it, code, nm, why, tk, back) {
   var msg = '«' + nm + '» 손절을 본전으로 올립니다.\n\n';
   if (it) {
     var pl = Number(it.pl_rate || 0);
@@ -9366,6 +10288,7 @@ function beAsk(it, code, nm, why, tk) {
       codes: [ code ]
     });
   }));
+  dlgBackTo(back);
 }
 
 function bulkMenuRow(bal) {
@@ -9382,7 +10305,9 @@ function bulkMenuRow(bal) {
 
 function bulkMenu(bal) {
   var items = [];
-  var ga = gaItem(bal);
+  var ga = gaItem(bal, (function() {
+    bulkMenu(bal);
+  }));
   if (ga) items.push(ga);
   if (!items.length) {
     say(bulkNone(bal));
@@ -9516,13 +10441,14 @@ function renderPower(first) {
       }), true);
     }), true, known ? '끄면 매수·매도 전부 멈춤 (손절·익절 포함)' : '⚠ 지금 상태를 못 읽었습니다 — 컴퓨터에서 확인하세요.');
     f.appendChild(row2);
-    f.appendChild(switchRow('💻 컴퓨터', true, '켜짐', '끄기', null, (function() {
+    f.appendChild(switchRow('💻 컴퓨터', true, '켜짐', '끄기', null, (function pcOff() {
       ask('컴퓨터를 30초 뒤에 끕니다.\n예약 매수·조건 매도가 전부 멎습니다.', (function() {
         ask('정말 끌까요? 다시 켜려면 컴퓨터 앞으로 가야 합니다.', (function() {
           botPost('/api/bot/shutdown', {
             confirm: true
           });
         }), true);
+        dlgBackTo(pcOff);
       }), true);
     }), true, '폰에서는 다시 못 켭니다'));
     f.appendChild(el('div', 'sec', '지금 돌고 있는 것'));
@@ -9861,6 +10787,39 @@ var MJ_CHIP = '', MJ_CHIPQ = '';
 
 var MJ_HELP = '칩 = 주요종목 3개 이상이 같이 든 테마·업종 · 위 칩을 누르면 그 묶음만 봅니다';
 
+var MJ_TAP = 0, MJ_TAP_MAX = 3e3, MJ_TAP_T = 0, MJ_LATE = false;
+
+function mjTapping() {
+  return !!MJ_TAP && Date.now() - MJ_TAP < MJ_TAP_MAX;
+}
+
+function mjTapEnd() {
+  if (!MJ_TAP) return;
+  MJ_TAP = 0;
+  clearTimeout(MJ_TAP_T);
+  setTimeout((function() {
+    if (!MJ_LATE || mjTapping()) return;
+    MJ_LATE = false;
+    if (TAB === 'major') renderMajor(); else if (TAB === 'market' && MK.sel) renderMarketGroup(false);
+  }), 0);
+}
+
+document.addEventListener('pointerdown', (function(e) {
+  if (!e.target || !e.target.closest) return;
+  if (!(TAB === 'major' && e.target.closest('#bd [data-mj]')) && !(TAB === 'market' && MK.sel && e.target.closest('#bd [data-mks]'))) return;
+  MJ_TAP = Date.now();
+  clearTimeout(MJ_TAP_T);
+  MJ_TAP_T = setTimeout(mjTapEnd, MJ_TAP_MAX);
+}), true);
+
+document.addEventListener('click', mjTapEnd, true);
+
+document.addEventListener('pointercancel', mjTapEnd, true);
+
+document.addEventListener('pointerup', (function() {
+  if (MJ_TAP) setTimeout(mjTapEnd, 400);
+}), true);
+
 function renderMajor(first) {
   TITLE.textContent = '주요종목';
   if (first && hasCache(MJ_URL)) first = false;
@@ -9887,6 +10846,10 @@ function renderMajor(first) {
     };
   })) ]).then((function(res) {
     if (TAB !== 'major') return;
+    if (mjTapping()) {
+      MJ_LATE = true;
+      return;
+    }
     var _am = amtMaps(res[2], res[3]), _wAmt = _am.w, _hAmt = _am.h;
     var d = res[0] || {};
     var f = document.createDocumentFragment();
@@ -9898,7 +10861,20 @@ function renderMajor(first) {
       swapBody(f);
       return;
     }
-    var items = d.items || [];
+    var items = (d.items || []).map((function(x, i) {
+      return [ x, i ];
+    })).sort((function(p, q) {
+      var a = p[0].chg, b = q[0].chg;
+      a = a == null || a === '' || isNaN(Number(a)) ? null : Number(a);
+      b = b == null || b === '' || isNaN(Number(b)) ? null : Number(b);
+      if (a === null || b === null) {
+        if (a !== b) return a === null ? 1 : -1;
+        return p[1] - q[1];
+      }
+      return b - a || p[1] - q[1];
+    })).map((function(p) {
+      return p[0];
+    }));
     var _chLive = Number(d.chg_live) || 0;
     f.appendChild(el('div', 'mut', '★ 주요종목 ' + items.length + '개 · ' + (_chLive ? '등락률 = 오늘 실시간 (' + (d.at || '') + ' 기준)' : '등락률 = 최종거래일 종가')));
     (d.errors || []).slice(0, 3).forEach((function(m) {
@@ -10129,6 +11105,8 @@ function fxTabGone(r, d, forTab) {
 }
 
 var FX_PICK_WAIT = 2500;
+
+var FX_PICK_APP_CODE = 17;
 
 function fxEl(id) {
   return document.getElementById(id);
@@ -10717,11 +11695,14 @@ function fxPick() {
   if (fxNotLoaded('사진을 넣어 주세요')) return;
   FX.caret = FX.touched ? [ ta.selectionStart || 0, ta.selectionEnd || 0 ] : [ ta.value.length, ta.value.length ];
   var opened = false;
+  var appPicks = !!APP_VER[2] && parseInt(APP_VER[2], 10) >= FX_PICK_APP_CODE;
   function mark() {
     opened = true;
   }
-  window.addEventListener('blur', mark);
-  document.addEventListener('visibilitychange', mark);
+  if (!appPicks) {
+    window.addEventListener('blur', mark);
+    document.addEventListener('visibilitychange', mark);
+  }
   inp.value = '';
   inp.onchange = function() {
     opened = true;
@@ -10731,6 +11712,7 @@ function fxPick() {
   try {
     inp.click();
   } catch (e) {}
+  if (appPicks) return;
   setTimeout((function() {
     window.removeEventListener('blur', mark);
     document.removeEventListener('visibilitychange', mark);
@@ -11026,8 +12008,10 @@ function pbHead(mb, o) {
   h1.appendChild(el('span', 'pbn', o.n + '종목 · ' + o.rows + '건' + (o.rows ? ' · ' + manWon(o.sum) : '')));
   p.appendChild(h1);
   if (o.pick) p.appendChild(el('div', 'pbx', '«' + o.pick.label + '» 만 보는 중 · 전체 ' + o.total + '종목'));
-  var b = o.bio;
-  if (!b || b.__err) {
+  var b = o.bio, bnr = bioNotReady(b);
+  if (bnr) {
+    p.appendChild(el('span', 'pbbio', '🧪 바이오 못 셈 — ' + bnr));
+  } else if (!b || b.__err) {
     p.appendChild(el('span', 'pbbio', '🧪 바이오 비중을 못 읽었습니다' + (b && b.__err ? ' — ' + b.__err.message : '')));
   } else {
     var hh = b.hold || {}, ww = b.wait || {};
@@ -11303,6 +12287,8 @@ var ORD_CHIPQ = '';
 
 var BAL_CHIP = '', BAL_CHIPQ = '';
 
+var BAL_TN_KEY = 'today|new', BAL_TN_LABEL = '🆕 오늘 편입';
+
 var BAL_Q = '', BAL_Q_LATE = false;
 
 var BAL_CHO = 'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ';
@@ -11540,6 +12526,37 @@ function dayLabel(ts) {
   return t.getMonth() + 1 + '월 ' + t.getDate() + '일 (' + w + ')' + (same ? ' · 오늘' : '');
 }
 
+var ALERT_SUB = '';
+
+var AL_SELL_DOWN = {
+  'sell.손절': 1,
+  'sell.본절': 1,
+  'sell.아래로익절': 1
+};
+
+var AL_SUBS = [ {
+  key: 'selldown',
+  label: '🔻 매도',
+  grps: [ 'trade' ],
+  none: '매도 알림 없음',
+  on: '🔻 매도만 보는 중',
+  tip: '아래로 닿아 판 알림만 봅니다 — 손절·본절·아래로익절의 발사·체결·거부\n(위로익절·구분 모르는 매도·바로 매도·직접 매매는 빠집니다)',
+  hit: function(a) {
+    return AL_SELL_DOWN.hasOwnProperty(String(a && a.kind || ''));
+  }
+} ];
+
+function alSub(key) {
+  for (var i = 0; i < AL_SUBS.length; i++) {
+    if (AL_SUBS[i].key === key) return AL_SUBS[i];
+  }
+  return null;
+}
+
+function alSubShown(s) {
+  return !ALERT_CH || s.grps.indexOf(ALERT_CH) >= 0;
+}
+
 function renderAlerts(first) {
   if (first && hasCache('/api/alerts?limit=200')) first = false;
   TITLE.textContent = '알림';
@@ -11556,6 +12573,9 @@ function renderAlerts(first) {
     showBadge(0);
     var kp = d && d.keep;
     var gitems = [];
+    var gearMenu = function() {
+      askPick('알림 설정', gitems);
+    };
     if (kp) gitems.push([ '⏳ 자동 삭제: ' + kp.label, function() {
       askPick('알림 기록 자동 삭제 — 지금 «' + kp.label + '»', (kp.options || []).map((function(o) {
         return [ (o[0] === kp.hours ? '✅ ' : '') + o[1], function() {
@@ -11564,17 +12584,19 @@ function renderAlerts(first) {
           });
         } ];
       })));
+      dlgBackTo(gearMenu);
     } ]);
     if (all.length) gitems.push([ '🗑 전체 지우기 (' + all.length + '건)', function() {
       ask('알림 기록 ' + all.length + '건을 모두 지울까요?\n되돌릴 수 없습니다.', (function() {
         botPost('/api/alerts/clear', {});
       }), true);
+      dlgBackTo(gearMenu);
     }, true ]);
     var gear = document.getElementById('hd-gear');
     if (gear) {
       gear.style.display = gitems.length ? '' : 'none';
       gear.onclick = function() {
-        askPick('알림 설정', gitems);
+        gearMenu();
       };
     }
     var weeks = {};
@@ -11606,7 +12628,7 @@ function renderAlerts(first) {
       var cw = el('div', 'chips');
       items.forEach((function(c) {
         var n = c[0] ? wk.filter((function(a) {
-          return (a.grp || 'etc') === c[0];
+          return alInCh(a, c[0]);
         })).length : wk.length;
         var b = el('button', '', c[1] + ' ' + n);
         if (c[0] === ALERT_CH) b.className = 'on';
@@ -11617,7 +12639,7 @@ function renderAlerts(first) {
         if (c[0] && !n) {
           b.disabled = true;
           b.style.opacity = '0.45';
-          b.title = _tip2 + _nl2 + _nl2 + '(이 주에는 없습니다)';
+          b.title = _tip2 + _nl2 + _nl2 + (c[0] === 'error' ? '(이 주에 안 풀린 문제가 없습니다 — 풀린 문제와 복구는 [전부] 에)' : '(이 주에는 없습니다)');
         } else {
           b.title = c[0] ? _tip2 : '이 주에 온 알림 전부';
           b.onclick = function() {
@@ -11631,13 +12653,45 @@ function renderAlerts(first) {
     }
     var _grps = d && d.groups || [];
     if (ALERT_CH && !wk.some((function(a) {
-      return (a.grp || 'etc') === ALERT_CH;
+      return alInCh(a, ALERT_CH);
     }))) ALERT_CH = '';
     f.appendChild(chipRow([ [ '', '전부' ] ]));
     if (_grps.length) f.appendChild(chipRow(_grps));
+    if (ALERT_CH === 'error') wk = wk.filter((function(a) {
+      return (a.grp || 'etc') !== 'error' || alInCh(a, 'error');
+    }));
     var list = ALERT_CH ? wk.filter((function(a) {
       return (a.grp || 'etc') === ALERT_CH;
     })) : wk;
+    var _sub = alSub(ALERT_SUB);
+    if (_sub && !alSubShown(_sub)) {
+      ALERT_SUB = '';
+      _sub = null;
+    }
+    var _subs = AL_SUBS.filter(alSubShown);
+    if (_subs.length) {
+      var sw = el('div', 'chips al-sub');
+      _subs.forEach((function(s) {
+        var n = list.filter(s.hit).length;
+        var b = el('button', s.key === ALERT_SUB ? 'on' : '', s.label + ' ' + n);
+        b.setAttribute('data-alsub', s.key);
+        b.title = s.tip + (n ? '' : '\n\n(이 주에는 없습니다)');
+        b.onclick = function() {
+          ALERT_SUB = ALERT_SUB === s.key ? '' : s.key;
+          renderAlerts();
+        };
+        sw.appendChild(b);
+      }));
+      f.appendChild(sw);
+    }
+    if (_sub) {
+      var _hid = list.length;
+      list = list.filter(_sub.hit);
+      _hid -= list.length;
+      var so = el('div', 'al-sub-on', _sub.on + (_hid ? ' · 다른 알림 ' + _hid + '건 숨김' : ''));
+      so.style.cssText = 'color:#b91c1c;font-size:12px;font-weight:600;margin:-3px 2px 9px';
+      f.appendChild(so);
+    }
     list = list.map((function(a, i) {
       return [ a, i ];
     })).sort((function(x, y) {
@@ -11646,7 +12700,7 @@ function renderAlerts(first) {
       return t[0];
     }));
     if (!list.length) {
-      f.appendChild(el('div', 'empty', all.length ? '이 주에는 해당하는 알림이 없습니다' : d.note || '아직 알림이 없습니다'));
+      f.appendChild(el('div', 'empty', _sub ? _sub.none : all.length ? '이 주에는 해당하는 알림이 없습니다' : d.note || '아직 알림이 없습니다'));
       swapBody(f);
       return;
     }
@@ -11660,7 +12714,8 @@ function renderAlerts(first) {
       }
       var isNew = ALERT_SEEN_AT > 0 && (a.ts || 0) > ALERT_SEEN_AT;
       var hv = HEAL.of(a);
-      var k = el('div', 'card' + (a.ok === false ? ' bad' : '') + (isNew ? ' new' : '') + (hv.healTs ? ' healed' : ''));
+      var _gray = !!(hv.healTs || hv.closed);
+      var k = el('div', 'card' + (a.ok === false ? ' bad' : '') + (isNew ? ' new' : '') + (_gray ? ' healed' : ''));
       var _ev = alEv(a);
       var t = new Date(_ev * 1e3);
       var _hm = function(d) {
@@ -11680,15 +12735,15 @@ function renderAlerts(first) {
         nm.appendChild(gl);
       }
       var _ttl = a.a && (a.a.name || a.a.title) || '';
-      if (!_ttl) _ttl = hv.rec ? '✅ 복구' : hv.healTs ? String(a.fn_label || '알림').replace(/^[^가-힣A-Za-z]+/, '') : a.fn_label || '알림';
+      if (!_ttl) _ttl = hv.rec ? '✅ 복구' : _gray ? String(a.fn_label || '알림').replace(/^[^가-힣A-Za-z]+/, '') : a.fn_label || '알림';
       nm.appendChild(document.createTextNode(_ttl));
       if (hv.healTs) {
-        var hn = el('span', 'healnote', '→ ' + alHealWhen(alEv(a), hv.healTs) + ' 복구됨');
-        hn.title = '이 문제는 그 뒤에 온 복구 알림으로 풀렸습니다' + (hv.what ? ' (' + hv.what + ')' : '');
+        var hn = el('span', 'healnote' + (hv.closed ? ' closed' : ''), '→ ' + (hv.after ? hv.after + ' ' : '') + (hv.closed ? '닫힘' : '복구됨'));
+        hn.title = hv.closed ? '이 문제는 복구 알림 없이 끝나 알림만 닫았습니다 — 까닭은 그 시각의 «☑ [닫힘]» 알림에 있습니다' : '이 문제는 그 뒤에 온 복구 알림으로 풀렸습니다' + (hv.what ? ' (' + hv.what + ')' : '');
         nm.appendChild(hn);
       }
       k.appendChild(nm);
-      var tag = el('span', 'tag' + (hv.rec ? ' ok' : hv.healTs ? ' h' : a.grp === 'error' ? ' s' : a.grp === 'trade' ? ' g' : ''), hv.rec ? '✅ 복구' : hv.healTs ? String(a.grp_label || '이상').replace(/^[^가-힣A-Za-z]+/, '') : a.grp_label || a.ch_label || a.ch || '');
+      var tag = el('span', 'tag' + (hv.rec ? ' ok' : _gray ? ' h' : a.grp === 'error' ? ' s' : a.grp === 'trade' ? ' g' : ''), hv.rec ? '✅ 복구' : _gray ? String(a.grp_label || '이상').replace(/^[^가-힣A-Za-z]+/, '') : a.grp_label || a.ch_label || a.ch || '');
       tag.title = '분류 탭: ' + (a.grp_label || '') + (a.fn_label ? '\n알림 종류: ' + a.fn_label : '') + (a.ch_label ? '\n보낸 곳: ' + a.ch_label + '봇' : '');
       var line = el('div', 'albody');
       line.appendChild(tag);
@@ -11696,6 +12751,11 @@ function renderAlerts(first) {
       k.appendChild(line);
       if (_fb) k.appendChild(_fb);
       if (a.ok === false) k.appendChild(el('div', 'mut', '⚠ 보내지 못했습니다'));
+      if (a.open === true) {
+        var _op = el('div', 'mut alopen', '🔒 복구 안 됨 · 자동 삭제 안 함');
+        _op.title = '이 문제의 복구 알림이 아직 오지 않아 보관 시간이 지나도 지우지 않습니다 — 복구 알림이 오면 보통 규칙으로 돌아갑니다 («전체 지우기» 로는 지워집니다)';
+        k.appendChild(_op);
+      }
       f.appendChild(k);
     }));
     swapBody(f);
@@ -11739,205 +12799,28 @@ function alFold(line, body, key) {
   return btn;
 }
 
-function alParse(a) {
-  var b = String(botAlertBody(a) || '').replace(/^\s+/, '');
-  var x = a.a || {}, w = '', e = b;
-  if (a.fn === 'send_worker_error') {
-    var m = /^🛑\s*worker 에러[^\n]*\n위치:\s*([^\n]*)\n에러:\s*([\s\S]*)$/.exec(b);
-    if (m) {
-      w = m[1].trim();
-      e = m[2];
-    } else if (x.where || x.error) {
-      w = String(x.where || '').trim();
-      e = String(x.error || '');
-    }
-  }
-  return {
-    fn: a.fn || '',
-    grp: a.grp || '',
-    w: w,
-    h: String(e).replace(/^\s+/, ''),
-    b: b
-  };
-}
-
-function _alRe(re, w) {
-  return function(p) {
-    return (w == null || p.w === w) && re.test(p.h) ? '' : null;
-  };
-}
-
-function _alKid(re, w) {
-  return function(p) {
-    var m = w == null || p.w === w ? re.exec(p.h) : null;
-    return m ? m[1] : null;
-  };
-}
-
-var AL_PAIRS = [ {
-  k: '테마분석 빌드',
-  p: function(p) {
-    return p.w === '테마분석 빌드(run_tt)' ? '' : null;
-  },
-  r: _alRe(/^✅ \[테마분석\] 빌드 정상 복구/)
-}, {
-  k: '주문 워커 죽음',
-  p: function(p) {
-    return p.fn === 'send_worker_dead' ? '' : null;
-  },
-  r: _alRe(/^✅ \[워커\] 주문 워커 정상 복구/)
-}, {
-  k: '지수 일봉 대체 소스',
-  p: _alRe(/^지수 일봉\(ka20006\) 실패/, '대체 소스 폴백'),
-  r: _alRe(/^✅ \[지수\] 증권사 지수 일봉\(ka20006\)/)
-}, {
-  k: '대체 소스(fdr)',
-  p: _alKid(/^(.+?) — 증권사가 아니라/, '대체 소스 폴백'),
-  r: _alKid(/^✅ \[(.+?)\] 증권사 원본으로/)
-}, {
-  k: '전 종목 시세 조회',
-  p: _alRe(/^전 종목\(/, '시세 조회'),
-  r: _alRe(/^✅ \[시세\] 현재가 조회 정상 복구/)
-}, {
-  k: 'Day 판정(지수 데이터)',
-  p: _alRe(/^🚨 지수 데이터 이상 —/),
-  r: _alRe(/^✅ \[지수데이터\] Day 판정 정상 복구/)
-}, {
-  k: '실시간 체결 감시',
-  p: _alRe(/^⚠ 실시간 체결 감시가 .* 부터 끊겼습니다/),
-  r: _alRe(/^✅ 실시간 체결 감시 복구/),
-  end: _alRe(/^⏹ 실시간 (체결 감시가|끊김 알림을 닫습니다)/)
-}, {
-  k: '웹서버 꺼짐',
-  p: _alRe(/^(🔴 웹서버 꺼짐|⚠ 웹서버를 \d+번 다시 켰는데도)/),
-  r: _alRe(/^✅ 웹서버 복구/)
-}, {
-  k: '매물대 거래정지 목록',
-  p: _alRe(/^⚠ \[매물대\] 증권사 거래정지 목록을 받지 못했습니다/),
-  r: _alRe(/^✅ \[매물대\] 증권사 거래정지 목록 정상 복구/)
-}, {
-  k: '주식봇 명령 수신',
-  p: _alRe(/^주식봇 명령 수신 불가/),
-  r: _alRe(/^주식봇 명령 수신 정상 복구/)
-}, {
-  k: '누적손익 대체 소스',
-  p: function(p) {
-    return p.w === '누적손익 대체 소스' ? '' : null;
-  },
-  r: _alRe(/^✅/, '누적손익 원본 복구')
-}, {
-  k: '매매원장 매일 점검',
-  p: _alRe(/^🔴 매매원장 매일 점검 실패/),
-  r: _alRe(/^✅ 매매원장 매일 점검이 다시 정상으로/)
-}, {
-  k: '감시견(워치독)',
-  p: _alRe(/^⚠ 감시견\(워치독\)이 /),
-  r: _alRe(/^✅ 감시견\(워치독\) 정상 복구/)
-}, {
-  k: '매수 발사 기록',
-  p: _alKid(/접수됐는데\(주문번호 (\d+)\)/, 'buy-record'),
-  r: _alKid(/^✅[^\n]*발사 기록 복구[\s\S]*\(주문번호 (\d+)/, 'buy-record')
-}, {
-  k: '매도 발사 기록',
-  p: _alKid(/접수됐는데\(주문번호 (\d+)\)/, 'sell-record'),
-  r: _alKid(/^✅[^\n]*발사 기록 복구[\s\S]*\(주문번호 (\d+)/, 'sell-record')
-}, {
-  k: '매도 다시 걸기 장부 기록',
-  p: _alKid(/주문번호 (\d+)\)는 증권사에 접수됐는데/, 'sell-resell'),
-  r: function(p) {
-    var m = p.w === 'sell-resell' && /^✅/.test(p.h) ? /\n적은 주문번호 ([\d,]+)/.exec(p.h) : null;
-    return m ? m[1].split(',') : null;
-  }
-}, {
-  k: '바이오 분류 월간 점검',
-  sys: true,
-  p: _alRe(/^🧪 바이오 분류 월간 점검이 실패했습니다/),
-  r: function(p) {
-    return p.fn === 'send_system' && p.b.indexOf('(지난번 점검 실패는 이번에 풀렸습니다)') >= 0 ? '' : null;
-  }
-} ];
-
 function alEv(a) {
   var ts = a && a.ts || 0;
   return a && a.ev && a.ev < ts ? a.ev : ts;
 }
 
 function alHeal(all) {
-  var idx = (all || []).map((function(a, i) {
-    return [ a, i ];
-  }));
-  idx.sort((function(x, y) {
-    return alEv(x[0]) - alEv(y[0]) || y[1] - x[1];
-  }));
-  var info = [], open = {};
-  function put(a, v) {
-    info.push([ a, v ]);
-  }
-  idx.forEach((function(t) {
-    var a = t[0];
-    if (a.grp !== 'error' && a.fn !== 'send_system') return;
-    var p = alParse(a), v = {
-      rec: false,
-      healTs: 0,
-      what: ''
-    };
-    var done = false, isRec = false;
-    AL_PAIRS.forEach((function(P, pi) {
-      if (done || a.grp !== 'error' && !P.sys) return;
-      var rk = P.r(p);
-      if (rk !== null && rk !== undefined) {
-        done = isRec = true;
-        (Array.isArray(rk) ? rk : [ rk ]).forEach((function(key) {
-          (open[pi + '|' + key] || []).forEach((function(pv) {
-            pv.healTs = alEv(a);
-            pv.what = P.k;
-          }));
-          open[pi + '|' + key] = [];
-        }));
-        v.what = P.k;
-        return;
-      }
-      if (P.end) {
-        var ek = P.end(p);
-        if (ek !== null && ek !== undefined) {
-          done = true;
-          open[pi + '|' + ek] = [];
-          return;
-        }
-      }
-    }));
-    if (!done && a.grp === 'error') {
-      AL_PAIRS.forEach((function(P, pi) {
-        if (done) return;
-        var pk = P.p(p);
-        if (pk !== null && pk !== undefined) {
-          done = true;
-          (open[pi + '|' + pk] = open[pi + '|' + pk] || []).push(v);
-        }
-      }));
-    }
-    if (a.grp === 'error' && (isRec || /^✅/.test(p.h))) v.rec = true;
-    put(a, v);
-  }));
-  var none = {
-    rec: false,
-    healTs: 0,
-    what: ''
-  };
   return {
     of: function(a) {
-      for (var i = 0; i < info.length; i++) {
-        if (info[i][0] === a) return info[i][1];
-      }
-      return none;
+      return {
+        rec: !!(a && a.rec),
+        healTs: +(a && a.heal || 0),
+        what: a && a.what || '',
+        after: String(a && a.heal_after || ''),
+        closed: !!(a && a.closed)
+      };
     }
   };
 }
 
-function alHealWhen(pts, hts) {
-  var h = new Date(hts * 1e3), p = new Date(pts * 1e3);
-  var hm = ('0' + h.getHours()).slice(-2) + ':' + ('0' + h.getMinutes()).slice(-2);
-  return h.toDateString() === p.toDateString() ? hm : h.getMonth() + 1 + '/' + h.getDate() + ' ' + hm;
+function alInCh(a, ch) {
+  if ((a && a.grp || 'etc') !== ch) return false;
+  return ch !== 'error' || !(a.rec || a.heal || a.closed);
 }
 
 function botAlertBody(a) {
@@ -12043,7 +12926,7 @@ window.appBack = function() {
 function appBackStep() {
   try {
     if (DLG && DLG.classList.contains('on')) {
-      dlgClose(null);
+      if (!dlgStepBack()) dlgClose(null);
       return true;
     }
     if (AM.open) {
@@ -12146,7 +13029,7 @@ function go(tab, dir) {
     renderBot(true);
   } else if (tab === 'major') {
     renderMajor(true);
-    TIMER = setInterval(renderMajor, 3e4);
+    TIMER = setInterval(renderMajor, 1e4);
   } else if (tab === 'fixnotes') {
     renderFix(_prev !== 'fixnotes');
     TIMER = setInterval(fxPoll, 2e4);
@@ -12155,7 +13038,10 @@ function go(tab, dir) {
     TIMER = setInterval(renderHoliday, 6e5);
   } else if (tab === 'market') {
     renderMarket(true, true);
-    TIMER = setInterval(renderMarket, 3e4);
+    var _mkN = 0;
+    TIMER = setInterval((function() {
+      if (MK.sel || ++_mkN % 3 === 0) renderMarket();
+    }), 1e4);
   } else if (tab === 'today') {
     renderToday(true);
     TIMER = setInterval(renderToday, 6e3);
