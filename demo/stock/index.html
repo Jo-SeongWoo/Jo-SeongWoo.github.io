@@ -22,7 +22,17 @@
   .hd b { flex:1; font-size:26px; font-weight:800; letter-spacing:-.8px; }
   .hd .dot { width:9px; height:9px; border-radius:5px; background:#16a34a; }
   .hd .dot.off { background:#dc2626; }
-  .bd { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:2px 13px 16px; }
+  .bd { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior-y:contain; padding:2px 13px 16px; }
+  
+  #ptr { position:fixed; left:50%; z-index:60; display:none; pointer-events:none; white-space:nowrap;
+        background:#fff; color:#475569; font-size:13.5px; font-weight:700; padding:7px 15px; border-radius:999px;
+        box-shadow:0 2px 10px rgba(15,23,42,.2); }
+  #ptr.on { display:block; }
+  #ptr.ready { background:#1a5490; color:#fff; }
+  #ptr.busy { color:#1a5490; }
+  #ptr.busy::before { content:''; display:inline-block; width:12px; height:12px; margin-right:7px; vertical-align:-1px;
+        border:2px solid #c7d6e6; border-top-color:#1a5490; border-radius:50%; animation:ptrspin .8s linear infinite; }
+  @keyframes ptrspin { to { transform:rotate(360deg); } }
   
   @keyframes slideFromR { from { transform:translateX(26px); opacity:.25 } to { transform:none; opacity:1 } }
   @keyframes slideFromL { from { transform:translateX(-26px); opacity:.25 } to { transform:none; opacity:1 } }
@@ -49,7 +59,7 @@
         margin-bottom:9px; font-size:13.5px; line-height:1.6; }
   .card .nm { font-weight:700; font-size:16px; color:#0b1220; letter-spacing:-.4px; }
   .card .rt { float:right; font-size:14px; font-weight:700; }
-  .up { color:#dc2626; } .dn { color:#2563eb; } .mut { color:#9aa3af; font-size:12.5px; }
+  .up { color:#000000; } .dn { color:#D42020; } .mut { color:#9aa3af; font-size:12.5px; }
   .tag { display:inline-block; font-size:11.5px; padding:2px 9px; border-radius:6px;
         border:none; background:#f1f5f9; color:#475569; margin-right:5px; }
   .tag.s { background:#fef2f2; color:#b91c1c; }
@@ -93,6 +103,7 @@
         padding:15px; font:inherit; font-size:15px; font-weight:600; color:#111827;
         text-align:left; }
   .mbtn:active { opacity:.72; }
+  .mfail { padding:8px 12px; color:#b45309; }   
   .mlist { margin-top:8px; border:none; border-radius:12px; background:#fff;
         overflow:hidden; }
   .mlist button { display:block; width:100%; background:#fff; border:none;
@@ -168,6 +179,8 @@
         padding:14px 15px; margin-bottom:11px; }
   .topsw .top { display:flex; align-items:center; gap:8px; }
   .topsw .lb { flex:1; font-size:15px; font-weight:700; }
+  .topsw .swwait { font-size:13px; color:#9aa3af; }
+  .topsw .swwait.bad { color:#c2410c; text-align:right; flex:2; }
   .topsw .why { margin-top:10px; padding-top:10px; border-top:1px solid #eef1f5;
         font-size:12px; color:#6b7280; line-height:1.6; }
   
@@ -208,7 +221,9 @@
   .bt-g { display:grid; grid-template-columns:1fr 1fr; row-gap:8px; column-gap:12px; }
   .bt-lb { font-size:12px; color:#6b7280; line-height:1.3; }
   .bt-v { font-size:16px; font-weight:800; letter-spacing:-.4px; line-height:1.35; color:#0b1220; word-break:keep-all; }
-  .bt-v.up { color:#dc2626; } .bt-v.dn { color:#2563eb; }
+  .bt-v.up { color:#000000; } .bt-v.dn { color:#D42020; }
+  
+  .bt-v.pv.up, .gap.pv.up, .card > .rt.pv.up, .rk > .pv.up { color:#000000; } .bt-v.pv.dn, .gap.pv.dn, .card > .rt.pv.dn, .rk > .pv.dn { color:#D42020; }
   .bt-v small { font-size:12.5px; font-weight:700; letter-spacing:0; white-space:nowrap; }   
   .bt-x { font-size:12px; color:#9aa3af; line-height:1.4; }
   
@@ -220,7 +235,7 @@
         -webkit-tap-highlight-color:transparent; user-select:none; }
   .bt-fold .bt-fs { font-size:15px; font-weight:800; color:#0b1220; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
   .bt-fold .bt-fs .bt-fl { font-size:12.5px; font-weight:600; color:#475569; }
-  .bt-fold .bt-fs.up .bt-fv { color:#dc2626; } .bt-fold .bt-fs.dn .bt-fv { color:#2563eb; }
+  .bt-fold .bt-fs.up .bt-fv { color:#000000; } .bt-fold .bt-fs.dn .bt-fv { color:#D42020; }
   
   .bt-fold .bt-tg { margin-left:auto; flex:0 0 auto; font-size:13px; font-weight:700; color:#1a5490; padding:2px 4px 2px 10px; }
   .baltop:not(.folded) .bt-fs { display:none; }
@@ -231,14 +246,14 @@
   .bt-fold .bt-fs2 .bt-fl { font-size:12.5px; font-weight:600; color:#475569; }
   .bt-fold .bt-fs2 .bt-fv { white-space:nowrap; }
   .bt-fold .bt-fs2 .bt-fx { font-size:12.5px; font-weight:600; color:#9aa3af; }
-  .bt-fold .bt-fs2.up .bt-fv { color:#dc2626; } .bt-fold .bt-fs2.dn .bt-fv { color:#2563eb; }
+  .bt-fold .bt-fs2.up .bt-fv { color:#000000; } .bt-fold .bt-fs2.dn .bt-fv { color:#D42020; }   
   
   .bt-fold .bt-fs3 { font-size:14px; font-weight:800; color:#0b1220; line-height:1.3; word-break:keep-all; min-width:0; }
   .bt-fold .bt-fs3 .bt-fl { font-size:12.5px; font-weight:600; color:#475569; }
   .bt-fold .bt-fs3 .bt-fv { white-space:nowrap; }
   .bt-fold .bt-fs3 .bt-fx { font-size:12.5px; font-weight:600; color:#9aa3af; }
   .bt-fold .bt-fs3 .bt-fsub { font-size:12px; font-weight:500; color:#64748b; letter-spacing:-.3px; white-space:nowrap; }   
-  .bt-fold .bt-fs3.up .bt-fv { color:#dc2626; } .bt-fold .bt-fs3.dn .bt-fv { color:#2563eb; }
+  .bt-fold .bt-fs3.up .bt-fv { color:#000000; } .bt-fold .bt-fs3.dn .bt-fv { color:#D42020; }
   .baltop.folded .bt-cnt { display:none; }
   .baltop.folded .bt-fold { margin-bottom:-4px; }
   .baltop.folded .bt-g, .baltop.folded .sum-warn, .baltop.folded > .bt-x { display:none; }
@@ -266,7 +281,7 @@
   .stk .hdr .cnt { margin-left:auto; font-size:12px; font-weight:600; color:#9aa3af; }
   
   .stk .hdr .gap { margin-left:8px; font-size:14px; font-weight:700; }
-  .gap.up { color:#dc2626; } .gap.dn { color:#2563eb; }
+  .gap.up { color:#000000; } .gap.dn { color:#D42020; }
   .gap.sm { margin-left:7px; font-size:12.5px; font-weight:700; }
   
   .warnbox { border:none; background:#fff; border-radius:12px;
@@ -401,10 +416,34 @@
   .rskp.rskp-b { color:#b45309; background:#fff7ed; }
   .rskn.tap .rskp { text-decoration:underline; text-underline-offset:3px; }
   
-  .rskpast { margin-top:8px; padding-top:7px; border-top:1px dashed #d5dbe1; }
-  .rskpast > .rskpt { font-size:12.5px; font-weight:700; color:#64748b; }
-  .rskpast > .rskd { font-size:12.5px; font-weight:700; color:#374151; margin-top:7px; padding:2px 0 1px; }
-  .rskpast > .rskd + .strow, .rskpast > .rskd + .sgrp > .strow:first-child, .rskpast > .rskd + .ddrow { border-top:none; }
+  
+  .rskpast { margin-top:9px; }
+  .rskc .rskld { font-size:14px; font-weight:800; color:#b91c1c; margin:2px 0 3px; }
+  .rskpast > .sec.fold.rskpt { margin:0; padding:9px 3px 9px 12px; border-left:none; border-radius:10px; background:#f1f3f7;
+        font-size:13px; font-weight:700; color:#64748b; letter-spacing:0; }
+  .rskpast > .sec.fold.rskpt:not(.shut) { border-radius:10px 10px 0 0; }
+  .rskpast > .sec.fold.rskpt .fsum.fin { font-size:13px; font-weight:700; }
+  .rskpast > .sec.fold.rskpt .ftg { color:#64748b; }
+  .rskpb { display:flow-root; background:#f1f3f7; border-radius:0 0 10px 10px; padding:0 12px 8px; }
+  .rskpb > .ddnote:first-child { margin-top:0; }
+  .rskpb > .rskd { font-size:12.5px; font-weight:700; color:#374151; margin-top:7px; padding:2px 0 1px; }
+  .rskpb .strow, .rskpb .ddrow { border-top-color:#e2e6ec; }
+  .rskpb > .rskd + .strow, .rskpb > .rskd + .sgrp > .strow:first-child, .rskpb > .rskd + .ddrow { border-top:none; }
+  
+  .sec.fold .fsum.rkb { display:flex; gap:4px; padding:3px 8px 2px 0; }
+  .rkc { flex:1 1 0; min-width:0; background:#fff; border-radius:9px; padding:6px 0 5px; text-align:center; line-height:1.15; }
+  .rkc .rkv { display:block; font-size:18px; line-height:21px; font-weight:800; color:#dc2626; }
+  .rkc .rkl { display:block; margin-top:2px; font-size:10.5px; font-weight:600; letter-spacing:-.4px; color:#475569; white-space:nowrap; }
+  .rkc.rkz .rkv { color:#cbd5e1; }
+  .rkc.rkz .rkl { color:#94a3b8; }
+  .rkc.rkg { background:#f1f5f9; }
+  .rkc.rkg .rkv { color:#475569; }
+  .rkc.rkg.rkz .rkv { color:#cbd5e1; }
+  .rkc .rkq { color:#b45309; }
+  .rkc.rkb0 { background:#fff7ed; }
+  .rkc.rkb0 .rkl { color:#b45309; }
+  .rkc .rkv.rkw { font-size:12.5px; color:#64748b; white-space:nowrap; letter-spacing:-.4px; }
+  .rkc.tap { cursor:pointer; }
   .ddrow .dday { font-size:11.5px; font-weight:700; color:#475569; background:#f1f5f9; border-radius:6px; padding:0 5px; }
   
   .thm { font-size:11.5px; font-weight:500; color:#8b94a1; line-height:1.5; letter-spacing:0;
@@ -500,7 +539,7 @@
   
   
   .card > .dchg { margin-top:2px; font-size:12.5px; font-weight:700; color:#6b7280; white-space:nowrap; }
-  .card > .dchg.up { color:#dc2626; } .card > .dchg.dn { color:#2563eb; }
+  .card > .dchg.up { color:#000000; } .card > .dchg.dn { color:#D42020; }
   
   #dlg.sheet { align-items:flex-end; padding:0; }
   #dlg.sheet .box { max-width:none; border-radius:18px 18px 0 0; max-height:86vh;
@@ -720,6 +759,7 @@
   .gspwhy { margin:5px 16px 2px; font-size:12px; color:#6b7280; line-height:1.5; word-break:keep-all; overflow-wrap:anywhere; }
   .gspwhy.bad { color:#b91c1c; font-weight:700; }
   .gspwhy:empty { display:none; }      
+  .gspwhy.gswait { margin:2px 20px 10px; font-size:14px; }   
   .gsbody.load .gslist { opacity:.5; }
   #dlg.sheet .btns button.gsok.gsoff { opacity:.45; }
   
@@ -745,7 +785,7 @@
   .gsc:not(.on) .gn { color:#9ca3af; }      
   .gsc .gr { flex:0 0 auto; text-align:right; }
   .gsc .gp { font-size:15px; font-weight:700; color:#111827; white-space:nowrap; }
-  .gsc .gp.up { color:#d23b3b; } .gsc .gp.dn { color:#2f6fd6; }
+  .gsc .gp.up { color:#000000; } .gsc .gp.dn { color:#D42020; }
   .gsc .gq { font-size:11.5px; font-weight:700; color:#6b7280; margin-top:1px; white-space:nowrap; }   
   #dlg.sheet .btns button.gsok.gsnone { pointer-events:none; }
   
@@ -893,8 +933,6 @@
   .mk-ic .jl { margin-top:7px; margin-bottom:2px; font-size:11px; font-weight:600; color:#b08968; }
   .mk-ic .jl.fin { color:#8a94a6; }
   .mk-ic .j.live, .mk-ic .j.fin { margin-top:0; font-size:13px; font-weight:800; background:#f1f5f9; color:#334155; }
-  .mk-ic .j.ftd { background:#fee2e2; color:#b91c1c; }
-  .mk-ic .j.dd { background:#dbeafe; color:#1d4ed8; }
   .mk-ic .j.none { background:#f3f4f6; color:#9aa3af; font-weight:600; }
   
   .mk-ic.st-good { background:#d9ecd9; }
@@ -909,6 +947,18 @@
   .mk-ic[class*="st-"]:active { filter:brightness(.95); }
   
   .mk-ic.st-good, .mk-ic.st-semi, .mk-ic.st-bad, .mk-ic.st-neutral { box-shadow:inset 0 0 0 1px rgba(15,23,42,.08); }
+  
+  .mk-ic.st-good .j { background:rgba(255,255,255,.55); color:#2d6a2d; }
+  .mk-ic.st-semi .j { background:rgba(255,255,255,.55); color:#6e5a1a; }
+  .mk-ic.st-bad .j { background:rgba(255,255,255,.55); color:#832222; }
+  .mk-ic.st-neutral .j { background:rgba(255,255,255,.55); color:#555; }
+  
+  .mk-ic.st-reset { background:#c4d3e6; box-shadow:inset 0 0 0 1px rgba(15,23,42,.08); }
+  .mk-ic.st-reset .n, .mk-ic.st-reset .v, .mk-ic.st-reset .c { color:#234A78; }
+  .mk-ic.st-reset .j { background:rgba(255,255,255,.55); color:#234A78; }
+  .mk-ic.st-day1 { background:#d6cbe6; box-shadow:inset 0 0 0 1px rgba(15,23,42,.08); }
+  .mk-ic.st-day1 .n, .mk-ic.st-day1 .v, .mk-ic.st-day1 .c { color:#4A3672; }
+  .mk-ic.st-day1 .j { background:rgba(255,255,255,.55); color:#4A3672; }
   .mk-ic .j.pre { background:#eef2ff; color:#3730a3; }   
   .mk-row { display:flex; align-items:center; gap:8px; }
   .mk-rk { flex:0 0 20px; font-size:12px; font-weight:800; color:#9aa3af; text-align:center; }
@@ -917,6 +967,7 @@
         letter-spacing:-.3px; }
   .mk-sub { font-size:11.5px; color:#9aa3af; margin-top:1px; }
   .mk-cg { flex:0 0 auto; font-size:14px; font-weight:800; min-width:58px; text-align:right; }
+  .mk-cg.up { color:#000000; } .mk-cg.dn { color:#D42020; }
   .mk-star { flex:0 0 auto; border:none; background:none; font:inherit; font-size:21px; line-height:1; padding:4px 0 4px 6px;
         color:#cbd2db; cursor:pointer; }
   .mk-star.on { color:#f59e0b; }
@@ -1221,17 +1272,15 @@ function mkStarBtn(on, fn) {
 
 function mkStCls(it) {
   if (!it || !it.judge) return 'st-none';
+  if (/^리셋/.test(String(it.judge))) return 'st-reset';
   var s = it.state !== undefined ? it.state : String(it.judge).split('(')[0];
   s = String(s || '').toUpperCase().replace(/[\s-]/g, '');
   if (!s) return 'st-none';
-  if (s === 'FTD' || s === 'DAY1') return 'st-good';
+  if (s === 'DAY1') return 'st-day1';
+  if (s === 'FTD') return 'st-good';
   if (s === 'SEMIFTD') return 'st-semi';
   if (s === 'DD') return 'st-bad';
   return 'st-neutral';
-}
-
-function mkJudgeCls(j) {
-  return /^FTD\b/i.test(j || '') ? ' ftd' : /^DD\b/i.test(j || '') ? ' dd' : '';
 }
 
 function mkIndexCards(ix) {
@@ -1255,16 +1304,16 @@ function mkIndexCards(ix) {
       jc += ' none';
     } else if (live_) {
       jt = it.judge;
-      jc += ' live' + mkJudgeCls(it.judge);
+      jc += ' live';
     } else {
       jt = it.judge;
-      jc += ' fin' + mkJudgeCls(it.judge);
+      jc += ' fin';
       if (it.day != null && !/^Day ?1\b/i.test(it.judge)) jt += ' · Day ' + it.day;
     }
     var jb = el('div', jc, jt);
     function why() {
       if (pre_) {
-        say([ it.name + '  —', '', '⏳ 장 전 (09:00 시작)', '', '장 열리는 날 08:00~09:00 에는 어제 값을 지우고 비워 둡니다.', '09:00 에 장이 열리면 마감예상 판정으로 바뀝니다.' ].join('\n'));
+        say([ it.name + '  —', '', '⏳ 장 전 (09:00 시작)', '', '장 열리는 날 07:00~09:00 에는 어제 값을 지우고 비워 둡니다.', '09:00 에 장이 열리면 마감예상 판정으로 바뀝니다.' ].join('\n'));
         return;
       }
       var L = [ it.name + ' ' + mkNum(it.value) + '  ' + mkPct(it.chg_pct), '' ];
@@ -1326,6 +1375,7 @@ function mkGroupRow(r, rank, both, lm) {
       dim: r.dim,
       name: r.name
     };
+    tabFillStart('market');
     renderMarket(true);
   };
   return k;
@@ -1610,14 +1660,32 @@ function mkApplyFind(noLoad) {
 }
 
 function mkRisk(lv) {
+  if (tabPend(lv)) {
+    var gw = document.createDocumentFragment();
+    gw.appendChild(el('div', 'sec', '🚨 위험신호'));
+    gw.appendChild(el('div', 'empty', TAB_WAIT));
+    return foldSec(gw, 'risk', [ {
+      t: TAB_WAIT
+    } ], null, true);
+  }
   if (!lv || lv.__err) {
     var g = document.createDocumentFragment();
     g.appendChild(el('div', 'sec', '🚨 위험신호'));
     g.appendChild(el('div', 'err', '⚠ 위험신호를 못 읽었습니다 — ' + (lv ? mkWhy(lv) : '답이 비었습니다')));
-    return foldSec(g, 'risk', [ {
-      t: '못 읽음',
-      c: 'fbad'
-    } ], null, true);
+    var gh = g.firstChild, gw = function() {
+      say('위험신호를 못 읽었습니다 — ' + (lv ? mkWhy(lv) : '답이 비었습니다'));
+    };
+    foldSec(g, 'risk', null, null, true);
+    riskBoard(gh, [ [ 'stop', '손절' ], [ 'be', '본절' ], [ 'down', '아래로익절' ], [ 'dd', '매도우세' ], [ 'past', '이전 거래일' ] ].map((function(c) {
+      return {
+        k: c[0],
+        l: c[1],
+        q: true,
+        why: gw,
+        g: c[0] === 'past'
+      };
+    })));
+    return g;
   }
   var fr = riskSigFrag(lv);
   thmDecorate(fr);
@@ -1667,7 +1735,7 @@ function renderMarket(first, open) {
   }
   if (first && hasCache(MK_URL)) first = false;
   if (first) BD.textContent = '불러오는 중…';
-  Promise.all([ ov, getJSONc('/api/bot/orders_live').catch((function(e) {
+  tabAll('market', [ ov, getJSONc('/api/bot/orders_live').catch((function(e) {
     return {
       __err: e
     };
@@ -1675,9 +1743,10 @@ function renderMarket(first, open) {
     return {
       __err: e
     };
-  })) ]).then((function(res) {
+  })) ], [ 0 ]).then((function(res) {
     tdBadgeSet(lvRead(res[1]));
     if (TAB !== 'market' || MK.sel || seq !== MK.seq) return;
+    chIdxWarm();
     if (balQTapping()) {
       MK_Q_LATE = 'all';
       return;
@@ -1784,7 +1853,7 @@ function renderMarketGroup(first) {
   var sel = MK.sel, url = mkGroupUrl(sel);
   if (first && hasCache(url)) first = false;
   if (first) BD.textContent = '불러오는 중…';
-  Promise.all([ getJSONc(url).catch((function(e) {
+  tabAll('market', [ getJSONc(url).catch((function(e) {
     return {
       __err: e
     };
@@ -1796,7 +1865,7 @@ function renderMarketGroup(first) {
     return {
       __err: e
     };
-  })) ]).then((function(res) {
+  })) ], [ 0 ]).then((function(res) {
     var d = res[0];
     if (TAB !== 'market' || MK.sel !== sel) return;
     if (mjTapping()) {
@@ -1811,6 +1880,7 @@ function renderMarketGroup(first) {
     bk.onclick = function() {
       navBack((function() {
         MK.sel = null;
+        tabFillStart('market');
         renderMarket(true, true);
       }));
     };
@@ -1921,7 +1991,7 @@ function renderMarketGroup(first) {
   .td-sum .n small { font-size:11.5px; font-weight:600; color:#9aa3af; margin-left:4px; }
   .td-sum .v { font-size:16px; font-weight:800; color:#0b1220; white-space:nowrap; letter-spacing:-.3px; }
   .td-sum .r.big .v { font-size:19px; }
-  .td-sum .v.up { color:#dc2626; } .td-sum .v.dn { color:#2563eb; } .td-sum .v.mut { color:#9aa3af; font-size:15px; }
+  .td-sum .v.up { color:#000000; } .td-sum .v.dn { color:#D42020; } .td-sum .v.mut { color:#9aa3af; font-size:15px; }
   .td-sum .w { font-size:11.5px; color:#b91c1c; padding:0 0 5px; line-height:1.45; word-break:break-all; }
   
   .td-sum .psum { font-size:11.5px; font-weight:600; color:#9aa3af; text-align:right; padding:0 0 5px; margin-top:-2px;
@@ -1939,6 +2009,7 @@ function renderMarketGroup(first) {
   .td-sd.s { color:#1d4ed8; background:#e8effd; }
   .td-sub { font-size:12px; color:#4b5563; margin-top:1px; line-height:1.45; word-break:keep-all; }
   .td-pl { flex:0 0 auto; text-align:right; font-size:13.5px; font-weight:800; white-space:nowrap; padding-top:1px; }
+  .td-pl.up { color:#000000; } .td-pl.dn { color:#D42020; }
   .td-pl .k { display:block; font-size:10.5px; font-weight:600; color:#9aa3af; }
   .td-why { font-size:11px; color:#9aa3af; margin-top:3px; line-height:1.45; word-break:break-all; }
   
@@ -1954,7 +2025,7 @@ function renderMarketGroup(first) {
   .td-st .td-c0 { font-weight:700; font-size:14.5px; color:#0b1220; letter-spacing:-.3px; }
   .td-st .td-c1, .td-st .td-c2 { font-size:13px; font-weight:600; color:#374151; letter-spacing:-.2px; }
   .td-st .td-c3 { font-size:13px; font-weight:800; color:#0b1220; letter-spacing:-.2px; }
-  .td-st .td-c3.up { color:#dc2626; } .td-st .td-c3.dn { color:#2563eb; }
+  .td-st .td-c3.up { color:#000000; } .td-st .td-c3.dn { color:#D42020; }
   .td-st .td-c3.mut, .td-st .td-c1.mut, .td-st .td-c2.mut { color:#b6bdc7; font-weight:600; }
   .td-st .td-c3 .k { display:block; font-size:10.5px; font-weight:600; color:#9aa3af; letter-spacing:0; }   
   
@@ -2275,9 +2346,9 @@ function tdFill(f, d) {
 function renderToday(first) {
   TITLE.textContent = '당일매매';
   if (!first && document.hidden) return;
-  if (first && hasCache(TD_URL) && hasCache(LV_URL)) first = false;
+  if (first && (hasCache(TD_URL) || hasCache(LV_URL))) first = false;
   if (first) BD.textContent = '불러오는 중…';
-  Promise.all([ getJSONc(TD_URL).catch((function(e) {
+  tabAll('today', [ getJSONc(TD_URL).catch((function(e) {
     return {
       __err: e
     };
@@ -2305,6 +2376,11 @@ function renderToday(first) {
     function tdSwap(x) {
       swapBody(x);
       applyTdFind();
+    }
+    if (tabPend(d)) {
+      f.appendChild(el('div', 'empty', TAB_WAIT));
+      tdSwap(f);
+      return;
     }
     live(!(d.__err && !/HTTP \d/.test(String(d.__err.message || ''))));
     if (d.__err || d.ok === false) {
@@ -2554,6 +2630,33 @@ function jcCutErr() {
   return new Error(Math.round(JC_BUSY_MAX / 1e3) + '초 넘게 답이 없어 끊었습니다');
 }
 
+function jcRace(p, ac) {
+  var tm = null;
+  var cutP = new Promise((function(_ok, no) {
+    tm = setTimeout((function() {
+      ac.abort();
+      no(jcCutErr());
+    }), JC_BUSY_MAX);
+  }));
+  var w = Promise.race([ p, cutP ]);
+  var end = function() {
+    clearTimeout(tm);
+  };
+  w.then(end, end);
+  return w;
+}
+
+function cutGet(url, how) {
+  var ac = jcCutter(), opt = {
+    headers: {
+      Accept: 'application/json'
+    },
+    cache: 'no-store'
+  };
+  if (typeof AbortController === 'function') opt.signal = ac.signal;
+  return jcRace(fetch(url, opt).then(how), ac);
+}
+
 function getJSONc(url) {
   warmLearn(url);
   try {
@@ -2580,7 +2683,113 @@ function getJSONc(url) {
   }
   var wp = warmLive(url);
   if (wp) return wp;
-  return getJSON(url);
+  if (TAB_FILL.on) {
+    var fl = TAB_FILL.fails[url];
+    if (fl && Date.now() - fl.at < JC_REFETCH) return Promise.reject(fl.e);
+    var gs = GJ_SHARE[url];
+    if (gs && Date.now() - gs.at < JC_BUSY_MAX) return gs.p;
+  }
+  var p = getJSON(url), rec = {
+    p: p,
+    at: Date.now()
+  };
+  GJ_SHARE[url] = rec;
+  p.then((function() {
+    if (GJ_SHARE[url] === rec) delete GJ_SHARE[url];
+  }), (function(e) {
+    if (GJ_SHARE[url] === rec) delete GJ_SHARE[url];
+    if (TAB_FILL.on) TAB_FILL.fails[url] = {
+      e: e,
+      at: Date.now()
+    };
+  }));
+  return p;
+}
+
+var GJ_SHARE = {};
+
+var TAB_WAIT = '불러오는 중…';
+
+var TAB_FILL = {
+  on: false,
+  tab: '',
+  fails: {},
+  timer: null
+};
+
+var TAB_FILL_TABS = [ 'orders', 'balance', 'today', 'market', 'major' ];
+
+function tabGrace() {
+  return navigator.webdriver && !window.__tabFillTest ? 5e3 : 80;
+}
+
+function tabPend(v) {
+  return !!(v && v.__pend);
+}
+
+function jcLive(url) {
+  var c = JC[url];
+  if (!c || Date.now() - c.ts >= JC_FRESH) return null;
+  return c.data || null;
+}
+
+function tabFillStart(tab) {
+  TAB_FILL = {
+    on: TAB_FILL_TABS.indexOf(tab) >= 0,
+    tab: tab,
+    fails: {},
+    timer: null
+  };
+}
+
+function tabFillKick(F) {
+  if (F !== TAB_FILL || !F.on || F.timer) return;
+  F.timer = setTimeout((function() {
+    F.timer = null;
+    if (F === TAB_FILL && F.on && TAB === F.tab) repaint();
+  }), 30);
+}
+
+function tabAll(tab, list, must) {
+  var F = TAB_FILL;
+  if (!F.on || F.tab !== tab) return Promise.all(list);
+  return new Promise((function(resolve) {
+    var vals = new Array(list.length), has = new Array(list.length), left = list.length, out = false, grace = false;
+    function give() {
+      out = true;
+      if (!left) F.on = false;
+      var res = [];
+      for (var i = 0; i < list.length; i++) res.push(has[i] ? vals[i] : {
+        __pend: true
+      });
+      resolve(res);
+    }
+    function mustIn() {
+      return (must || []).every((function(i) {
+        return has[i];
+      }));
+    }
+    list.forEach((function(p, i) {
+      Promise.resolve(p).then(null, (function(e) {
+        return {
+          __err: e
+        };
+      })).then((function(v) {
+        vals[i] = v;
+        has[i] = true;
+        left--;
+        if (out) {
+          tabFillKick(F);
+          return;
+        }
+        if (!left || grace && mustIn()) give();
+      }));
+    }));
+    setTimeout((function() {
+      grace = true;
+      if (!out && mustIn()) give();
+    }), tabGrace());
+  }));
 }
 
 function dropCache() {
@@ -2591,6 +2800,7 @@ function dropCache() {
       JC[k].busy = false;
     }
   }));
+  GJ_SHARE = {};
 }
 
 var JC_RD = {};
@@ -3027,6 +3237,10 @@ function toast(msg, ms, wide) {
   }), ms || 2200);
 }
 
+function sayNoCover(msg) {
+  if (DLG.classList.contains('on')) toast('⚠ ' + String(msg).replace(/\s*\n+\s*/g, ' '), 5e3, true); else say(msg);
+}
+
 function ask(msg, cb, danger) {
   DLG_CB = function(v) {
     if (v) cb();
@@ -3307,8 +3521,7 @@ var THM_URL = '/api/bot/theme_tags';
 var BIO_URL = '/api/bio_exposure';
 
 function bioData() {
-  var c = JC[BIO_URL];
-  return c && c.data || null;
+  return jcLive(BIO_URL);
 }
 
 function bioPctTxt(v) {
@@ -3339,6 +3552,61 @@ function bioNotReady(res) {
   return '';
 }
 
+var BIO_GRACE = 12e3, BIO_FAIL = {
+  at: 0,
+  t: null,
+  told: false
+}, BIO_GOOD = null;
+
+function bioSteady(res) {
+  var e = res && res.__err;
+  if (res && !e && !res.__pend) {
+    BIO_GOOD = {
+      data: res,
+      day: chToday()
+    };
+    if (BIO_FAIL.t) clearTimeout(BIO_FAIL.t);
+    BIO_FAIL = {
+      at: 0,
+      t: null,
+      told: false
+    };
+    return res;
+  }
+  if (!e || e.status) return res;
+  if (BIO_FAIL.at && Date.now() - BIO_FAIL.last > 3e4) BIO_FAIL = {
+    at: 0,
+    t: BIO_FAIL.t,
+    told: false
+  };
+  if (!BIO_FAIL.at) BIO_FAIL.at = Date.now();
+  BIO_FAIL.last = Date.now();
+  if (!BIO_FAIL.told) {
+    BIO_FAIL.told = true;
+    try {
+      fetch(BIO_URL + '/client_fail', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Order-Client': 'phone'
+        },
+        body: JSON.stringify({
+          why: String(e.message || e)
+        })
+      }).catch((function() {}));
+    } catch (_e) {}
+  }
+  var left = BIO_GRACE - (Date.now() - BIO_FAIL.at);
+  if (left <= 0) return res;
+  if (!BIO_FAIL.t) BIO_FAIL.t = setTimeout((function() {
+    BIO_FAIL.t = null;
+    repaint();
+  }), left + 50);
+  return BIO_GOOD && BIO_GOOD.day === chToday() ? BIO_GOOD.data : {
+    __pend: true
+  };
+}
+
 function bioLine(res) {
   var nr = bioNotReady(res);
   if (nr) return el('div', 'mut bioln', '🧪 바이오 못 셈 — ' + nr);
@@ -3365,6 +3633,14 @@ function bioCard(res, bal) {
     m.appendChild(el('div', 'bit', '바이오'));
     m.appendChild(el('div', 'biv', '못 셈'));
     m.appendChild(el('div', 'biw', nr));
+    return k;
+  }
+  res = bioSteady(res);
+  if (tabPend(res)) {
+    k.className = 'biocard off';
+    k.setAttribute('data-bio-pend', '1');
+    m.appendChild(el('div', 'bit', '바이오'));
+    m.appendChild(el('div', 'biw', TAB_WAIT));
     return k;
   }
   if (!res || res.__err) {
@@ -3555,7 +3831,7 @@ function thmDecorate(root) {
 }
 
 function thmNote(res) {
-  if (!res) return null;
+  if (!res || tabPend(res)) return null;
   var why = res.__err ? res.__err.message : res.ok === false || res.stale ? res.error || '못 읽음' : '';
   if (why) return el('div', 'mut', '🏷 테마·업종 표시를 못 읽었습니다 — ' + why);
   if (res.errors && res.errors.length) return el('div', 'mut', '🏷 테마·업종 일부를 못 읽었습니다 — ' + res.errors.join(' · '));
@@ -3624,6 +3900,8 @@ function ordSortSet(v) {
 }
 
 var ORD_PX = {};
+
+var ORD_PX_LAST = {};
 
 function ordGap(o) {
   var c = Number((ORD_PX || {})[o.code]), t = Number(o.trigger_price);
@@ -4982,7 +5260,7 @@ function renderSellList() {
         if (v === undefined) return null;
         return {
           text: (v >= 0 ? '+' : '') + v.toFixed(2) + '%',
-          cls: 'gap ' + (v >= 0 ? 'up' : 'dn')
+          cls: 'gap pv ' + (v >= 0 ? 'up' : 'dn')
         };
       },
       sub: function(r) {
@@ -4993,7 +5271,7 @@ function renderSellList() {
         if (h.known) {
           a.appendChild(el('span', 'dot', '·'));
           a.appendChild(el('span', '', '현재손익 '));
-          a.appendChild(el('span', 'gap sm ' + (h.pnl >= 0 ? 'up' : 'dn'), (h.pnl > 0 ? '+' : '') + fmt(h.pnl) + '원'));
+          a.appendChild(el('span', 'gap pv sm ' + (h.pnl >= 0 ? 'up' : 'dn'), (h.pnl > 0 ? '+' : '') + fmt(h.pnl) + '원'));
         }
         return a;
       },
@@ -5176,7 +5454,7 @@ var AR_SW = {
     url: '/api/eval_sellall_config',
     ask: function(on) {
       var c = JC['/api/eval_sellall_config'], th = c && c.data ? c.data.threshold : null;
-      return on ? '평가손익 전량 매도를 끕니다.\n평가손익이 그 금액 아래로 가도 팔지 않습니다.' : '평가손익 전량 매도를 켭니다.\n계좌 평가손익(증권사 값 · 실현손익 제외)이 ' + evWon(th) + ' 이하가 되면 보유 전부를 시장가로 팔고 [매수] 스위치를 끕니다.\n발동하면 이 규칙도 꺼집니다 · 대기 매수는 그대로 둡니다.';
+      return on ? '평가손익 전량 매도를 끕니다.\n평가손익이 그 금액 아래로 가도 팔지 않습니다.' : '평가손익 전량 매도를 켭니다.\n계좌 평가손익(증권사 값 · 실현손익 제외)이 ' + evManWon(th) + ' 이하가 되면 보유 전부를 시장가로 팔고 [매수] 스위치를 끕니다.\n발동하면 이 규칙도 꺼집니다 · 대기 매수는 그대로 둡니다.';
     },
     danger: function(on) {
       return !on;
@@ -5184,7 +5462,7 @@ var AR_SW = {
     blocked: function(on) {
       if (on) return '';
       var c = JC['/api/eval_sellall_config'];
-      return c && c.data && c.data.threshold == null ? '금액이 비어 있어 켤 수 없습니다.\n아래 [✏️ 금액 수정] 으로 먼저 «평가손익 몇 원 이하» 를 정해 주세요.' : '';
+      return c && c.data && c.data.threshold == null ? '금액이 비어 있어 켤 수 없습니다.\n아래 [✏️ 금액 수정] 으로 먼저 «평가손익 몇 만원 이하» 를 정해 주세요.' : '';
     },
     body: function(to) {
       return {
@@ -5392,6 +5670,29 @@ function arSep(g) {
   g.appendChild(el('div', 'arsep'));
 }
 
+function beRunNow() {
+  var wait = '올릴 종목을 확인하는 중…';
+  var alive = function() {
+    return DLG.classList.contains('on') && DLG_PICK.style.display === 'none' && DLG_MSG.textContent === wait;
+  };
+  say(wait);
+  getJSON('/api/bot/breakeven_candidates').then((function(cd) {
+    if (!alive()) return;
+    if (!(cd.codes || []).length) {
+      say(cd.text || '지금 올릴 종목이 없습니다');
+      return;
+    }
+    ask(cd.text + '\n\n위 종목 전부를 본전으로 올릴까요?', (function() {
+      botPost('/api/bot/breakeven', {
+        action: 'raise',
+        codes: cd.codes
+      });
+    }));
+  })).catch((function(e) {
+    if (alive()) say('목록을 못 읽었습니다 — ' + e.message);
+  }));
+}
+
 function arErr(g, what, e) {
   var m = String(e && e.message || e || '');
   g.appendChild(el('div', 'arerr', /404/.test(m) ? '⏳ ' + what + ' — 서버를 다시 켜면 나옵니다' : what + ' 설정을 못 읽었습니다 — ' + m));
@@ -5496,10 +5797,30 @@ function arAddBal() {
   } ] ]);
 }
 
+var EV_BIG_WON = 1e8, EV_MAX_WON = 1e12;
+
 function evWon(n) {
   if (n === null || n === undefined || n === '') return '(금액 없음)';
   var v = Number(n);
   return (v > 0 ? '+' : v < 0 ? '-' : '') + Math.abs(v).toLocaleString('en-US') + '원';
+}
+
+function evManNum(n) {
+  var a = Math.abs(Number(n)), r = a % 1e4;
+  return String(Math.floor(a / 1e4)) + (r ? '.' + String(1e4 + r).slice(1).replace(/0+$/, '') : '');
+}
+
+function evMan(n) {
+  if (n === null || n === undefined || n === '') return '(금액 없음)';
+  var v = Number(n);
+  if (!v) return '0원';
+  var p = evManNum(v).split('.');
+  return (v > 0 ? '+' : '-') + Number(p[0]).toLocaleString('en-US') + (p[1] ? '.' + p[1] : '') + '만원';
+}
+
+function evManWon(n) {
+  if (n === null || n === undefined || n === '' || !Number(n)) return evMan(n);
+  return evMan(n) + ' (= ' + evWon(n) + ')';
 }
 
 function evPost(body) {
@@ -5557,8 +5878,16 @@ function evPost(body) {
 }
 
 function evEdit(cur) {
-  function step2(sign) {
+  var has = cur !== null && cur !== undefined;
+  function unchanged() {
+    say('금액이 그대로입니다 — ' + evManWon(cur) + '\n저장하지 않았습니다.');
+  }
+  function step2(sign, pre) {
     if (sign === 0) {
+      if (cur === 0) {
+        unchanged();
+        return;
+      }
       ask('평가손익 0원 이하(본전 아래)가 되면 보유 전부를 팝니다.\n이 금액으로 바꿀까요?', (function() {
         evPost({
           threshold: 0
@@ -5566,23 +5895,67 @@ function evEdit(cur) {
       }));
       return;
     }
-    var same = cur !== null && cur !== undefined && cur !== 0 && cur < 0 === sign < 0;
-    arAskNum((sign < 0 ? '손실 — 평가손익이 몇 원 «손실» 이 되면 팔까요?' : '이익 — 평가손익 «이익» 이 몇 원까지 줄면 팔까요?') + '\n숫자만 넣으세요 (원 · 예: 5000000 → ' + (sign < 0 ? '-' : '+') + '5,000,000원)' + (cur !== null && cur !== undefined ? '\n지금: ' + evWon(cur) : ''), same ? Math.abs(cur) : '', (function(n) {
-      if (!(n > 0)) {
-        say('0 보다 큰 숫자를 넣어 주세요 (0원은 «0원» 을 고르세요).');
+    var same = has && cur !== 0 && cur < 0 === sign < 0;
+    var preset = same ? evManNum(cur) : '';
+    askVal((sign < 0 ? '손실 — 평가손익이 몇 만원 «손실» 이 되면 팔까요?' : '이익 — 평가손익 «이익» 이 몇 만원까지 줄면 팔까요?') + '\n숫자만 넣으세요 (단위는 만원 — 예: 500 이면 오백만 원)' + (has ? '\n지금: ' + evManWon(cur) : ''), pre == null ? preset : pre, (function(txt) {
+      if (same && txt === preset) {
+        unchanged();
         return;
       }
-      var v = sign * n;
-      ask('평가손익 ' + evWon(v) + ' 이하가 되면 보유 전부를 시장가로 팝니다.\n이 금액으로 바꿀까요?', (function() {
+      var again = function() {
+        step2(sign, txt);
+      };
+      var r = arParse(txt, true);
+      if (r.why) {
+        say(r.why + '\n저장하지 않았습니다.');
+        dlgBackTo(again);
+        return;
+      }
+      if (!(r.n > 0)) {
+        say('0 보다 큰 숫자를 넣어 주세요 (0원은 «0원» 을 고르세요).');
+        dlgBackTo(again);
+        return;
+      }
+      var v = sign * r.n * 1e4;
+      if (Math.abs(v) > EV_MAX_WON) {
+        say('금액이 너무 큽니다 — 칸에 100000000 (1조 원)까지 넣을 수 있습니다.\n저장하지 않았습니다.');
+        dlgBackTo(again);
+        return;
+      }
+      if (v === cur) {
+        unchanged();
+        return;
+      }
+      var big = Math.abs(v) >= EV_BIG_WON;
+      ask('평가손익 ' + evManWon(v) + ' 이하가 되면 보유 전부를 시장가로 팝니다.' + (big ? '\n⚠ 아주 큰 금액입니다 — 단위는 «만원» 입니다. 원으로 넣으셨으면 [취소] 하고 만원으로 다시 넣어 주세요.' : '') + '\n이 금액으로 바꿀까요?', (function() {
         evPost({
           threshold: v
         });
-      }));
+      }), big);
     }), true);
+    var live = el('div', '');
+    live.id = 'ev-live';
+    live.style.cssText = 'margin-top:6px;font-weight:700;color:#b03a2e';
+    DLG_MSG.appendChild(live);
+    var paintLive = function() {
+      if (!live.isConnected) {
+        DLG_IN.removeEventListener('input', paintLive);
+        return;
+      }
+      var t = String(DLG_IN.value).trim();
+      if (same && t === preset) {
+        live.textContent = '= ' + evWon(cur);
+        return;
+      }
+      var r = arParse(t, true);
+      live.textContent = r.why || !(r.n > 0) || Math.abs(r.n * 1e4) > EV_MAX_WON ? '' : '= ' + evWon(sign * r.n * 1e4);
+    };
+    DLG_IN.addEventListener('input', paintLive);
+    paintLive();
   }
-  askPick('🧯 평가손익 몇 원 이하에서 전부 팔까요?', [ [ '🔻 손실 (−) — 평가손실이 N원이 되면', function() {
+  askPick('🧯 평가손익 몇 만원 이하에서 전부 팔까요?', [ [ '🔻 손실 (−) — 평가손실이 N만원이 되면', function() {
     step2(-1);
-  } ], [ '🔺 이익 (+) — 평가이익이 N원까지 줄면', function() {
+  } ], [ '🔺 이익 (+) — 평가이익이 N만원까지 줄면', function() {
     step2(1);
   } ], [ '⚖️ 0원 — 평가손익이 0원 이하가 되면', function() {
     step2(0);
@@ -5652,22 +6025,7 @@ function renderAutoRules() {
             value: v
           });
         }), true);
-      } ], [ '⚡ 지금 실행', function() {
-        getJSON('/api/bot/breakeven_candidates').then((function(cd) {
-          if (!(cd.codes || []).length) {
-            say(cd.text || '지금 올릴 종목이 없습니다');
-            return;
-          }
-          ask(cd.text + '\n\n위 종목 전부를 본전으로 올릴까요?', (function() {
-            botPost('/api/bot/breakeven', {
-              action: 'raise',
-              codes: cd.codes
-            });
-          }));
-        })).catch((function(e) {
-          say('목록을 못 읽었습니다 — ' + e.message);
-        }));
-      } ] ]);
+      } ], [ '⚡ 지금 실행', beRunNow ] ]);
     }
     arSep(g);
     if (ms.__err || !ms.l21 || !ms.l50) {
@@ -5749,7 +6107,7 @@ function renderAutoRules() {
       arErr(g, '평가손익 전량 매도', ev.__err || '설정이 비어 왔습니다');
     } else {
       arHead(g, 6, '🧯 평가손익 전량 매도', arPill(!!ev.enabled, null, 'ev'));
-      var _evl = [ ev.threshold == null ? '금액이 비어 있습니다 — <b>[✏️ 금액 수정]</b> 으로 정하면 켤 수 있습니다' : '계좌 평가손익 <b>' + arEsc(evWon(ev.threshold)) + '</b> 이하 → 보유 전부 시장가 매도 + [매수] 끔', '<span class="armut">증권사 평가손익 합계(실현손익 제외) · 발동하면 이 규칙도 꺼짐 · 대기 매수는 그대로</span>' ];
+      var _evl = [ ev.threshold == null ? '금액이 비어 있습니다 — <b>[✏️ 금액 수정]</b> 으로 정하면 켤 수 있습니다' : '계좌 평가손익 <b>' + arEsc(evMan(ev.threshold)) + '</b>' + (ev.threshold ? ' (= ' + arEsc(evWon(ev.threshold)) + ')' : '') + ' 이하 → 보유 전부 시장가 매도 + [매수] 끔', '<span class="armut">증권사 평가손익 합계(실현손익 제외) · 발동하면 이 규칙도 꺼짐 · 대기 매수는 그대로</span>' ];
       if (ev.fired_text) _evl.push('<span class="armut">🧯 ' + arEsc(ev.fired_text) + '</span>');
       arBody(g, _evl);
       arBtns(g, [ [ '✏️ 금액 수정', function() {
@@ -5936,6 +6294,8 @@ function chLoad(code, name, keep) {
     CH.idxRef = '';
     CH.idxNote = '';
     CH.idxSrc = '';
+    CH.idxMemoAt = 0;
+    if (CH.idx && chIdxFromMemo(code, CH.period)) keep = true;
   }
   drawPhoneChart();
   chLiveLoop();
@@ -5981,7 +6341,7 @@ function chLoad(code, name, keep) {
 }
 
 function chLoadIdx(code, keep, per) {
-  getJSON('/api/index_ohlc/' + encodeURIComponent(code) + '?period=' + per + '&n=' + CH_MAX).catch((function() {
+  chIdxFetch(code, per).catch((function() {
     return null;
   })).then((function(oh) {
     if (CH.code === code && CH.period !== per) return;
@@ -5990,23 +6350,15 @@ function chLoadIdx(code, keep, per) {
     oh = oh || {};
     var bars = oh.bars || [];
     if (keep && !bars.length) {
+      if (CH.idxMemoAt) {
+        CH.idxNote = '새 값을 못 받아 ' + clockHMS(CH.idxMemoAt) + ' 에 받은 봉입니다';
+        CH.idxSrc = '';
+      }
       drawPhoneChart();
       return;
     }
-    CH.bars = bars.slice(Math.max(0, bars.length - CH_MAX)).map((function(b) {
-      return {
-        date: String(b.date).replace(/-/g, ''),
-        o: +b.o,
-        h: +b.h,
-        l: +b.l,
-        c: +b.c,
-        v: +b.v || 0
-      };
-    }));
-    CH.idxStale = !!oh.stale;
-    CH.idxRef = String(oh.ref || '');
-    CH.idxNote = String(oh.note || '');
-    CH.idxSrc = String(oh.src || '');
+    CH.idxMemoAt = 0;
+    chIdxApply(oh);
     if (bars.length) {
       CH.loadedDay = chToday();
       CH.idxTry = Date.now();
@@ -6014,6 +6366,104 @@ function chLoadIdx(code, keep, per) {
     drawPhoneChart();
     chLoadFtd(code);
   }));
+}
+
+function chIdxApply(oh) {
+  var bars = oh.bars || [];
+  CH.bars = bars.slice(Math.max(0, bars.length - CH_MAX)).map((function(b) {
+    return {
+      date: String(b.date).replace(/-/g, ''),
+      o: +b.o,
+      h: +b.h,
+      l: +b.l,
+      c: +b.c,
+      v: +b.v || 0
+    };
+  }));
+  CH.idxStale = !!oh.stale;
+  CH.idxRef = String(oh.ref || '');
+  CH.idxNote = String(oh.note || '');
+  CH.idxSrc = String(oh.src || '');
+}
+
+var CH_IDX_MEMO = {}, CH_IDX_FLY = {}, CH_FTD_MEMO = null, CH_IDX_WARM = {
+  at: 0,
+  t: null
+};
+
+var CH_IDX_WARM_GAP = 27e4;
+
+function chIdxFetch(code, per) {
+  var key = code + '|' + per;
+  if (CH_IDX_FLY[key]) return CH_IDX_FLY[key];
+  var p = getJSON('/api/index_ohlc/' + encodeURIComponent(code) + '?period=' + per + '&n=' + CH_MAX).then((function(oh) {
+    if (oh && (oh.bars || []).length) CH_IDX_MEMO[key] = {
+      oh: oh,
+      at: Date.now(),
+      day: chToday()
+    };
+    return oh;
+  }));
+  CH_IDX_FLY[key] = p;
+  var end = function() {
+    if (CH_IDX_FLY[key] === p) delete CH_IDX_FLY[key];
+  };
+  p.then(end, end);
+  return p;
+}
+
+function chFtdFetch() {
+  if (CH_IDX_FLY.ftd) return CH_IDX_FLY.ftd;
+  var p = getJSON('/api/index_ftd_markers').then((function(j) {
+    if (j && j.ok) CH_FTD_MEMO = {
+      j: j,
+      day: chToday()
+    };
+    return j;
+  }));
+  CH_IDX_FLY.ftd = p;
+  var end = function() {
+    if (CH_IDX_FLY.ftd === p) delete CH_IDX_FLY.ftd;
+  };
+  p.then(end, end);
+  return p;
+}
+
+function chIdxFromMemo(code, per) {
+  var m = CH_IDX_MEMO[code + '|' + per];
+  if (!m || m.day !== chToday()) return false;
+  chIdxApply(m.oh);
+  CH.idxMemoAt = m.at;
+  CH.loadedDay = chToday();
+  var fm = CH_FTD_MEMO, key = code === 'KS11' ? 'kospi' : 'kosdaq';
+  if (CH.on.ftd && fm && fm.day === chToday() && fm.j[key]) CH.ftd = {
+    code: code,
+    marks: fm.j[key],
+    err: ''
+  };
+  return true;
+}
+
+function chIdxWarm() {
+  if (navigator.webdriver && !window.__idxWarmTest) return;
+  if (CH_IDX_WARM.t || Date.now() - CH_IDX_WARM.at < CH_IDX_WARM_GAP) return;
+  CH_IDX_WARM.t = setTimeout((function() {
+    CH_IDX_WARM.t = null;
+    if (document.hidden || TAB !== 'market') return;
+    CH_IDX_WARM.at = Date.now();
+    var next = function(fn) {
+      return function() {
+        return fn().catch((function() {}));
+      };
+    };
+    next((function() {
+      return chIdxFetch('KS11', 'daily');
+    }))().then(next((function() {
+      return chIdxFetch('KQ11', 'daily');
+    }))).then(next((function() {
+      return CH.on.ftd ? chFtdFetch() : Promise.resolve();
+    })));
+  }), window.__idxWarmTest ? 50 : 1200);
 }
 
 function chLoadFtd(code) {
@@ -6029,7 +6479,7 @@ function chLoadFtd(code) {
     };
     drawPhoneChart();
   }
-  getJSON('/api/index_ftd_markers').then((function(j) {
+  chFtdFetch().then((function(j) {
     if (CH.code !== code) return;
     if (j && j.ok && j[key]) {
       CH.ftd = {
@@ -6673,7 +7123,7 @@ function drawPhoneChart() {
       mtx(_pct(it.mk.pct), x(it.i), y(vis[it.i].l) + 15, it.col, 11, false, 1);
     }));
     var _low = [];
-    [ [ 'day1', 'Day1', '#0066CC' ], [ 'reset_points', 'Reset', '#D42020' ] ].forEach((function(kd) {
+    [ [ 'day1', 'Day1', '#7B3FC4' ], [ 'reset_points', 'Reset', '#0066CC' ] ].forEach((function(kd) {
       (FM[kd[0]] || []).forEach((function(mk) {
         if (!_ok(mk.date)) return;
         var i = _fi(mk.date);
@@ -6909,18 +7359,56 @@ function chTouch(wrap) {
   });
 }
 
+function chNeed(url, what, jobs) {
+  if (hasCache(url)) {
+    delete CH.listErr[url];
+    return;
+  }
+  var fl = CH.listErr[url];
+  if (fl && Date.now() - fl.at < JC_REFETCH) return;
+  jobs.push(getJSONc(url).then((function() {
+    delete CH.listErr[url];
+  }), (function(e) {
+    CH.listErr[url] = {
+      what: what,
+      e: e,
+      at: Date.now()
+    };
+  })));
+}
+
+function chListErrs(f) {
+  var any = false;
+  Object.keys(CH.listErr || {}).forEach((function(u) {
+    var x = CH.listErr[u];
+    if (!x.what) return;
+    any = true;
+    f.appendChild(el('div', 'err', '⚠ ' + x.what + '을(를) 못 읽었습니다 — ' + mkWhy({
+      __err: x.e
+    })));
+  }));
+  return any;
+}
+
 function renderChartTab() {
   TITLE.textContent = '차트';
   var _need = [];
+  CH.listErr = CH.listErr || {};
   if (!CH.code) {
-    if (!hasCache('/api/orders?active=1')) _need.push(getJSONc('/api/orders?active=1').catch((function() {})));
-    if (!hasCache('/api/balance')) _need.push(getJSONc('/api/balance').catch((function() {})));
+    chNeed('/api/orders?active=1', '대기 주문', _need);
+    chNeed('/api/balance', '잔고', _need);
   }
-  if (!hasCache(THM_URL)) _need.push(getJSONc(THM_URL).catch((function() {})));
+  CH.listWait = _need.length > 0;
+  chNeed(THM_URL, '', _need);
   if (_need.length) {
     Promise.all(_need).then((function() {
       if (TAB === 'chart') renderChartTab();
     }));
+  } else if (!CH.code && Object.keys(CH.listErr).length && !CH.listT) {
+    CH.listT = setTimeout((function() {
+      CH.listT = null;
+      if (TAB === 'chart' && !CH.code) renderChartTab();
+    }), JC_REFETCH + 100);
   }
   var f = document.createDocumentFragment();
   live(true, '');
@@ -6966,8 +7454,9 @@ function chMenu() {
 function renderChartView() {
   var f = document.createDocumentFragment();
   var ss = chStocks();
+  var _lsBad = !CH.code && chListErrs(f);
   if (!CH.code && !ss.length) {
-    f.appendChild(el('div', 'empty', '대기 주문도 보유 종목도 없습니다'));
+    if (CH.listWait) f.appendChild(el('div', 'empty', TAB_WAIT)); else if (!_lsBad) f.appendChild(el('div', 'empty', '대기 주문도 보유 종목도 없습니다'));
     return f;
   }
   if (!CH.code) {
@@ -6982,7 +7471,7 @@ function renderChartView() {
     }));
     var chips = el('div', 'chips');
     [ [ 'all', '전체' ], [ 'wait', '대기' ], [ 'hold', '보유' ] ].forEach((function(p) {
-      var b = el('button', CH.filter === p[0] ? 'on' : '', p[1] + ' ' + cnt[p[0]]);
+      var b = el('button', CH.filter === p[0] ? 'on' : '', p[1] + (CH.listWait || _lsBad ? '' : ' ' + cnt[p[0]]));
       b.onclick = function() {
         CH.filter = p[0];
         try {
@@ -6999,7 +7488,7 @@ function renderChartView() {
       return true;
     }));
     if (!view.length) {
-      f.appendChild(el('div', 'empty', (CH.filter === 'wait' ? '대기 중인' : '갖고 있는') + ' 종목이 없습니다\n[전체] 를 누르면 다 나옵니다'));
+      if (CH.listWait) f.appendChild(el('div', 'empty', TAB_WAIT)); else if (!_lsBad) f.appendChild(el('div', 'empty', (CH.filter === 'wait' ? '대기 중인' : '갖고 있는') + ' 종목이 없습니다\n[전체] 를 누르면 다 나옵니다'));
       return f;
     }
     f.appendChild(el('div', 'mut', '볼 수 있는 종목 ' + view.length + '개' + (CH.filter === 'all' ? ' · 대기 중이거나 갖고 있는 종목만' : '')));
@@ -7134,7 +7623,7 @@ function stopKindCls(k) {
   return c ? ' sellk ' + c : '';
 }
 
-function stopKindTitle(day, n, items) {
+function stopKindTitle(items) {
   var cnt = {}, ks = [];
   (items || []).forEach((function(x) {
     var k = stopKind(x.label) || '기타';
@@ -7150,14 +7639,14 @@ function stopKindTitle(day, n, items) {
   }));
   var wt = el('div', 'wt');
   if (ks.length <= 1) {
-    wt.textContent = '📉 ' + day + ' ' + (ks[0] && ks[0] !== '기타' ? ks[0] : '손절') + ' ' + n + '건';
+    wt.textContent = '📉 ' + (ks[0] && ks[0] !== '기타' ? ks[0] : '손절');
     return wt;
   }
-  wt.appendChild(document.createTextNode('📉 ' + day + ' '));
+  wt.appendChild(document.createTextNode('📉 '));
   wt.appendChild(el('span', 'kc', ks.map((function(k) {
     return k + ' ' + cnt[k];
   })).join(' · ')));
-  stopTitleFit(wt, '📉 ' + day.replace(/^최종거래일\((.*)\)$/, '$1') + ' ');
+  stopTitleFit(wt, '📉 ');
   return wt;
 }
 
@@ -7220,6 +7709,9 @@ function riskSigFrag(lv) {
     }
     return w;
   }
+  function rskLatest(day, n) {
+    return el('div', 'rskld', (day ? '최종거래일 ' + wdOf(day) : '오늘') + ' · ' + n + '건');
+  }
   if (_st) {
     var sw = el('div', 'warnbox k rsks');
     if (!_sn) {
@@ -7230,7 +7722,8 @@ function riskSigFrag(lv) {
     card.appendChild(sw);
   }
   if (_sn) {
-    sw.appendChild(stopKindTitle(_stDay, _sn, _st.items || []));
+    sw.appendChild(stopKindTitle(_st.items || []));
+    sw.appendChild(rskLatest(_st.day, _sn));
     stopGroupsTo(sw, _st.items, '');
   }
   function stopGroupsTo(into, items, day) {
@@ -7305,20 +7798,30 @@ function riskSigFrag(lv) {
       return (k === '기타' && ks.length === 1 ? '손절' : k) + ' ' + cnt[k];
     })).join(' · ');
   }
+  function pastBox(kind, n, range, bad, fill) {
+    var b = el('div', 'rskpast'), fp = document.createDocumentFragment(), pb = el('div', 'rskpb');
+    b.setAttribute('data-past', kind);
+    fp.appendChild(el('div', 'sec rskpt'));
+    fill(pb);
+    fp.appendChild(pb);
+    b.appendChild(foldSec(fp, 'risk_past_' + kind, bad ? [ {
+      t: '· ' + bad,
+      c: 'fbad'
+    } ] : null, '📅 이전 거래일 ' + n + '건' + (range ? ' · ' + range : '')));
+    return b;
+  }
   var _stp = _stOk && _st.past || null, _spn = _stp ? Number(_stp.n) || 0 : 0;
   if (_spn && sw) {
-    var spw = el('div', 'rskpast');
-    spw.setAttribute('data-past', 'stops');
-    spw.appendChild(el('div', 'rskpt', '📅 이전 거래일(' + pastRange(_stp.days && _stp.days.length ? _stp.days : pastDays(_stp.items).map((function(g) {
+    sw.appendChild(pastBox('stops', _spn, pastRange(_stp.days && _stp.days.length ? _stp.days : pastDays(_stp.items).map((function(g) {
       return g.day;
-    }))) + ') ' + _spn + '건'));
-    pastDays(_stp.items).forEach((function(g) {
-      var dh = el('div', 'rskd', wdOf(g.day) + ' · ' + kindSum(g.items));
-      dh.setAttribute('data-day', g.day);
-      spw.appendChild(dh);
-      stopGroupsTo(spw, g.items, g.day);
-    }));
-    sw.appendChild(spw);
+    }))), '', (function(spw) {
+      pastDays(_stp.items).forEach((function(g) {
+        var dh = el('div', 'rskd', wdOf(g.day) + ' · ' + kindSum(g.items));
+        dh.setAttribute('data-day', g.day);
+        spw.appendChild(dh);
+        stopGroupsTo(spw, g.items, g.day);
+      }));
+    })));
   }
   function stopRow(x, withName, day) {
     var row = el('div', withName ? 'strow' : 'strow sgit');
@@ -7329,7 +7832,7 @@ function riskSigFrag(lv) {
     var _kd = stopKind(x.label);
     if (_kd) top.appendChild(el('span', 'tag kd' + stopKindCls(_kd), _kd));
     var _pr = x.pl_rate, _done = /체결완료/.test(String(x.state || ''));
-    if (_pr != null) top.appendChild(el('span', 'gap ' + (_pr > 0 ? 'up' : _pr < 0 ? 'dn' : ''), (_pr > 0 ? '+' : '') + Number(_pr).toFixed(2) + '%')); else if (x.pl_err) top.appendChild(el('span', 'gap mut', '손익 못 받음(증권사 오류)')); else top.appendChild(el('span', 'gap mut', _done || !x.state ? '—' : String(x.state)));
+    if (_pr != null) top.appendChild(el('span', 'gap pv ' + (_pr > 0 ? 'up' : _pr < 0 ? 'dn' : ''), (_pr > 0 ? '+' : '') + Number(_pr).toFixed(2) + '%')); else if (x.pl_err) top.appendChild(el('span', 'gap mut', '손익 못 받음(증권사 오류)')); else top.appendChild(el('span', 'gap mut', _done || !x.state ? '—' : String(x.state)));
     top.appendChild(el('span', 'at', (day ? mdOf(day) + ' ' : '') + (x.at || '')));
     row.appendChild(top);
     row.onclick = function() {
@@ -7376,7 +7879,8 @@ function riskSigFrag(lv) {
     return row;
   }
   if (_dn) {
-    dw.appendChild(el('div', 'wt', '📢 보유종목 대량거래 매도우세 ' + _dn + '종목' + (_ddFinal ? ' · ' + _ddDay + ' 확정' : '')));
+    dw.appendChild(el('div', 'wt', '📢 보유종목 대량거래 매도우세'));
+    dw.appendChild(_ddFinal ? rskLatest(_dd.day, _dn) : el('div', 'rskld', '오늘' + (_dd.at ? ' ' + String(_dd.at).slice(0, 5) + ' 기준' : '') + ' · ' + _dn + '건'));
     (_dd.items || []).forEach((function(x) {
       dw.appendChild(ddRow(x, ''));
     }));
@@ -7385,6 +7889,23 @@ function riskSigFrag(lv) {
   }
   var _ddp = _dd.on && _dd.past || null, _dpn = _ddp && !_ddp.error ? Number(_ddp.n) || 0 : 0;
   var _dpUnk = _ddp && !_ddp.error ? (_ddp.unknown || []).length + (_ddp.nobar || []).length : 0;
+  function _dpUnkSay() {
+    var by = {}, names = [], lines = [];
+    (_ddp.unknown || []).forEach((function(u) {
+      if (!by[u.name]) {
+        by[u.name] = [];
+        names.push(u.name);
+      }
+      by[u.name].push(mdOf(u.day));
+    }));
+    names.forEach((function(n) {
+      lines.push(n + ' — ' + by[n].join(', '));
+    }));
+    (_ddp.nobar || []).forEach((function(d) {
+      lines.push(mdOf(d) + ' — 그날 일봉이 없습니다(보유 종목 전부)');
+    }));
+    say('이전 거래일 판정 못 한 것\n' + lines.join('\n') + '\n\n50일 거래량이 모자라거나(상장한 지 얼마 안 됨) 그날 일봉이 없는 경우(거래정지 등)입니다.');
+  }
   if (_ddp && _ddp.error) {
     var dpe = el('div', 'rskpast');
     dpe.setAttribute('data-past', 'distday');
@@ -7395,128 +7916,133 @@ function riskSigFrag(lv) {
     dpe.appendChild(dpt);
     dw.appendChild(dpe);
   } else if (_dpn || _dpUnk) {
-    var dpw = el('div', 'rskpast');
-    dpw.setAttribute('data-past', 'distday');
-    dpw.appendChild(el('div', 'rskpt', '📅 이전 거래일(' + pastRange(_ddp.days) + ') ' + _dpn + '건 · 확정 일봉'));
-    pastDays(_ddp.items).forEach((function(g) {
-      var dh = el('div', 'rskd', wdOf(g.day) + ' · ' + g.items.length + '종목');
-      dh.setAttribute('data-day', g.day);
-      dpw.appendChild(dh);
-      g.items.forEach((function(x) {
-        dpw.appendChild(ddRow(x, g.day));
+    dw.appendChild(pastBox('distday', _dpn, pastRange(_ddp.days), _dpUnk ? '판정 못 함 ' + _dpUnk : '', (function(dpw) {
+      dpw.appendChild(el('div', 'ddnote', '확정 일봉 기준'));
+      pastDays(_ddp.items).forEach((function(g) {
+        var dh = el('div', 'rskd', wdOf(g.day) + ' · ' + g.items.length + '종목');
+        dh.setAttribute('data-day', g.day);
+        dpw.appendChild(dh);
+        g.items.forEach((function(x) {
+          dpw.appendChild(ddRow(x, g.day));
+        }));
       }));
-    }));
-    if (_dpUnk) {
-      var du2 = el('div', 'ddnote tap', '⚠ 이전 거래일 판정 못 한 ' + _dpUnk + '건 — 누르면 보기');
-      du2.onclick = function() {
-        var by = {}, names = [], lines = [];
-        (_ddp.unknown || []).forEach((function(u) {
-          if (!by[u.name]) {
-            by[u.name] = [];
-            names.push(u.name);
-          }
-          by[u.name].push(mdOf(u.day));
-        }));
-        names.forEach((function(n) {
-          lines.push(n + ' — ' + by[n].join(', '));
-        }));
-        (_ddp.nobar || []).forEach((function(d) {
-          lines.push(mdOf(d) + ' — 그날 일봉이 없습니다(보유 종목 전부)');
-        }));
-        say('이전 거래일 판정 못 한 것\n' + lines.join('\n') + '\n\n50일 거래량이 모자라거나(상장한 지 얼마 안 됨) 그날 일봉이 없는 경우(거래정지·상장 전)입니다.');
-      };
-      dpw.appendChild(du2);
-    }
-    dw.appendChild(dpw);
+      if (_dpUnk) {
+        var du2 = el('div', 'ddnote tap', '⚠ 이전 거래일 판정 못 한 ' + _dpUnk + '건 — 누르면 보기');
+        du2.onclick = _dpUnkSay;
+        dpw.appendChild(du2);
+      }
+    })));
   }
   if (dw.childNodes.length) card.appendChild(dw);
   if (card.childNodes.length) {
     fR.firstChild.classList.add('rskh');
     fR.appendChild(card);
   }
-  var _sum = [], _zero = true;
-  if (_st) {
-    if (!_stOk) {
-      _sum.push({
-        t: '손절 못 읽음',
-        c: 'fbad'
-      });
-      _zero = false;
-    } else if (!_sn) _sum.push({
-      t: '손절 0'
-    }); else {
-      _zero = false;
-      var _kc = {}, _ks = [];
-      (_st.items || []).forEach((function(x) {
-        var k = stopKind(x.label) || '기타';
-        if (!_kc[k]) {
-          _kc[k] = 0;
-          _ks.push(k);
-        }
-        _kc[k]++;
-      }));
-      _ks.sort((function(a, b) {
-        var ia = STOP_KIND_ORDER.indexOf(a), ib = STOP_KIND_ORDER.indexOf(b);
-        return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
-      }));
-      if (_ks.length <= 1) _sum.push({
-        t: (_ks[0] && _ks[0] !== '기타' ? _ks[0] : '손절') + ' ' + _sn,
-        c: 'fhit'
-      }); else _ks.forEach((function(k) {
-        _sum.push({
-          t: k + ' ' + _kc[k],
-          c: 'fhit'
-        });
-      }));
-    }
-  }
-  if (_ddOn) {
-    if (_dn) {
-      _sum.push({
-        t: '대량 매도우세 ' + _dn,
-        c: 'fhit'
-      });
-      _zero = false;
-    } else _sum.push({
-      t: '대량 매도우세 0'
-    });
-    if (_dunk.length) {
-      _sum.push({
-        t: '판정 못 함 ' + _dunk.length,
-        c: 'fbad'
-      });
-      _zero = false;
-    }
-  } else if (_dd.on && _dd.pending) {
-    _sum.push({
-      t: '대량 매도우세 확정 전'
-    });
-    _zero = false;
-  } else if (_dd.on && _dd.error) {
-    _sum.push({
-      t: '대량 매도우세 못 읽음',
-      c: 'fbad'
-    });
-    _zero = false;
-  }
   var _rc = lv.risk_count || null;
   var _pastN = _rc && isFinite(Number(_rc.past)) ? Number(_rc.past) : _spn + _dpn;
-  var _pastBad = _ddp && _ddp.error ? {
-    t: '이전 거래일 못 읽음',
-    c: 'fbad'
-  } : _dpUnk ? {
-    t: '이전 거래일 판정 못 함 ' + _dpUnk,
-    c: 'fbad'
-  } : null;
-  if (_sum.length && _zero) _sum = [ {
-    t: _pastN || _pastBad ? '최종거래일 없음' : '없음'
-  } ];
-  if (_pastBad) _sum.push(_pastBad);
-  if (_pastN) _sum.push({
-    t: '이전 거래일 ' + _pastN,
-    c: 'fpast'
-  });
-  return foldSec(fR, 'risk', _sum, null, true);
+  var _kc3 = {
+    stop: 0,
+    be: 0,
+    down: 0
+  };
+  if (_stOk) {
+    (_st.items || []).forEach((function(x) {
+      var k = stopKind(x.label);
+      if (k === '본절') _kc3.be++; else if (k === '손절' || !k) _kc3.stop++; else _kc3.down++;
+    }));
+    _kc3.stop += Math.max(0, _sn - _kc3.stop - _kc3.be - _kc3.down);
+  }
+  function stCell(k, l, n) {
+    if (!_st) return {
+      k: k,
+      l: l,
+      dash: true
+    };
+    if (!_stOk) return {
+      k: k,
+      l: l,
+      q: true,
+      why: function() {
+        say(String(_st.error));
+      }
+    };
+    return {
+      k: k,
+      l: l,
+      n: n
+    };
+  }
+  var _ddCell = !_dd.on ? {
+    k: 'dd',
+    l: '매도우세',
+    dash: true
+  } : _dd.error ? {
+    k: 'dd',
+    l: '매도우세',
+    q: true,
+    why: function() {
+      say(String(_dd.error));
+    }
+  } : _dd.pending ? {
+    k: 'dd',
+    l: '매도우세',
+    word: '확정 전',
+    why: function() {
+      say((_ddDay ? _ddDay + ' ' : '') + '데이터 업데이트 뒤에 판정합니다.');
+    }
+  } : {
+    k: 'dd',
+    l: '매도우세',
+    n: _dn,
+    q: !!_dunk.length,
+    why: _dunk.length ? _ddUnknownSay : null
+  };
+  var _pastCell = {
+    k: 'past',
+    l: '이전 거래일',
+    g: true,
+    n: _pastN
+  };
+  if (_st && !_stOk) {
+    _pastCell.q = true;
+    _pastCell.why = function() {
+      say(String(_st.error));
+    };
+  } else if (_ddp && _ddp.error) {
+    _pastCell.q = true;
+    _pastCell.why = function() {
+      say(String(_ddp.error));
+    };
+  } else if (_dpUnk) {
+    _pastCell.q = true;
+    _pastCell.why = _dpUnkSay;
+  }
+  var _hdDay = _st && _st.day || _ddFinal && _dd.day || '';
+  if (_hdDay) fR.firstChild.textContent = '🚨 위험신호 · 최종거래일 ' + mdOf(_hdDay);
+  var _hdFold = fR.firstChild;
+  foldSec(fR, 'risk', null, null, true);
+  riskBoard(_hdFold, [ stCell('stop', '손절', _kc3.stop), stCell('be', '본절', _kc3.be), stCell('down', '아래로익절', _kc3.down), _ddCell, _pastCell ]);
+  return fR;
+}
+
+function riskBoard(hd, cells) {
+  var b = el('span', 'fsum fbl rkb');
+  cells.forEach((function(c) {
+    var bare = c.q && !c.n;
+    var zero = c.dash || c.word || !c.q && !c.n;
+    var cell = el('span', 'rkc' + (zero ? ' rkz' : '') + (c.g ? ' rkg' : '') + (bare ? ' rkb0' : '') + (c.why ? ' tap' : ''));
+    cell.setAttribute('data-k', c.k);
+    var v = el('b', 'rkv' + (c.word ? ' rkw' : ''), c.word || (c.dash ? '–' : bare ? '' : String(c.n || 0)));
+    if (c.q) v.appendChild(el('span', 'rkq', '?'));
+    cell.appendChild(v);
+    cell.appendChild(el('span', 'rkl', c.l));
+    if (c.why) cell.onclick = function(ev) {
+      ev.stopPropagation();
+      c.why();
+    };
+    b.appendChild(cell);
+  }));
+  hd.appendChild(b);
 }
 
 var FOLD_MEM = {};
@@ -7595,6 +8121,17 @@ function okLineTo(arr, into) {
 var LV_URL = '/api/bot/orders_live';
 
 function lvRead(raw) {
+  if (tabPend(raw)) return {
+    lv: {},
+    bad: '',
+    pxBad: '',
+    unBad: '',
+    pn: 0,
+    un: 0,
+    ptd: [],
+    n: 0,
+    pend: true
+  };
   var lv = raw || {};
   var bad = !raw ? '답이 비었습니다' : lv.__err ? mkWhy(lv) : lv.ok === false || lv.error && !lv.unfilled && !lv.passed ? lv.error || '못 읽음' : '';
   if (bad) lv = {};
@@ -7614,6 +8151,16 @@ function lvRead(raw) {
 }
 
 function ordLiveFrag(r, thm) {
+  if (r.pend) {
+    var fW = document.createDocumentFragment();
+    fW.appendChild(el('div', 'sec', '📋 미체결 · 지나친 주문'));
+    fW.appendChild(el('div', 'empty', TAB_WAIT));
+    return foldSec(fW, 'ordlive', [ {
+      t: '미체결 · 지나친 주문'
+    }, {
+      t: TAB_WAIT
+    } ], '📋 ');
+  }
   var lv = r.lv, _lvBad = r.bad, _lvPxBad = r.pxBad, _unBad = r.unBad;
   var fO = document.createDocumentFragment();
   fO.appendChild(el('div', 'sec', '📋 미체결 · 지나친 주문'));
@@ -7696,27 +8243,36 @@ function ordLiveFrag(r, thm) {
   return fO;
 }
 
+function swapBodyKeep(frag, id) {
+  var was = document.getElementById(id), top = BD.scrollTop;
+  var kids = was ? [].slice.call(was.childNodes) : null;
+  swapBody(frag);
+  var now = document.getElementById(id);
+  if (!now || now === was || !kids || !kids.length) return;
+  now.textContent = '';
+  kids.forEach((function(k) {
+    now.appendChild(k);
+  }));
+  BD.scrollTop = top;
+}
+
 function renderOrders(first) {
   TITLE.textContent = '주문';
   if (first && hasCache('/api/orders?active=1')) first = false;
   if (first) BD.textContent = '불러오는 중…';
-  Promise.all([ getJSONc('/api/orders?active=1').catch((function(e) {
+  tabAll('orders', [ getJSONc('/api/orders?active=1').catch((function(e) {
     return {
       __err: e
     };
-  })), getJSONc('/api/market_day').catch((function() {
-    return null;
+  })), getJSONc('/api/market_day').catch((function(e) {
+    return {
+      __err: e
+    };
   })), getJSONc('/api/bot/orders_live').catch((function(e) {
     return {
       __err: e
     };
-  })), BOT.menu ? Promise.resolve({
-    items: BOT.menu
-  }) : getJSON('/api/bot/menu').catch((function() {
-    return {
-      items: []
-    };
-  })), getJSONc(THM_URL).catch((function(e) {
+  })), menuGet(), getJSONc(THM_URL).catch((function(e) {
     return {
       __err: e
     };
@@ -7732,7 +8288,7 @@ function renderOrders(first) {
     return {
       __err: e
     };
-  })) ]).then((function(res) {
+  })) ], [ 0 ]).then((function(res) {
     var _lr = lvRead(res[2]), lv = _lr.lv, _lvBad = _lr.bad, _lvPxBad = _lr.pxBad;
     tdBadgeSet(_lr);
     if (TAB !== 'orders') return;
@@ -7744,15 +8300,14 @@ function renderOrders(first) {
         if (TAB === 'orders') renderOrders();
       }));
     }), 0);
-    BOT.menu = res[3] && res[3].items || BOT.menu || [];
     var f = document.createDocumentFragment();
     live(true, '');
     var buyOn = !!(md && md.switch_mode === 'on');
-    f.appendChild(switchRow('⏯ 매수', buyOn, '켬', '끔', (function() {
+    f.appendChild(md && !md.__pend && !md.__err && md.switch_mode ? switchRow('⏯ 매수', buyOn, '켬', '끔', (function() {
       setWatch('on');
     }), (function() {
       setWatch('off');
-    }), true, '끄면 매수만 멈춤 · 손절·익절은 그대로'));
+    }), true, '끄면 매수만 멈춤 · 손절·익절은 그대로') : switchRowWait('⏯ 매수', md, '끄면 매수만 멈춤 · 손절·익절은 그대로'));
     var _tn = thmNote(res[4]);
     if (_tn) f.appendChild(_tn);
     thmDecorate(f);
@@ -7763,7 +8318,7 @@ function renderOrders(first) {
       holder.id = 'sell-holder';
       holder.appendChild(el('div', 'empty', '불러오는 중…'));
       f.appendChild(holder);
-      swapBody(f);
+      swapBodyKeep(f, 'sell-holder');
       renderSellList();
       return;
     }
@@ -7772,7 +8327,7 @@ function renderOrders(first) {
       bh.id = 'ar-box';
       bh.appendChild(el('div', 'empty', '불러오는 중…'));
       f.appendChild(bh);
-      swapBody(f);
+      swapBodyKeep(f, 'ar-box');
       renderAutoRules();
       return;
     }
@@ -7781,7 +8336,10 @@ function renderOrders(first) {
       out.id = 'botout';
       f.appendChild(out);
       swapBody(f);
-      if (BOT.text) botPaint(BOT.text); else botLoad();
+      if (BOT.text) {
+        botPaint(BOT.text);
+        botTextTick();
+      } else botLoad();
       return;
     }
     if (od && od.__err) {
@@ -7805,7 +8363,7 @@ function renderOrders(first) {
         by[k].rows.push(o);
         by[k].sum += Number(o.total_amount || o.base_amount || 0);
       }));
-      var _gsOk = !_lvBad && !_lvPxBad && Array.isArray(lv.groups);
+      var _gsOk = !_lvBad && !_lvPxBad && !_lr.pend && Array.isArray(lv.groups);
       if (_gsOk) ORD_GS_LAST = {
         gs: lv.groups,
         at: Date.now()
@@ -7844,7 +8402,7 @@ function renderOrders(first) {
         }));
         f.appendChild(cw);
         f.appendChild(chipNone('ord-chips'));
-        if (!_gsOk) f.appendChild(el('div', 'mut', '⚠ 칩 묶음은 ' + clockHMS(ORD_GS_LAST.at) + ' 에 받은 것 (지금 것을 못 읽었습니다)'));
+        if (!_gsOk && !_lr.pend) f.appendChild(el('div', 'mut', '⚠ 칩 묶음은 ' + clockHMS(ORD_GS_LAST.at) + ' 에 받은 것 (지금 것을 못 읽었습니다)'));
       }
       _pendChipFind = true;
       var _pick = ORD_CHIP ? _gs.filter((function(g) {
@@ -7860,7 +8418,9 @@ function renderOrders(first) {
           return _keep[by[k].code];
         }));
       }
-      var _osort = ordSortGet(), _px = lv.prices || {};
+      var _pxOk = !_lr.pend && !_lvBad && !_lvPxBad;
+      if (_pxOk) ORD_PX_LAST = lv.prices || {};
+      var _osort = ordSortGet(), _px = _pxOk ? lv.prices || {} : ORD_PX_LAST;
       var _needOf = function(k) {
         var best = null;
         by[k].rows.forEach((function(o) {
@@ -8039,9 +8599,12 @@ function nc(c) {
   return s;
 }
 
+function riskOk(d) {
+  return d && !d.__pend && !d.__err && d.ok !== false && d.items ? d : null;
+}
+
 function riskData() {
-  var c = JC[RISK_URL], d = c && c.data;
-  return d && d.ok !== false && d.items ? d : null;
+  return riskOk(jcLive(RISK_URL));
 }
 
 function riskErrText(res) {
@@ -8063,7 +8626,7 @@ function riskSpans(o, isItem) {
   var _net = o.stop_pl_net_krw != null;
   var pl = Number((_net ? o.stop_pl_net_krw : o.stop_pl_krw) || 0), pct = _net ? o.stop_pl_net_pct : o.stop_pl_pct;
   var _pctTxt = pct == null ? '' : ' (' + (pl < 0 ? '−' : pl > 0 ? '+' : '') + Math.abs(Number(pct)).toFixed(2) + '%)';
-  if (pl < 0) out.push(el('span', 'dn', '아래로 닿으면 기대손익 −' + fmt(-pl) + '원' + _pctTxt)); else if (pl > 0) out.push(el('span', 'up', '아래로 닿으면 기대손익 +' + fmt(pl) + '원' + _pctTxt)); else out.push(el('span', '', '아래로 닿으면 기대손익 0원'));
+  if (pl < 0) out.push(el('span', 'pv dn', '아래로 닿으면 기대손익 −' + fmt(-pl) + '원' + _pctTxt)); else if (pl > 0) out.push(el('span', 'pv up', '아래로 닿으면 기대손익 +' + fmt(pl) + '원' + _pctTxt)); else out.push(el('span', '', '아래로 닿으면 기대손익 0원'));
   if (isItem && Number(o.uncovered_qty) > 0) {
     out.push(document.createTextNode(' · '));
     out.push(el('span', 'o', '손절 없음 ' + fmt(o.uncovered_qty) + '주'));
@@ -8102,7 +8665,7 @@ function stopSumCell(s, net) {
     w.appendChild(el('div', 'bt-x o', '걸어 둔 손절이 없습니다'));
     return w;
   }
-  return withNetPct(btCell('아래로 닿으면 기대손익', signWon(v.pl), v.pl > 0 ? 'up' : v.pl < 0 ? 'dn' : '', v.pctTxt), v.pl, net);
+  return withNetPct(btCell('아래로 닿으면 기대손익', signWon(v.pl), v.pl > 0 ? 'pv up' : v.pl < 0 ? 'pv dn' : '', v.pctTxt), v.pl, net);
 }
 
 function uncoveredNames(rk, codes) {
@@ -8140,7 +8703,7 @@ function riskSumCard(title, s, why, rk, codes, net) {
     var _un = uncoveredNames(rk, codes);
     if (_un) k.appendChild(el('div', 'sum-warn', '⚠ 손절 안 걸림 — ' + _un));
   } else {
-    k.appendChild(el('div', 'mut', '💰 손절 계산을 못 읽었습니다 — ' + why));
+    k.appendChild(el('div', 'mut', why === TAB_WAIT ? '💰 ' + TAB_WAIT : '💰 손절 계산을 못 읽었습니다 — ' + why));
   }
   return k;
 }
@@ -8174,7 +8737,11 @@ function rzName(rz) {
 function rzFoldLine(rz) {
   var s = el('span', 'bt-fs3'), v, x = false, c = '', sub = '';
   s.appendChild(el('span', 'bt-fl', rzName(rz) + ' '));
-  if (!rz || rz.__err || rz.ok === false) {
+  if (tabPend(rz)) {
+    v = TAB_WAIT;
+    x = true;
+    s.setAttribute('data-rz', 'wait');
+  } else if (!rz || rz.__err || rz.ok === false) {
     v = '조회 실패';
     x = true;
     s.setAttribute('data-rz', 'fail');
@@ -8197,6 +8764,12 @@ function rzFoldLine(rz) {
 
 function realizedCell(rz) {
   var nm = rzName(rz);
+  if (tabPend(rz)) {
+    var w0 = el('div', 'bt-c');
+    w0.appendChild(el('div', 'bt-lb', nm));
+    w0.appendChild(el('div', 'bt-x', TAB_WAIT));
+    return w0;
+  }
   if (!rz || rz.__err || rz.ok === false) {
     var w = el('div', 'bt-c');
     w.appendChild(el('div', 'bt-lb', nm));
@@ -8211,7 +8784,7 @@ function realizedCell(rz) {
     return c0;
   }
   var n = Number(rz.net || 0);
-  var cell = btCell(nm, signWon(n), n > 0 ? 'up' : n < 0 ? 'dn' : '');
+  var cell = btCell(nm, signWon(n), n > 0 ? 'pv up' : n < 0 ? 'pv dn' : '');
   var g = rz.gross, cm = Number(rz.cmsn || 0), tx = Number(rz.tax || 0);
   if (g != null && Number(g) || cm || tx) {
     var parts = [];
@@ -8262,7 +8835,7 @@ function balTopCard(bal, rz, rk, rkWhy, net) {
     var _sv = rk && rk.totals ? stopSumVals(rk.totals) : null;
     var _fs2 = el('span', 'bt-fs2' + (_sv && _sv.cov ? _sv.pl > 0 ? ' up' : _sv.pl < 0 ? ' dn' : '' : ''));
     _fs2.appendChild(el('span', 'bt-fl', '아래로 닿으면 기대손익 '));
-    _fs2.appendChild(el('span', _sv && _sv.cov ? 'bt-fv' : 'bt-fv bt-fx', !_sv ? '못 읽었습니다' : !_sv.cov ? '걸어 둔 손절 없음' : signWon(_sv.pl) + (_sv.pctTxt ? ' (' + _sv.pctTxt + ')' : '')));
+    _fs2.appendChild(el('span', _sv && _sv.cov ? 'bt-fv' : 'bt-fv bt-fx', !_sv ? rkWhy === TAB_WAIT ? TAB_WAIT : '못 읽었습니다' : !_sv.cov ? '걸어 둔 손절 없음' : signWon(_sv.pl) + (_sv.pctTxt ? ' (' + _sv.pctTxt + ')' : '')));
     _fsw.appendChild(_fs2);
   }
   _fsw.appendChild(rzFoldLine(rz));
@@ -8287,14 +8860,14 @@ function balTopCard(bal, rz, rk, rkWhy, net) {
   var g = el('div', 'bt-g');
   g.appendChild(btCell('매수금액', fmt(buy) + '원'));
   g.appendChild(btCell('평가금액', fmt(bal.total_eval || 0) + '원'));
-  g.appendChild(withNetPct(btCell('평가손익', signWon(pl), pl > 0 ? 'up' : pl < 0 ? 'dn' : '', buy > 0 ? (pl > 0 ? '+' : pl < 0 ? '−' : '') + Math.abs(pl * 100 / buy).toFixed(2) + '%' : ''), pl, net));
+  g.appendChild(withNetPct(btCell('평가손익', signWon(pl), pl > 0 ? 'pv up' : pl < 0 ? 'pv dn' : '', buy > 0 ? (pl > 0 ? '+' : pl < 0 ? '−' : '') + Math.abs(pl * 100 / buy).toFixed(2) + '%' : ''), pl, net));
   g.appendChild(realizedCell(rz));
   if ((bal.holdings || []).length) {
     var sc;
     if (rk && rk.totals) sc = stopSumCell(rk.totals, net); else {
       sc = el('div', 'bt-c');
       sc.appendChild(el('div', 'bt-lb', '아래로 닿으면 기대손익'));
-      sc.appendChild(el('div', 'bt-x', '못 읽었습니다 — ' + (rkWhy || '손절 계산을 못 받았습니다')));
+      sc.appendChild(el('div', 'bt-x', rkWhy === TAB_WAIT ? TAB_WAIT : '못 읽었습니다 — ' + (rkWhy || '손절 계산을 못 받았습니다')));
     }
     sc.classList.add('bt-wide');
     g.appendChild(sc);
@@ -8315,7 +8888,7 @@ function renderBalance(first) {
   if (first && hasCache('/api/balance')) first = false;
   TITLE.textContent = '잔고';
   if (first) BD.textContent = '불러오는 중…';
-  Promise.all([ getJSONc('/api/balance').catch((function(e) {
+  tabAll('balance', [ getJSONc('/api/balance').catch((function(e) {
     return {
       __err: e
     };
@@ -8345,7 +8918,7 @@ function renderBalance(first) {
     return {
       __err: e
     };
-  })) ]).then((function(res) {
+  })) ], [ 0 ]).then((function(res) {
     if (TAB !== 'balance') return;
     if (balQFocused() || balQTapping()) {
       BAL_Q_LATE = true;
@@ -8353,7 +8926,7 @@ function renderBalance(first) {
     }
     var _dch = res[6] && !res[6].__err && res[6].ok !== false && res[6].items || {};
     var bal = res[0], md = res[1];
-    var rk = riskData(), rkWhy = rk ? '' : riskErrText(res[4]);
+    var rk = riskData() || riskOk(res[4]), rkWhy = rk ? '' : tabPend(res[4]) ? TAB_WAIT : riskErrText(res[4]);
     var f = document.createDocumentFragment();
     live(true, '');
     if (bal && bal.__err) {
@@ -8374,7 +8947,7 @@ function renderBalance(first) {
     var _sob = soBox(res[7]);
     if (_sob) f.appendChild(_sob);
     if ((bal.holdings || []).length) f.appendChild(bulkMenuRow(bal));
-    var _bg = [];
+    var _bg = [], _bgOld = false;
     if (rk) {
       (rk.groups || []).forEach((function(g) {
         _bg.push({
@@ -8382,6 +8955,26 @@ function renderBalance(first) {
           label: g.label,
           codes: (g.codes || []).map(nc),
           sum: g
+        });
+      }));
+      BAL_GS_LAST = {
+        gs: _bg.slice(),
+        at: Date.now()
+      };
+    } else if (BAL_GS_LAST) {
+      _bgOld = true;
+      var _bHeld = {};
+      (bal.holdings || []).forEach((function(h) {
+        _bHeld[nc(h['종목코드'])] = 1;
+      }));
+      BAL_GS_LAST.gs.forEach((function(g) {
+        var _cs = g.codes.filter((function(x) {
+          return _bHeld[x];
+        }));
+        if (_cs.length >= CHIP_MIN || g.key === BAL_CHIP) _bg.push({
+          key: g.key,
+          label: g.label,
+          codes: _cs
         });
       }));
     } else {
@@ -8479,12 +9072,15 @@ function renderBalance(first) {
       }));
       f.appendChild(bcw);
       f.appendChild(chipNone('bal-chips'));
+      if (_bgOld && !tabPend(res[4])) f.appendChild(el('div', 'mut', '⚠ 칩 묶음은 ' + clockHMS(BAL_GS_LAST.at) + ' 에 받은 것 (지금 것을 못 읽었습니다)'));
       _pendChipFind = 'bal';
     }
     var _bpick = BAL_CHIP ? (_tn ? [ _tn ] : []).concat(_bg).filter((function(g) {
       return g.key === BAL_CHIP;
     }))[0] : null;
-    if (BAL_CHIP && !_bpick) BAL_CHIP = '';
+    if (BAL_CHIP && !_bpick) {
+      if (rk || BAL_CHIP === BAL_TN_KEY) BAL_CHIP = ''; else f.appendChild(el('div', 'mut', '⚠ 고른 묶음을 지금 못 읽어 전체를 보여 줍니다 (읽히면 돌아옵니다)'));
+    }
     if (_bpick) {
       var _bk = {};
       _bpick.codes.forEach((function(x) {
@@ -8535,7 +9131,7 @@ function renderBalance(first) {
         f.appendChild(k);
         return;
       }
-      k.appendChild(el('span', 'rt ' + (r >= 0 ? 'up' : 'dn'), (r >= 0 ? '+' : '') + r.toFixed(2) + '%   ' + (money >= 0 ? '+' : '') + fmt(money) + '원'));
+      k.appendChild(el('span', 'rt pv ' + (r >= 0 ? 'up' : 'dn'), (r >= 0 ? '+' : '') + r.toFixed(2) + '%   ' + (money >= 0 ? '+' : '') + fmt(money) + '원'));
       k.appendChild(el('span', 'nm', h['종목명'] || h['종목코드']));
       var _dc = _dch[ck], _dcl = null;
       if (_dc && _dc.chg != null) {
@@ -8720,33 +9316,187 @@ function balActions(hh, back) {
 
 var SN_POLL_MS = 1e3, SN_WAIT_MS = 45e3;
 
+var SN_PX_REUSE_MS = 5e3;
+
 function sellNow(code, nm, back) {
-  toast('보유 수량을 확인하는 중…', 1500);
-  Promise.all([ fetch('/api/bot/sell_now/preview?code=' + encodeURIComponent(code), {
-    headers: {
-      Accept: 'application/json'
+  var open0 = snOpenGuess();
+  var st = {
+    code: code,
+    nm: nm,
+    back: back || null,
+    seq: -1,
+    sig: '',
+    fail: '',
+    modeSet: false,
+    qtyDone: false,
+    soDone: false,
+    pxBusy: false,
+    pxAt: 0,
+    p: {
+      ok: true,
+      code: code,
+      name: nm,
+      total_qty: snBalQty(code),
+      open: open0,
+      why: '',
+      pct_free: true,
+      qty_ok: true,
+      price: null,
+      price_later: true
     },
-    cache: 'no-store'
-  }).then((function(r) {
+    so: snQuickSo(),
+    mode: open0 ? 'now' : 'open'
+  };
+  snPick(st);
+  snGet('/api/bot/sell_now/preview?code=' + encodeURIComponent(code) + '&price=0').then((function(p) {
+    if (!p || p.ok === false) {
+      st.fail = p && p.error || '답이 비었습니다';
+      snSync(st);
+      return;
+    }
+    st.p = p;
+    st.qtyDone = true;
+    if (!st.modeSet) st.mode = p.open ? 'now' : 'open';
+    snSync(st);
+  })).catch((function(e) {
+    st.fail = e && e.message || String(e);
+    snSync(st);
+  }));
+  soList().then((function(so) {
+    st.so = so;
+    st.soDone = true;
+    snSync(st);
+  }));
+}
+
+function snBalQty(code) {
+  var c = JC['/api/balance'], d = c && c.data || {};
+  if (!c || !(Date.now() - Number(c.ts) <= SN_BAL_PX_MAX_MS) || d.cache_meta) return null;
+  var q = 0;
+  (d.holdings || []).forEach((function(h) {
+    if (nc(h['종목코드']) === nc(code)) q += Number(h['보유수량'] || 0);
+  }));
+  return q > 0 ? q : null;
+}
+
+function snOpenGuess() {
+  var t = new Date, wd = t.getDay(), hm = t.getHours() * 60 + t.getMinutes();
+  return wd >= 1 && wd <= 5 && hm >= 9 * 60 && hm < 15 * 60 + 20;
+}
+
+function snQuickSo() {
+  var c = JC[SO_URL], d = c && c.data;
+  return c && Date.now() - Number(c.ts) < JC_FRESH && soUsable(d) ? d : {
+    wait: true
+  };
+}
+
+function snGet(url) {
+  return cutGet(url, (function(r) {
     if (r.status === 404) throw new Error('컴퓨터 서버를 다시 켠 뒤에 쓸 수 있습니다 (HTTP 404)');
     return r.json();
-  })), soList() ]).then((function(res) {
-    var p = res[0], so = res[1];
-    if (!p || p.ok === false) {
-      say('팔 수 없습니다 — ' + (p && p.error || '답이 비었습니다'));
-      dlgBackTo(back);
-      return;
-    }
-    if (!p.open && !soUsable(so)) {
-      say('지금은 팔 수 없습니다 — ' + (p.why || '장 시간이 아닙니다') + '\n\n' + soWhyNot(so));
-      dlgBackTo(back);
-      return;
-    }
-    snPick(code, p.name || nm, p, so, p.open ? 'now' : 'open', back);
-  })).catch((function(e) {
-    say('팔 수 없습니다 — ' + (e && e.message || e));
-    dlgBackTo(back);
   }));
+}
+
+function snAlive(st) {
+  return st.seq === PICK_SEQ && DLG.classList.contains('on') && DLG_PICK.style.display !== 'none';
+}
+
+function snStop(st) {
+  if (st.fail) return '팔 수 없습니다 — ' + st.fail;
+  if (st.qtyDone && st.soDone && !st.p.open && !soUsable(st.so)) return '지금은 팔 수 없습니다 — ' + (st.p.why || '장 시간이 아닙니다') + '\n\n' + soWhyNot(st.so);
+  return '';
+}
+
+function snSig(st) {
+  var p = st.p, so = st.so, ok = soUsable(so);
+  return JSON.stringify([ st.mode, p.name || st.nm, p.total_qty, !!p.open, st.qtyDone && !p.open ? p.why || '' : '', !!p.pct_free, !!p.qty_ok, !!so.wait, !!so.old, so.err || '', ok ? so.run_date : '', ok ? (so.items || []).filter((function(it) {
+    return nc(it.code) === nc(st.code);
+  })).map(fpOf) : [] ]);
+}
+
+function snSync(st) {
+  if (!snAlive(st)) return;
+  if (snStop(st) || snSig(st) !== st.sig) {
+    snPick(st);
+    return;
+  }
+  snAmtPaint(st);
+  snMark(st);
+  snPxAsk(st);
+}
+
+function snMark(st) {
+  var h = DLG_PICK.querySelector('.snhead');
+  if (!h) return;
+  if (!st.qtyDone || !st.soDone || st.mode === 'now' && st.p.price_later && !st.pxAt) h.setAttribute('data-wait', '1'); else h.removeAttribute('data-wait');
+}
+
+function snPxAsk(st) {
+  if (st.mode !== 'now' || !st.qtyDone || !st.p.price_later || st.pxBusy || st.pxAt) return;
+  st.pxBusy = true;
+  var fin = function(q) {
+    var p = st.p, good = !!(q && q.ok !== false), v = good ? Number(q.price) : 0;
+    st.pxBusy = false;
+    st.pxAt = Date.now();
+    p.price = v > 0 ? v : null;
+    p.eval = v > 0 ? q.eval : null;
+    p.px_fail = !(v > 0);
+    if (good && q.total_qty != null) {
+      p.total_qty = q.total_qty;
+      p.open = q.open;
+      p.why = q.why;
+    }
+    if (!snAlive(st)) return;
+    if (snStop(st) || snSig(st) !== st.sig) {
+      snPick(st);
+      return;
+    }
+    snAmtPaint(st);
+    snMark(st);
+  };
+  snGet('/api/bot/sell_now/preview?code=' + encodeURIComponent(st.code)).then(fin, (function() {
+    fin(null);
+  }));
+}
+
+function snAmtPaint(st) {
+  var row = document.getElementById('sn-amt');
+  if (!row || st.mode !== 'now' || st.p.total_qty == null) return;
+  var it = snAmtItem(st.code, st.p.name || st.nm, st.p, (function() {
+    snPick(st);
+  }));
+  var sub = row.querySelector('.sub');
+  if (sub && !!it[3].off === !!row.disabled) {
+    sub.textContent = it[3].sub;
+    return;
+  }
+  row.parentNode.replaceChild(pickRow(it), row);
+}
+
+function snWaitItems(why) {
+  return [ [ '🔴 전량 매도', null, true, {
+    off: true,
+    sub: why
+  } ], [ '✏️ % 직접 입력', null, false, {
+    off: true,
+    sub: why
+  } ], [ '✏️ 금액 직접 입력 (' + SN_AMT_UNIT.label + ')', null, false, {
+    off: true,
+    sub: why
+  } ] ];
+}
+
+function snWaitToast(msg) {
+  var tt = setTimeout((function() {
+    toast(msg, 15e3);
+  }), 300);
+  return function() {
+    clearTimeout(tt);
+    [].forEach.call(document.querySelectorAll('.pvtoast'), (function(o) {
+      if (o.textContent === msg && o.parentNode) o.parentNode.removeChild(o);
+    }));
+  };
 }
 
 function snNowItems(code, nm2, p, me) {
@@ -8770,14 +9520,10 @@ function snNowItems(code, nm2, p, me) {
           dlgBackTo(again);
           return;
         }
-        fetch('/api/bot/sell_now/preview?code=' + encodeURIComponent(code) + '&pct=' + n, {
-          headers: {
-            Accept: 'application/json'
-          },
-          cache: 'no-store'
-        }).then((function(r) {
-          return r.json();
-        })).then((function(q) {
+        var dn = snWaitToast('몇 주인지 세는 중…');
+        snGet('/api/bot/sell_now/preview?code=' + encodeURIComponent(code) + '&pct=' + n + '&price=0').then((function(q) {
+          dn();
+          if (DLG.classList.contains('on')) return;
           if (!q || q.ok === false || !q.custom_pct) {
             say('몇 주인지 못 셌습니다 — ' + (q && q.error || '답이 비었습니다'));
             dlgBackTo(again);
@@ -8789,6 +9535,8 @@ function snNowItems(code, nm2, p, me) {
           }), true);
           dlgBackTo(again);
         })).catch((function(e) {
+          dn();
+          if (DLG.classList.contains('on')) return;
           say('몇 주인지 못 셌습니다 — ' + (e && e.message || e));
           dlgBackTo(again);
         }));
@@ -8806,71 +9554,77 @@ function snNowItems(code, nm2, p, me) {
       sub: '컴퓨터 서버를 다시 켠 뒤에 쓸 수 있습니다 (장 마감 뒤 데이터 업데이트 때 자동)'
     } ]);
   }
+  items.push(snAmtItem(code, nm2, p, me));
+  return items;
+}
+
+function snAmtItem(code, nm2, p, me) {
   var sp = snPxSrc(code, p);
   var amtLab = '✏️ 금액 직접 입력 (' + SN_AMT_UNIT.label + ')';
   if (!p.qty_ok) {
-    items.push([ amtLab, null, false, {
+    return [ amtLab, null, false, {
       off: true,
+      id: 'sn-amt',
       sub: '컴퓨터 서버를 다시 켠 뒤에 쓸 수 있습니다 (장 마감 뒤 데이터 업데이트 때 자동)'
-    } ]);
-  } else if (sp.px > 0) {
-    var wonAsk = function(pre) {
-      askVal('매도 금액 (' + SN_AMT_UNIT.label + ')', pre || '', (function(v) {
-        var again = function() {
-          wonAsk(v);
-        };
-        var won = snWonOf(v);
-        if (won == null) {
+    } ];
+  }
+  var pxWait = !(sp.px > 0) && p.price_later && !p.px_fail;
+  if (!(sp.px > 0) && !pxWait) {
+    return [ amtLab, null, false, {
+      off: true,
+      id: 'sn-amt',
+      sub: '지금 값을 못 받아 몇 주인지 셀 수 없습니다'
+    } ];
+  }
+  var wonAsk = function(pre) {
+    askVal('매도 금액 (' + SN_AMT_UNIT.label + ')', pre || '', (function(v) {
+      var again = function() {
+        wonAsk(v);
+      };
+      var won = snWonOf(v);
+      if (won == null) {
+        dlgBackTo(again);
+        return;
+      }
+      var noPx = function(why) {
+        say('팔지 않습니다 — 지금 값을 못 받아 몇 주인지 셀 수 없습니다\n(' + why + ' · % 로 팔거나 창을 다시 열어 주세요)');
+        dlgBackTo(again);
+      };
+      var dn = snWaitToast('지금 값을 확인하는 중…');
+      snGet('/api/bot/sell_now/preview?code=' + encodeURIComponent(code)).then((function(q0) {
+        dn();
+        if (DLG.classList.contains('on')) return;
+        if (!q0 || q0.ok === false) {
+          noPx(q0 && q0.error || '답이 비었습니다');
+          return;
+        }
+        var s2 = snPxSrc(code, q0);
+        if (!(s2.px > 0)) {
+          noPx('받아 둔 잔고 값이 묵었습니다');
+          return;
+        }
+        var q = snWonQty(won, s2.px, q0.total_qty, s2.pre);
+        if (q.why) {
+          say(q.why);
           dlgBackTo(again);
           return;
         }
-        var noPx = function(why) {
-          say('팔지 않습니다 — 지금 값을 못 받아 몇 주인지 셀 수 없습니다\n(' + why + ' · % 로 팔거나 창을 다시 열어 주세요)');
-          dlgBackTo(again);
-        };
-        fetch('/api/bot/sell_now/preview?code=' + encodeURIComponent(code), {
-          headers: {
-            Accept: 'application/json'
-          },
-          cache: 'no-store'
-        }).then((function(r) {
-          return r.json();
-        })).then((function(q0) {
-          if (!q0 || q0.ok === false) {
-            noPx(q0 && q0.error || '답이 비었습니다');
-            return;
-          }
-          var s2 = snPxSrc(code, q0);
-          if (!(s2.px > 0)) {
-            noPx('받아 둔 잔고 값이 묵었습니다');
-            return;
-          }
-          var q = snWonQty(won, s2.px, q0.total_qty, s2.pre);
-          if (q.why) {
-            say(q.why);
-            dlgBackTo(again);
-            return;
-          }
-          sellWonAsk(code, nm2, won, q, s2, q0.total_qty);
-          dlgBackTo(again);
-        })).catch((function(e) {
-          noPx(e && e.message || String(e));
-        }));
-      }), true);
-      dlgBackTo(me);
-    };
-    items.push([ amtLab, function() {
-      wonAsk('');
-    }, false, {
-      sub: sp.pre + ' ' + fmt(sp.px) + '원 기준 · 평가 ' + fmt(sp.px * Number(p.total_qty || 0)) + '원 · 예: ' + snAmtEx() + ' (주수는 내림)'
-    } ]);
-  } else {
-    items.push([ amtLab, null, false, {
-      off: true,
-      sub: '지금 값을 못 받아 몇 주인지 셀 수 없습니다'
-    } ]);
-  }
-  return items;
+        sellWonAsk(code, nm2, won, q, s2, q0.total_qty);
+        dlgBackTo(again);
+      })).catch((function(e) {
+        dn();
+        if (DLG.classList.contains('on')) return;
+        noPx(e && e.message || String(e));
+      }));
+    }), true);
+    dlgBackTo(me);
+  };
+  return [ amtLab, function() {
+    wonAsk('');
+  }, false, {
+    id: 'sn-amt',
+    sub: pxWait ? '지금 값 확인 중… · 예: ' + snAmtEx() + ' (주수는 내림)' : sp.pre + ' ' + fmt(sp.px) + '원 기준 · 평가 ' + fmt(sp.px * Number(p.total_qty || 0)) + '원 · 예: ' + snAmtEx() + ' (주수는 내림)'
+  } ];
 }
 
 var SN_AMT_UNIT = {
@@ -9032,12 +9786,7 @@ function soWhat(it) {
 }
 
 function soList() {
-  return fetch(SO_URL, {
-    headers: {
-      Accept: 'application/json'
-    },
-    cache: 'no-store'
-  }).then((function(r) {
+  return cutGet(SO_URL, (function(r) {
     if (r.status === 404) return {
       old: true
     };
@@ -9066,33 +9815,61 @@ function soWhyNot(so) {
   return '🌅 다음 거래일을 못 찾아 시가 매도 예약을 걸 수 없습니다';
 }
 
-function snPick(code, nm, p, so, mode, back) {
-  var ok = soUsable(so);
+function snPick(st) {
+  var stop = snStop(st);
+  if (stop) {
+    say(stop);
+    dlgBackTo(st.back);
+    return;
+  }
+  var code = st.code, back = st.back, p = st.p, so = st.so, nm = p.name || st.nm, ok = soUsable(so);
+  if (st.mode === 'open' && st.soDone && !ok) st.mode = 'now';
+  if (st.mode === 'now' && st.qtyDone && !p.open) st.mode = 'open';
+  if (p.price_later && st.pxAt && Date.now() - st.pxAt > SN_PX_REUSE_MS) {
+    p.price = null;
+    p.eval = null;
+    p.px_fail = false;
+    st.pxAt = 0;
+  }
+  var mode = st.mode;
   var me = function() {
-    snPick(code, nm, p, so, mode, back);
+    snPick(st);
   };
-  askPick('', mode === 'open' ? snOpenItems(code, nm, p, so, me) : snNowItems(code, nm, p, me));
+  var wait = p.total_qty == null ? '수량 확인 중…' : mode === 'open' && !ok ? '예약 날짜 확인 중…' : '';
+  askPick('', wait ? snWaitItems(wait) : mode === 'open' ? snOpenItems(code, nm, p, so, me) : snNowItems(code, nm, p, me));
   var head = el('div', 'snhead'), bar = el('div', 'snmode');
   var bNow = el('button', mode === 'now' ? 'on' : '', '📤 지금 팔기');
   var bOpen = el('button', mode === 'open' ? 'on' : '', '🌅 ' + (ok ? soDay(so.run_date) : '다음 거래일') + ' 시가');
   bNow.disabled = !p.open;
   bOpen.disabled = !ok;
   bNow.onclick = function() {
-    if (mode !== 'now') snPick(code, nm, p, so, 'now', back);
+    if (st.mode !== 'now') {
+      st.mode = 'now';
+      st.modeSet = true;
+      snPick(st);
+    }
   };
   bOpen.onclick = function() {
-    if (mode !== 'open') snPick(code, nm, p, so, 'open', back);
+    if (st.mode !== 'open') {
+      st.mode = 'open';
+      st.modeSet = true;
+      snPick(st);
+    }
   };
   bar.appendChild(bNow);
   bar.appendChild(bOpen);
   head.appendChild(bar);
-  if (!p.open) head.appendChild(el('div', 'snwhy', '📤 지금은 못 팝니다 — ' + (p.why || '장 시간이 아닙니다')));
-  if (!ok) head.appendChild(el('div', 'snwhy', soWhyNot(so))); else if (mode === 'open') head.appendChild(el('div', 'snwhy', '🌅 ' + SO_HOW));
+  if (!p.open && st.qtyDone) head.appendChild(el('div', 'snwhy', '📤 지금은 못 팝니다 — ' + (p.why || '장 시간이 아닙니다')));
+  if (!ok && !so.wait) head.appendChild(el('div', 'snwhy', soWhyNot(so))); else if (ok && mode === 'open') head.appendChild(el('div', 'snwhy', '🌅 ' + SO_HOW));
   DLG_PICK.insertBefore(head, DLG_PICK.firstChild);
   (ok ? so.items || [] : []).forEach((function(it) {
     if (nc(it.code) === nc(code)) DLG_PICK.appendChild(soLine(it, soAfter, me));
   }));
   dlgBackTo(back);
+  st.seq = PICK_SEQ;
+  st.sig = snSig(st);
+  snMark(st);
+  snPxAsk(st);
 }
 
 function snOpenItems(code, nm, p, so, me) {
@@ -9120,16 +9897,12 @@ function snOpenItems(code, nm, p, so, me) {
         dlgBackTo(again);
         return;
       }
-      fetch('/api/bot/sell_now/preview?code=' + encodeURIComponent(code) + '&pct=' + n, {
-        headers: {
-          Accept: 'application/json'
-        },
-        cache: 'no-store'
-      }).then((function(r) {
-        return r.json();
-      })).catch((function() {
+      var dn = snWaitToast('몇 주인지 세는 중…');
+      snGet('/api/bot/sell_now/preview?code=' + encodeURIComponent(code) + '&pct=' + n + '&price=0').catch((function() {
         return null;
       })).then((function(q) {
+        dn();
+        if (DLG.classList.contains('on')) return;
         var cq = q && q.ok !== false && q.custom_pct ? q.custom_pct.qty : null;
         var what = n >= 100 ? '보유 전량을' : '보유의 ' + n + '%' + (cq != null ? '(지금 보유 ' + fmt(q.total_qty) + '주 기준 ' + fmt(cq) + '주)' : '') + '를';
         ask('«' + nm + '» ' + what + '\n' + day + ' 09:00 시가에 팔도록 예약합니다.\n' + '(신용분부터 · 주수는 그날 보유로 다시 셉니다)' + tail, (function() {
@@ -9281,7 +10054,7 @@ function soCancel(it, after, back) {
 }
 
 function soBox(d) {
-  if (!d) return null;
+  if (!d || tabPend(d)) return null;
   if (d.__err) {
     var em = String(d.__err && d.__err.message || d.__err);
     return /HTTP 404/.test(em) ? null : el('div', 'mut', '🌅 시가 매도 예약 목록을 못 읽었습니다 — ' + em);
@@ -9351,12 +10124,7 @@ function sellNowSend(code, nm, pct, qty) {
     toast('📤 매도 요청을 보냈습니다 — 주문 프로그램이 곧 냅니다', 3e3, true);
     var t0 = Date.now();
     (function poll() {
-      fetch('/api/bot/sell_now/' + encodeURIComponent(j.req_id), {
-        headers: {
-          Accept: 'application/json'
-        },
-        cache: 'no-store'
-      }).then((function(r) {
+      cutGet('/api/bot/sell_now/' + encodeURIComponent(j.req_id), (function(r) {
         return r.json();
       })).then((function(s) {
         var st = s && s.status;
@@ -9448,12 +10216,7 @@ function gsNameN(p, n) {
 function gsProbe(key) {
   if (GS_PROBING[key]) return;
   GS_PROBING[key] = 1;
-  fetch(gsPrevUrl(key), {
-    headers: {
-      Accept: 'application/json'
-    },
-    cache: 'no-store'
-  }).then((function(r) {
+  cutGet(gsPrevUrl(key), (function(r) {
     return r.status === 404 ? {
       old: true
     } : r.json().catch((function() {
@@ -9490,16 +10253,17 @@ var GS_PICK_KEY = 'pick|*';
 
 function gsOpen(key, back, via) {
   if (BOT.busy) return;
-  toast('보유 종목을 확인하는 중…', 1500);
-  fetch(gsPrevUrl(key) + '&pick=1', {
-    headers: {
-      Accept: 'application/json'
-    },
-    cache: 'no-store'
-  }).then((function(r) {
-    if (r.status === 404) throw new Error('컴퓨터 서버를 다시 켠 뒤에 쓸 수 있습니다 (HTTP 404)');
-    return r.json();
-  })).then((function(p) {
+  askPick('', []);
+  dlgBackTo(back || null);
+  DLG.classList.add('gssel');
+  DLG_MSG.textContent = gsTitleOf(key, via && via.label);
+  DLG_PICK.appendChild(el('div', 'gspwhy gswait', '보유 종목을 확인하는 중…'));
+  var my = PICK_SEQ;
+  function alive() {
+    return my === PICK_SEQ && DLG.classList.contains('on') && DLG_PICK.style.display !== 'none';
+  }
+  snGet(gsPrevUrl(key) + '&pick=1').then((function(p) {
+    if (!alive()) return;
     if (!p || p.ok === false) {
       say('팔 수 없습니다 — ' + (p && p.error || '답이 비었습니다'));
       dlgBackTo(back);
@@ -9523,9 +10287,14 @@ function gsOpen(key, back, via) {
     S.back = back || null;
     gsPick(S);
   })).catch((function(e) {
+    if (!alive()) return;
     say('팔 수 없습니다 — ' + (e && e.message || e));
     dlgBackTo(back);
   }));
+}
+
+function gsTitleOf(key, via) {
+  return via ? '«' + via + '» 일괄 매도' : key === GS_ALL_KEY ? '보유 전체 일괄 매도' : '«' + gsKeyLabel(key) + '» 일괄 매도';
 }
 
 function gsViaState(p, via) {
@@ -9763,7 +10532,7 @@ function gsBuysNote(sc, pct, p, S) {
 }
 
 function dayChgEl(url, code) {
-  var c = JC[url], d = c && c.data, it = d && d.ok !== false && d.items && d.items[nc(code)];
+  var d = jcLive(url), it = d && d.ok !== false && d.items && d.items[nc(code)];
   if (!it || it.chg == null || it.chg === '') return null;
   var v = Number(it.chg);
   if (!isFinite(v)) return null;
@@ -9795,7 +10564,7 @@ function gsPick(S, raw) {
     load: false
   };
   function setTitle() {
-    DLG_MSG.textContent = S.via ? '«' + S.via + '» 일괄 매도' : S.entry === GS_ALL_KEY ? '보유 전체 일괄 매도' : '«' + gsKeyLabel(S.entry) + '» 일괄 매도';
+    DLG_MSG.textContent = gsTitleOf(S.entry, S.via);
   }
   askPick('', []);
   dlgBackTo(S.back || null);
@@ -9874,15 +10643,11 @@ function gsPick(S, raw) {
   }
   function ask_(n, then) {
     var my_rq = ++rq;
-    fetch(gsPrevUrl(S.entry) + (S.locked ? '' : '&pick=1') + '&pct=' + n, {
-      headers: {
-        Accept: 'application/json'
-      },
-      cache: 'no-store'
-    }).then((function(r) {
+    cutGet(gsPrevUrl(S.entry) + (S.locked ? '' : '&pick=1') + '&pct=' + n, (function(r) {
       return r.json();
     })).then((function(q) {
       if (my_rq !== rq || !(then || alive())) return;
+      if (then && DLG.classList.contains('on')) return;
       if (!q || q.ok === false || !q.pct_ok || Number(q.pct) !== n || !(q.items || []).length || !S.locked && q.pick_ok !== true) {
         st = {
           ok: false,
@@ -9909,6 +10674,7 @@ function gsPick(S, raw) {
       paint();
     })).catch((function(e) {
       if (my_rq !== rq || !(then || alive())) return;
+      if (then && DLG.classList.contains('on')) return;
       st = {
         ok: false,
         why: '몇 주인지 못 셌습니다 — ' + (e && e.message || e)
@@ -10219,12 +10985,7 @@ function gsBoard(bid, p, first) {
   };
   (function poll() {
     if (!alive()) return;
-    fetch(GS_URL + '/' + encodeURIComponent(bid), {
-      headers: {
-        Accept: 'application/json'
-      },
-      cache: 'no-store'
-    }).then((function(r) {
+    cutGet(GS_URL + '/' + encodeURIComponent(bid), (function(r) {
       return r.json();
     })).then((function(s) {
       if (!alive()) return;
@@ -10326,17 +11087,12 @@ function bulkNone(bal) {
 
 var BAL_REFRESHING = false;
 
-function balRefresh() {
+function balRefresh(quiet) {
   if (BAL_REFRESHING) return;
   BAL_REFRESHING = true;
   var btn = document.getElementById('hd-refresh');
   if (btn) btn.classList.add('busy');
-  fetch('/api/balance?refresh=1', {
-    headers: {
-      Accept: 'application/json'
-    },
-    cache: 'no-store'
-  }).then((function(r) {
+  return cutGet('/api/balance?refresh=1', (function(r) {
     return r.json().catch((function() {
       return null;
     })).then((function(j) {
@@ -10347,7 +11103,7 @@ function balRefresh() {
   })).then((function(d) {
     var cm = d.cache_meta;
     if (cm) {
-      say('증권사에서 새로 받지 못했습니다.\n' + String(cm.reason || '').replace(/\s*—\s*캐시 표시$/, '') + '\n\n마지막으로 받아 둔 잔고는 ' + (cm.mtime || '?') + (cm.age ? ' (' + cm.age + ')' : '') + ' 것입니다.');
+      sayNoCover('증권사에서 새로 받지 못했습니다.\n' + String(cm.reason || '').replace(/\s*—\s*캐시 표시$/, '') + '\n\n마지막으로 받아 둔 잔고는 ' + (cm.mtime || '?') + (cm.age ? ' (' + cm.age + ')' : '') + ' 것입니다.');
       return;
     }
     var now = Date.now();
@@ -10378,18 +11134,29 @@ function balRefresh() {
       if (TAB === 'balance') renderBalance();
     })).catch((function() {}));
     var t = new Date;
-    toast('✓ 잔고를 새로 받았습니다 · ' + ('0' + t.getHours()).slice(-2) + ':' + ('0' + t.getMinutes()).slice(-2) + ':' + ('0' + t.getSeconds()).slice(-2));
+    if (!quiet) toast('✓ 잔고를 새로 받았습니다 · ' + ('0' + t.getHours()).slice(-2) + ':' + ('0' + t.getMinutes()).slice(-2) + ':' + ('0' + t.getSeconds()).slice(-2));
   })).catch((function(e) {
-    say('잔고를 새로 받지 못했습니다 — ' + (e && e.message ? e.message : e));
+    sayNoCover('잔고를 새로 받지 못했습니다 — ' + (e && e.message ? e.message : e));
   })).then((function() {
     BAL_REFRESHING = false;
     if (btn) btn.classList.remove('busy');
   }));
 }
 
-document.getElementById('hd-refresh').onclick = balRefresh;
+document.getElementById('hd-refresh').onclick = function() {
+  balRefresh();
+};
 
 document.getElementById('hd-eye').onclick = eyeToggle;
+
+function switchRowWait(label, res, why) {
+  var w = el('div', 'topsw'), top = el('div', 'top');
+  top.appendChild(el('span', 'lb', label));
+  top.appendChild(tabPend(res) ? el('span', 'swwait', TAB_WAIT) : el('span', 'swwait bad', '못 읽음 — ' + mkWhy(res || {})));
+  w.appendChild(top);
+  if (why) w.appendChild(el('div', 'why', why));
+  return w;
+}
 
 function switchRow(label, on, onText, offText, goOn, goOff, offIsRed, why, onIsGrey) {
   var w = el('div', 'topsw');
@@ -10420,8 +11187,10 @@ function renderPower(first) {
   TITLE.textContent = '설정';
   if (first && hasCache('/api/bot/estop_state')) first = false;
   if (first) BD.textContent = '불러오는 중…';
-  Promise.all([ getJSONc('/api/bot/estop_state').catch((function() {
-    return null;
+  Promise.all([ getJSONc('/api/bot/estop_state').catch((function(e) {
+    return {
+      __err: e
+    };
   })), getJSONc(VIB_URL).catch((function() {
     return null;
   })) ]).then((function(res) {
@@ -10431,7 +11200,7 @@ function renderPower(first) {
     live(true, '');
     var known = !!(es && es.ok);
     var running = known && !es.stopped;
-    var row2 = switchRow('🖥 주문 프로그램', running, '켬', '끔', (function() {
+    var row2 = !known ? switchRowWait('🖥 주문 프로그램', es, '⚠ 지금 상태를 못 읽었습니다 — 컴퓨터에서 확인하세요.') : switchRow('🖥 주문 프로그램', running, '켬', '끔', (function() {
       ask('멈춰 둔 주문 프로그램을 다시 시작합니다.\n매수·매도가 모두 다시 나갑니다.', (function() {
         botPost('/api/bot/eresume', {}, '다시 시작했습니다');
       }));
@@ -10574,6 +11343,8 @@ function amBuild() {
       go('orders');
     }), false, 'ord:' + it.key);
   })));
+  var _amf = menuFailNote();
+  if (_amf) AMSHEET.appendChild(_amf);
   sec('g-mkt', '시장', [ tab('📊', '시장 개요', 'market', (function() {
     MK.sel = null;
   })), tab('★', '주요종목', 'major'), tab('📈', '차트', 'chart', (function() {
@@ -10589,10 +11360,9 @@ function amBuild() {
 
 function amOpen() {
   if (!BOT.menu) {
-    getJSON('/api/bot/menu').then((function(m) {
-      BOT.menu = m && m.items || [];
+    menuGet().then((function() {
       if (AM.open) amBuild();
-    })).catch((function() {}));
+    }));
   }
   amBuild();
   var tb = document.querySelector('.tb');
@@ -10824,7 +11594,7 @@ function renderMajor(first) {
   TITLE.textContent = '주요종목';
   if (first && hasCache(MJ_URL)) first = false;
   if (first) BD.textContent = '불러오는 중…';
-  Promise.all([ getJSONc(MJ_URL).catch((function(e) {
+  tabAll('major', [ getJSONc(MJ_URL).catch((function(e) {
     return {
       __err: e
     };
@@ -10844,7 +11614,7 @@ function renderMajor(first) {
     return {
       __err: e
     };
-  })) ]).then((function(res) {
+  })) ], [ 0 ]).then((function(res) {
     if (TAB !== 'major') return;
     if (mjTapping()) {
       MJ_LATE = true;
@@ -10939,7 +11709,7 @@ function renderMajor(first) {
       var k = el('div', 'card' + (x.nocode ? ' dim' : ' tap'));
       k.setAttribute('data-mj', x.code || '');
       var ch = x.chg;
-      if (ch == null) k.appendChild(el('span', 'rt mut', '—')); else k.appendChild(el('span', 'rt ' + (ch > 0 ? 'up' : ch < 0 ? 'dn' : ''), (ch > 0 ? '+' : '') + Number(ch).toFixed(2) + '%'));
+      if (ch == null) k.appendChild(el('span', 'rt mut', '—')); else k.appendChild(el('span', 'rt pv ' + (ch > 0 ? 'up' : ch < 0 ? 'dn' : ''), (ch > 0 ? '+' : '') + Number(ch).toFixed(2) + '%'));
       k.appendChild(el('span', 'nm', x.name));
       if (_chLive && x.chg_src === 'final' && ch != null) k.appendChild(el('span', 'tag', '지난 거래일'));
       var _ck = nc(x.code);
@@ -11877,7 +12647,12 @@ function renderFix(first) {
 var BOT = {
   pick: 'list',
   menu: null,
+  menuP: null,
+  menuFail: null,
   text: '',
+  textAt: 0,
+  textGot: 0,
+  textErr: null,
   busy: false,
   page: '',
   watch: null,
@@ -11915,6 +12690,53 @@ function botPost(url, body, okMsg, method) {
     BOT.busy = false;
     say('실패 — ' + e.message);
   }));
+}
+
+function menuFetch() {
+  var ac = jcCutter();
+  BOT.menuP = jcRace(getJSON('/api/bot/menu', ac), ac).then((function(m) {
+    if (!m || !Array.isArray(m.items)) throw new Error('답이 비었습니다');
+    BOT.menuP = null;
+    BOT.menuFail = null;
+    BOT.menu = m.items;
+    return m;
+  })).catch((function(e) {
+    BOT.menuP = null;
+    var why = e && e.message || String(e);
+    BOT.menuFail = {
+      why: why,
+      at: Date.now()
+    };
+    return {
+      items: [],
+      menuErr: why
+    };
+  }));
+  return BOT.menuP;
+}
+
+function menuCame() {
+  if (TAB === 'orders') repaint();
+  if (AM.open) amBuild();
+}
+
+function menuGet() {
+  if (BOT.menu) return Promise.resolve({
+    items: BOT.menu
+  });
+  var fl = BOT.menuFail;
+  if (!fl) return BOT.menuP || menuFetch();
+  if (!BOT.menuP && Date.now() - fl.at >= JC_REFETCH) menuFetch().then((function() {
+    if (BOT.menu) menuCame();
+  }));
+  return Promise.resolve({
+    items: [],
+    menuErr: fl.why
+  });
+}
+
+function menuFailNote() {
+  return !BOT.menu && BOT.menuFail ? el('div', 'mut mfail', '⚠ ☰ 목록 일부(매도 목록·전체 주문 등)를 못 읽었습니다 — ' + BOT.menuFail.why + ' · 저절로 다시 묻습니다') : null;
 }
 
 function menuOf(tab) {
@@ -11984,6 +12806,8 @@ function menuBar(pick, tab) {
     };
     list.appendChild(bb);
   }
+  var _mfn = menuFailNote();
+  if (_mfn) list.appendChild(_mfn);
   wrap.appendChild(list);
   if (BOT.open) wrap.classList.add('open');
   head.onclick = function() {
@@ -12008,8 +12832,10 @@ function pbHead(mb, o) {
   h1.appendChild(el('span', 'pbn', o.n + '종목 · ' + o.rows + '건' + (o.rows ? ' · ' + manWon(o.sum) : '')));
   p.appendChild(h1);
   if (o.pick) p.appendChild(el('div', 'pbx', '«' + o.pick.label + '» 만 보는 중 · 전체 ' + o.total + '종목'));
-  var b = o.bio, bnr = bioNotReady(b);
-  if (bnr) {
+  var bnr = bioNotReady(o.bio), b = bnr ? o.bio : bioSteady(o.bio);
+  if (tabPend(b)) {
+    p.appendChild(el('span', 'pbbio', '🧪 바이오 ' + TAB_WAIT));
+  } else if (bnr) {
     p.appendChild(el('span', 'pbbio', '🧪 바이오 못 셈 — ' + bnr));
   } else if (!b || b.__err) {
     p.appendChild(el('span', 'pbbio', '🧪 바이오 비중을 못 읽었습니다' + (b && b.__err ? ' — ' + b.__err.message : '')));
@@ -12148,11 +12974,9 @@ function stkList(box, rows, opt) {
 function renderBot(first) {
   TITLE.textContent = '관리';
   if (first) BD.textContent = '불러오는 중…';
-  (BOT.menu ? Promise.resolve({
-    items: BOT.menu
-  }) : getJSON('/api/bot/menu')).then((function(m) {
+  menuGet().then((function(m) {
     if (TAB !== 'bot') return;
-    BOT.menu = m.items || [];
+    if (m.menuErr) throw new Error(m.menuErr);
     var _ek = menuOf('bot').map((function(x) {
       return x.key;
     }));
@@ -12245,6 +13069,58 @@ function botPaint(text) {
     o.className = 'botout';
     o.textContent = text;
   }
+  var _te = BOT.textErr;
+  if (_te && _te.key === BOT.pick) {
+    o.insertBefore(el('div', 'err', '⚠ ' + clockHMS(_te.was) + ' 에 받은 글입니다 — 새로 받지 못했습니다: ' + _te.why), o.firstChild);
+  }
+}
+
+function botTextGet(want) {
+  var seq = BOT.textSeq = (BOT.textSeq || 0) + 1;
+  BOT.textAt = Date.now();
+  return cutGet('/api/bot/text/' + encodeURIComponent(want), (function(r) {
+    return r.json().catch((function() {
+      return null;
+    })).then((function(d) {
+      if (d && d.text) return d;
+      var e = new Error(d && d.error || (r.ok ? '가져오지 못했습니다' : 'HTTP ' + r.status));
+      e.srv = !!(d && d.error);
+      throw e;
+    }));
+  })).then((function(d) {
+    if (seq < (BOT.textDone || 0) || BOT.pick !== want) return {
+      stale: true
+    };
+    BOT.textDone = seq;
+    BOT.text = d.text;
+    BOT.textGot = Date.now();
+    BOT.textErr = null;
+    return d;
+  }));
+}
+
+var BOT_TEXT_EVERY = 14500;
+
+function botTextTick() {
+  if (BOT.textBusy || Date.now() - (BOT.textAt || 0) < BOT_TEXT_EVERY) return;
+  var want = BOT.pick, was = BOT.text;
+  botTextGet(want).then((function(d) {
+    if (d.stale || TAB !== 'orders') return;
+    if (BOT.text !== was) {
+      botPaint(BOT.text);
+      return;
+    }
+    var _old = document.querySelector('#botout > .err');
+    if (_old) _old.parentNode.removeChild(_old);
+  }), (function(e) {
+    if (BOT.pick !== want || TAB !== 'orders') return;
+    BOT.textErr = {
+      key: want,
+      why: e && e.message || String(e),
+      was: BOT.textGot || Date.now()
+    };
+    botPaint(BOT.text);
+  }));
 }
 
 function botLoad() {
@@ -12254,22 +13130,26 @@ function botLoad() {
     out.className = 'botout';
     out.textContent = '불러오는 중…';
   }
-  fetch('/api/bot/text/' + encodeURIComponent(want), {
-    headers: {
-      Accept: 'application/json'
-    }
-  }).then((function(r) {
-    return r.json();
-  })).then((function(d) {
-    if (BOT.pick !== want) return;
-    BOT.text = d.text || '❌ ' + (d.error || '가져오지 못했습니다');
-    if (document.getElementById('botout')) botPaint(BOT.text); else renderBot(true);
+  if (BOT.textBusy && BOT.textBusy.key === want && Date.now() - BOT.textBusy.at < JC_BUSY_MAX) return;
+  var _tb = BOT.textBusy = {
+    key: want,
+    at: Date.now()
+  };
+  var _tbEnd = function() {
+    if (BOT.textBusy === _tb) BOT.textBusy = null;
+  };
+  botTextGet(want).then((function(d) {
+    _tbEnd();
+    if (d.stale) return;
+    if (document.getElementById('botout')) botPaint(BOT.text); else if (TAB === 'bot') renderBot(true);
     [].forEach.call(document.querySelectorAll('.grid button'), (function(b, i) {
-      b.classList.toggle('on', (BOT.menu[i] || {}).key === BOT.pick);
+      b.classList.toggle('on', ((BOT.menu || [])[i] || {}).key === BOT.pick);
     }));
   })).catch((function(e) {
+    _tbEnd();
+    if (BOT.pick !== want) return;
     var o = document.getElementById('botout');
-    if (o) o.textContent = '❌ 가져오지 못했습니다 — ' + e.message;
+    if (o) o.textContent = e.srv ? '❌ ' + e.message : '❌ 가져오지 못했습니다 — ' + e.message;
   }));
 }
 
@@ -12286,6 +13166,8 @@ var ORD_GS_LAST = null;
 var ORD_CHIPQ = '';
 
 var BAL_CHIP = '', BAL_CHIPQ = '';
+
+var BAL_GS_LAST = null;
 
 var BAL_TN_KEY = 'today|new', BAL_TN_LABEL = '🆕 오늘 편입';
 
@@ -12884,7 +13766,7 @@ var TDB = document.getElementById('today-badge');
 var TDB_TIMER = null, TDB_AT = 0;
 
 function tdBadgeSet(r) {
-  if (!TDB || !r || r.bad) return;
+  if (!TDB || !r || r.bad || r.pend) return;
   var n = r.n || 0;
   TDB.textContent = n > 0 ? n > 99 ? '99+' : String(n) : '';
   TDB.setAttribute('data-n', String(n));
@@ -13013,6 +13895,13 @@ function go(tab, dir) {
   eyePaint();
   if (tab !== _prev) BD.scrollTop = 0;
   keepScroll(_keep);
+  tabFillStart(tab);
+  if (tab !== _prev) {
+    var _bdWas = BD.firstChild;
+    setTimeout((function() {
+      if (_bdWas && TAB === tab && BD.firstChild === _bdWas) BD.textContent = TAB_WAIT;
+    }), tabGrace() + 1);
+  }
   if (tab === 'orders') {
     renderOrders(true);
     TIMER = setInterval(renderOrders, 15e3);
@@ -13161,6 +14050,170 @@ BD.addEventListener('touchend', (function(e) {
   }), 120);
 }), {
   passive: true
+});
+
+var PTR_MIN = 80;
+
+var PTR = {
+  g: null,
+  busy: false,
+  box: null
+};
+
+function ptrShow(cls, txt, dy) {
+  if (!PTR.box) {
+    PTR.box = el('div', '', '');
+    PTR.box.id = 'ptr';
+    document.body.appendChild(PTR.box);
+  }
+  var b = PTR.box;
+  b.className = 'on ' + cls;
+  if (b.textContent !== txt) b.textContent = txt;
+  b.style.top = BD.getBoundingClientRect().top + 6 + 'px';
+  b.style.transform = 'translate(-50%,' + Math.round(Math.min(dy, PTR_MIN) * .4) + 'px)';
+}
+
+function ptrHide() {
+  if (PTR.box) PTR.box.className = '';
+}
+
+function ptrBlocked(t) {
+  if (DLG.classList.contains('on') || AM.open) return true;
+  if (document.body.classList.contains('chfull') || TAB === 'chart' && CH.code) return true;
+  var ae = document.activeElement;
+  if (ae && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName)) return true;
+  for (var n = t; n && n !== BD && n.nodeType === 1; n = n.parentNode) {
+    if (/^(INPUT|TEXTAREA|SELECT)$/.test(n.tagName) || n.isContentEditable || n.classList.contains('chwrap')) return true;
+    if (n.scrollHeight > n.clientHeight + 1 && /^(auto|scroll)$/.test(getComputedStyle(n).overflowY)) return true;
+  }
+  return false;
+}
+
+function ptrDrop() {
+  var g = PTR.g;
+  PTR.g = null;
+  if (!g) return;
+  g.t.removeEventListener('touchmove', ptrMove);
+  g.t.removeEventListener('touchend', ptrEnd);
+  g.t.removeEventListener('touchcancel', ptrDrop);
+  if (g.on) ptrHide();
+}
+
+function ptrMove(e) {
+  var g = PTR.g;
+  if (!g) return;
+  if (e.touches.length !== 1 || BD.scrollTop > 0 || DLG.classList.contains('on')) {
+    ptrDrop();
+    return;
+  }
+  var dx = e.touches[0].clientX - g.x, dy = e.touches[0].clientY - g.y;
+  if (!g.on) {
+    if (Math.abs(dx) < 4 && Math.abs(dy) < 4) return;
+    if (dy <= 0 || Math.abs(dx) >= dy) {
+      ptrDrop();
+      return;
+    }
+    g.on = true;
+    if (_sw) {
+      if (_sw.moved) BD.style.transform = '';
+      _sw = null;
+    }
+  }
+  if (dy <= 0) {
+    ptrDrop();
+    return;
+  }
+  if (e.cancelable) e.preventDefault();
+  g.ready = dy >= PTR_MIN && Math.abs(dx) < dy;
+  if (g.ready) ptrShow('ready', '↻ 놓으면 새로고침', dy); else ptrShow('', '↓ 더 당기면 새로고침', dy);
+}
+
+function ptrEnd() {
+  var g = PTR.g, fire = !!(g && g.on && g.ready);
+  ptrDrop();
+  if (fire) ptrRefresh();
+}
+
+function ptrRefresh() {
+  var me = scrKey(), ac = jcCutter(), bad = [], jobs = [], finished = false, tmo = null;
+  PTR.busy = true;
+  ptrShow('busy', '새로 받는 중…', PTR_MIN);
+  function one(p) {
+    jobs.push(Promise.resolve(p).then((function(d) {
+      if (d && d.ok === false) bad.push(String(d.error || d.msg || '서버가 못 읽었습니다'));
+    }), (function(e) {
+      if (e && e.status === 503 && e.body && e.body.ready === false) return;
+      bad.push(String(e && e.message || e));
+    })));
+  }
+  var mk = TAB === 'market' && !MK.sel, hasBal = TAB === 'balance' || TAB === 'chart';
+  if (TAB === 'chart') {
+    one(mkFresh('/api/orders?active=1', ac));
+    one(mkFresh(THM_URL, ac));
+  }
+  if (document.getElementById('botout')) one(botTextGet(BOT.pick));
+  Object.keys(JC_RD).forEach((function(u) {
+    if (JC_RD[u] !== me || TAB === 'chart' && (u === '/api/orders?active=1' || u === THM_URL)) return;
+    if (u === '/api/balance') {
+      hasBal = true;
+      return;
+    }
+    if (mk && u === MK_URL) return;
+    one(mkFresh(u, ac));
+  }));
+  if (hasBal) one(balRefresh(TAB !== 'balance'));
+  if (mk) one(mkOpenFetch());
+  if (TAB === 'fixnotes') fxPoll();
+  function fin() {
+    if (finished) return;
+    finished = true;
+    clearTimeout(tmo);
+    PTR.busy = false;
+    ptrHide();
+    if (scrKey() !== me) return;
+    try {
+      repaint();
+    } catch (_e) {}
+    if (!bad.length) return;
+    var why = bad.filter((function(x, i) {
+      return bad.indexOf(x) === i;
+    })).join('\n');
+    if (DLG.classList.contains('on')) toast('⚠ 새로고침 실패 — ' + why, 5e3, true); else say('새로고침 실패 — 일부를 새로 받지 못했습니다(보던 값 그대로입니다).\n\n' + why);
+  }
+  tmo = setTimeout((function() {
+    ac.abort();
+    bad.push(jcCutErr().message);
+    fin();
+  }), JC_BUSY_MAX);
+  Promise.all(jobs).then(fin, fin);
+}
+
+BD.addEventListener('touchstart', (function(e) {
+  ptrDrop();
+  if (PTR.busy || e.touches.length !== 1 || BD.scrollTop > 0 || ptrBlocked(e.target)) return;
+  var g = {
+    x: e.touches[0].clientX,
+    y: e.touches[0].clientY,
+    on: false,
+    ready: false,
+    t: e.target
+  };
+  PTR.g = g;
+  g.t.addEventListener('touchmove', ptrMove, {
+    passive: false
+  });
+  g.t.addEventListener('touchend', ptrEnd, {
+    passive: true
+  });
+  g.t.addEventListener('touchcancel', ptrDrop, {
+    passive: true
+  });
+}), {
+  passive: true
+});
+
+BD.addEventListener('touchmove', (function() {}), {
+  passive: false
 });
 
 var _M0 = (location.hash.match(/m=([a-z]+)/) || [])[1] || '';
