@@ -360,6 +360,20 @@
   .argrp > .card.aradd { color:#1a5490; font-weight:700; font-size:13.5px; }
   .argrp > .card.arrule .nm { font-size:14.5px; }
   .argrp > .balnote { margin:4px 14px 6px 43px; }
+  
+  .osagrp { padding:4px 0 8px; box-shadow:inset 3px 0 0 #d97706; }
+  .osahd { display:flex; align-items:center; gap:8px; padding:12px 14px 4px; }
+  .osahd .art { color:#9a5b00; }
+  .osagrp .arbd { padding-left:14px; }
+  .osaon { color:#b91c1c; font-weight:700; }
+  
+  .arevrow { display:flex; align-items:center; gap:8px; padding:4px 14px 2px 43px; font-size:13.5px; color:#374151; }
+  .arevrow .arevtx { flex:1; line-height:1.5; }
+  .evst { font-size:12.5px; font-weight:700; line-height:1.5; border-radius:9px; padding:6px 10px; }
+  .evst.on { background:#fbf1f0; color:#b03a2e; } .evst.off { background:#f3f4f6; color:#4b5563; } .evst.err { background:#fff7e6; color:#8a5a00; }
+  .argrp > .evst { margin:2px 14px 4px 43px; }
+  .evtop { margin:2px 0 8px; }
+  .evst.osa { background:#fff8ec; color:#9a5b00; }   
   .chbar button { flex:0 0 auto; background:#f1f5f9; border:none; border-radius:9px;
         width:38px; height:34px; font:inherit; font-size:16px; color:#374151; }
   .chbar button:active { opacity:.7; }
@@ -694,8 +708,8 @@
         font-weight:600; padding:7px 14px; max-width:60vw; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .fxtab.on { background:#1f6feb; color:#fff; }
   
-  .fxtime { border:none; background:#eef1f5; border-radius:9px; padding:7px 10px; font:inherit; font-size:14px;
-        font-weight:700; color:#111827; }
+  .fxrun { display:flex; align-items:center; gap:9px; margin:0 0 9px; }
+  .fxrun .btn { flex:0 0 auto; }
   .fximgs { display:flex; flex-wrap:wrap; gap:7px; margin:0 0 10px; }
   .fximgs figure { margin:0; width:84px; }
   .fximgs img { width:84px; height:84px; object-fit:cover; border-radius:9px; background:#dde3ea; display:block; }
@@ -703,6 +717,12 @@
         text-overflow:ellipsis; white-space:nowrap; }
   .pvtoast.wide { width:max-content; max-width:calc(100vw - 28px); text-align:center; line-height:1.5;
         border-radius:12px; }
+  
+  #sn-stick { position:fixed; left:50%; transform:translateX(-50%); top:calc(54px + env(safe-area-inset-top)); z-index:9998;
+        width:max-content; max-width:calc(100vw - 24px); display:flex; flex-direction:column; gap:6px; }
+  #sn-stick .snstick { background:#7f1d1d; color:#fff; font-size:13px; font-weight:700; line-height:1.5; padding:9px 14px;
+        border-radius:12px; box-shadow:0 4px 14px rgba(0,0,0,.3); text-align:center; cursor:pointer; white-space:pre-wrap; }
+  #sn-stick .snstick .snx { margin-left:8px; opacity:.75; font-weight:600; }
   
   .hcm { background:#fff; border-radius:14px; padding:10px 8px 8px; margin:0 0 12px; }
   .hcm .ht { font-size:15px; font-weight:800; color:#0b1220; margin:0 4px 8px; }
@@ -1253,8 +1273,8 @@ function mkStarStock(s, btn) {
     mkSync('major_changed');
     toast((s.major ? '★ 주요개별종목 표시됨 — ' : '☆ 주요개별종목 해제됨 — ') + (s.name || ''));
     dropCache();
-    mkFresh('/api/bot/major_stocks').catch((function() {}));
-    (MK.sel ? mkFresh(mkGroupUrl(MK.sel)) : Promise.resolve()).catch((function() {})).then((function() {
+    var _mjp = mkFresh('/api/bot/major_stocks').catch((function() {}));
+    (MK.sel ? mkFresh(mkGroupUrl(MK.sel)) : MK.chip === 'stars' ? _mjp : Promise.resolve()).catch((function() {})).then((function() {
       if (TAB === 'market') renderMarket();
     }));
   }));
@@ -1296,8 +1316,10 @@ function mkIndexCards(ix) {
     var pts = !pre_ && it.value != null && it.prev != null ? it.value - it.prev : null;
     c.appendChild(el('div', 'c' + (pre_ ? ' mut' : ''), (pre_ || it.chg_pct == null ? '—' : (it.chg_pct > 0 ? '▲ ' : it.chg_pct < 0 ? '▼ ' : '') + mkPct(it.chg_pct)) + (pts == null ? '' : '  ' + (pts > 0 ? '+' : '') + pts.toFixed(2))));
     var jt, jc = 'j';
+    var op_ = /^\d\d:\d\d$/.test(String(ix.open || '')) ? String(ix.open) : '09:00';
+    var pf_ = /^\d\d:\d\d$/.test(String(ix.pre_from || '')) ? String(ix.pre_from) : '07:00';
     if (pre_) {
-      jt = '장 전 · 09:00 시작';
+      jt = '장 전 · ' + op_ + ' 시작';
       jc += ' pre';
     } else if (!it.judge) {
       jt = '판정을 못 읽었습니다';
@@ -1313,7 +1335,7 @@ function mkIndexCards(ix) {
     var jb = el('div', jc, jt);
     function why() {
       if (pre_) {
-        say([ it.name + '  —', '', '⏳ 장 전 (09:00 시작)', '', '장 열리는 날 07:00~09:00 에는 어제 값을 지우고 비워 둡니다.', '09:00 에 장이 열리면 마감예상 판정으로 바뀝니다.' ].join('\n'));
+        say([ it.name + '  —', '', '⏳ 장 전 (' + op_ + ' 시작)', '', '장 열리는 날 ' + pf_ + '~' + op_ + ' 에는 어제 값을 지우고 비워 둡니다.', op_ + ' 에 장이 열리면 마감예상 판정으로 바뀝니다.' ].join('\n'));
         return;
       }
       var L = [ it.name + ' ' + mkNum(it.value) + '  ' + mkPct(it.chg_pct), '' ];
@@ -1743,9 +1765,25 @@ function renderMarket(first, open) {
     return {
       __err: e
     };
-  })) ], [ 0 ]).then((function(res) {
+  })), MK.chip === 'stars' ? getJSONc(MJ_URL).catch((function(e) {
+    return {
+      __err: e
+    };
+  })) : null, MK.chip === 'stars' ? getJSONc('/api/orders?active=1').catch((function(e) {
+    return {
+      __err: e
+    };
+  })) : null, MK.chip === 'stars' ? getJSONc('/api/balance').catch((function(e) {
+    return {
+      __err: e
+    };
+  })) : null ], [ 0 ]).then((function(res) {
     tdBadgeSet(lvRead(res[1]));
     if (TAB !== 'market' || MK.sel || seq !== MK.seq) return;
+    if (MK.chip === 'stars' && mjTapping()) {
+      MJ_LATE = true;
+      return;
+    }
     chIdxWarm();
     if (balQTapping()) {
       MK_Q_LATE = 'all';
@@ -1782,7 +1820,8 @@ function renderMarket(first, open) {
     var cw = el('div', 'chips');
     cw.setAttribute('data-mk-main', '');
     cw.style.marginTop = '12px';
-    [ [ 'top', '📈 등락률 TOP10' ], [ 'major', '★ 주요테마업종 ' + maj.length ] ].forEach((function(c) {
+    var _mjc = JC[MJ_URL], _mjn = _mjc && _mjc.data && _mjc.data.ok !== false && _mjc.data.items ? _mjc.data.items.length : null;
+    [ [ 'top', '📈 등락률 TOP10' ], [ 'major', '★ 주요테마업종 ' + maj.length ], [ 'stars', '★ 주요종목' + (_mjn != null ? ' ' + _mjn : '') ] ].forEach((function(c) {
       var b = el('button', MK.chip === c[0] ? 'on' : '', c[1]);
       b.setAttribute('data-mkchip', c[0]);
       b.onclick = function() {
@@ -1796,7 +1835,9 @@ function renderMarket(first, open) {
     if (wn) f.appendChild(wn);
     var mk0 = f.childNodes.length;
     var grp = el('div', 'grp');
-    if (MK.chip === 'major') {
+    if (MK.chip === 'stars') {
+      f.appendChild(mkStarsFrag(res[3], amtMaps(res[4], res[5])));
+    } else if (MK.chip === 'major') {
       maj.forEach((function(r) {
         grp.appendChild(mkGroupRow(r, 0));
       }));
@@ -1825,7 +1866,7 @@ function renderMarket(first, open) {
     qr.id = 'mk-q-res';
     qr.style.display = 'none';
     f.appendChild(qr);
-    f.appendChild(infoLine('mut', gs.pre ? '등락률 = 장 전이라 0.00% (09:00 부터 오늘 실시간)' : MK._live ? '등락률 = 오늘 실시간(네이버' + (gs.asof ? ' · ' + gs.asof : '') + ')' : '등락률 = 마지막 분석 값(최종거래일)', '테마와 업종을 한 줄로 셉니다 · 줄을 누르면 그 종목들 · ☆ 를 누르면 주요테마업종 표시(컴퓨터와 같은 목록)'));
+    if (MK.chip !== 'stars') f.appendChild(infoLine('mut', gs.pre ? '등락률 = 장 전이라 0.00% (09:00 부터 오늘 실시간)' : MK._live ? '등락률 = 오늘 실시간(네이버' + (gs.asof ? ' · ' + gs.asof : '') + ')' : '등락률 = 마지막 분석 값(최종거래일)', '테마와 업종을 한 줄로 셉니다 · 줄을 누르면 그 종목들 · ☆ 를 누르면 주요테마업종 표시(컴퓨터와 같은 목록)'));
     (d.errors || []).slice(0, 3).forEach((function(m) {
       f.appendChild(el('div', 'mut', '⚠ ' + m));
     }));
@@ -1847,6 +1888,67 @@ function renderMarket(first, open) {
     swapBody(f);
     mkApplyFind();
   }));
+}
+
+function mkStockRow(s, am, anyLive) {
+  var k = el('div', 'card' + (s.nocode ? ' dim' : ' tap'));
+  k.setAttribute('data-mks', s.code || '');
+  var r = el('div', 'mk-row'), m = el('div', 'mk-mid');
+  m.appendChild(el('div', 'mk-nm', s.name));
+  var sub = el('div', 'mk-sub'), _k = nc(s.code);
+  if (s.held) sub.appendChild(heldTag(am.h[_k]));
+  if (s.pending_n) sub.appendChild(pendTag(s.pending_n, am.w[_k]));
+  if (anyLive && s.chg_src === 'final') sub.appendChild(document.createTextNode('지난 거래일 값'));
+  if (sub.childNodes.length) {
+    if (s.held || s.pending_n) sub.classList.add('tg');
+    m.appendChild(sub);
+  }
+  r.appendChild(m);
+  r.appendChild(el('span', 'mk-cg ' + mkCls(s.chg), mkPct(s.chg)));
+  r.appendChild(mkStarBtn(!!s.major, (function(b) {
+    mkStarStock(s, b);
+  })));
+  k.appendChild(r);
+  if (s.nocode) k.appendChild(el('div', 'mut', '종목코드가 없어 차트를 못 엽니다')); else k.onclick = function() {
+    stockPick(s.code, s.name);
+  };
+  return k;
+}
+
+function mkStarsFrag(d, am) {
+  var f = document.createDocumentFragment();
+  if (!d || tabPend(d)) {
+    f.appendChild(el('div', 'mut', '★ 주요종목 불러오는 중…'));
+    return f;
+  }
+  if (d.__err || d.ok === false) {
+    var why = d.__err ? d.__err.message || String(d.__err) : d.error || '답이 비었습니다';
+    if (/HTTP 404/.test(why)) why = '컴퓨터 서버를 다시 켠 뒤에 나옵니다 (HTTP 404)';
+    f.appendChild(el('div', 'err', '★ 주요종목을 못 읽었습니다 — ' + why));
+    return f;
+  }
+  var items = mjSortChg(d.items || []), anyLive = (Number(d.chg_live) || 0) > 0;
+  (d.errors || []).slice(0, 3).forEach((function(m) {
+    f.appendChild(el('div', 'mut', '⚠ ' + m));
+  }));
+  if (!items.length) {
+    f.appendChild(infoLine('empty', '★ 표시한 종목이 없습니다', '종목 줄의 ☆ 를 누르거나 컴퓨터 차트·분석 창에서 ★(주요개별종목)를 켜면 여기에 나옵니다'));
+    return f;
+  }
+  var grp = el('div', 'grp');
+  grp.setAttribute('data-mk-stars', '');
+  items.forEach((function(x) {
+    var s = {};
+    for (var key in x) s[key] = x[key];
+    s.major = true;
+    var k = mkStockRow(s, am, anyLive);
+    var tl = thmChipLine(nc(s.code));
+    if (tl) k.appendChild(tl);
+    grp.appendChild(k);
+  }));
+  f.appendChild(grp);
+  f.appendChild(infoLine('mut', '★ 주요종목 ' + items.length + '개 · ' + (anyLive ? '등락률 = 오늘 실시간 (' + (d.at || '') + ' 기준)' : '등락률 = 최종거래일 종가'), '종목을 누르면 차트 보기 · 이 종목의 테마·업종 보기 · 칩 줄 = [잔고] 와 같은 표시(🛒 산 곳 = 산·주문한 테마·업종)'));
+  return f;
 }
 
 function renderMarketGroup(first) {
@@ -1950,28 +2052,7 @@ function renderMarketGroup(first) {
       if (anyF && view.length) f.appendChild(el('div', 'mut mk-majf-on', fName + '만 보는 중 — ' + st.length + '종목 중 ' + view.length + '종목' + (fBad ? ' · ' + fBad + '을(를) 못 읽어 빠진 종목이 있을 수 있습니다' : '')));
     }
     view.forEach((function(s) {
-      var k = el('div', 'card tap');
-      k.setAttribute('data-mks', s.code || '');
-      var r = el('div', 'mk-row'), m = el('div', 'mk-mid');
-      m.appendChild(el('div', 'mk-nm', s.name));
-      var sub = el('div', 'mk-sub'), _k = nc(s.code);
-      if (s.held) sub.appendChild(heldTag(_am.h[_k]));
-      if (s.pending_n) sub.appendChild(pendTag(s.pending_n, _am.w[_k]));
-      if (anyLive && s.chg_src === 'final') sub.appendChild(document.createTextNode('지난 거래일 값'));
-      if (sub.childNodes.length) {
-        if (s.held || s.pending_n) sub.classList.add('tg');
-        m.appendChild(sub);
-      }
-      r.appendChild(m);
-      r.appendChild(el('span', 'mk-cg ' + mkCls(s.chg), mkPct(s.chg)));
-      r.appendChild(mkStarBtn(!!s.major, (function(b) {
-        mkStarStock(s, b);
-      })));
-      k.appendChild(r);
-      k.onclick = function() {
-        stockPick(s.code, s.name);
-      };
-      grp.appendChild(k);
+      grp.appendChild(mkStockRow(s, _am, anyLive));
     }));
     if (view.length) f.appendChild(grp); else if (st.length) f.appendChild(el('div', 'empty mk-majf-none', (fBad ? fBad + '을(를) 못 읽었습니다 — 있는지 없는지 모릅니다' : '이 묶음엔 ' + (majOnly && pendOnly ? '★ 주요종목도 ⏳ 매수 대기중 종목도 없습니다' : majOnly ? '★ 주요종목이 없습니다' : '⏳ 매수 대기중 종목이 없습니다')) + ' — ' + st.length + '종목 모두 숨김\n[전체] 를 누르면 다 나옵니다')); else f.appendChild(el('div', 'empty', '이 묶음에 든 종목이 없습니다'));
     f.appendChild(infoLine('mut', d.pre ? '종목 등락률 = 장 전이라 0.00% (09:00 부터 오늘 실시간)' : anyLive ? '종목 등락률 = 오늘 실시간(' + (d.at || '') + ' 기준)' : '종목 등락률 = 최종거래일 종가 기준', '종목을 누르면 차트 보기 · 이 종목의 테마·업종 보기 · ☆ = 주요개별종목'));
@@ -2134,14 +2215,31 @@ function tdSumBox(d) {
 
 var TD_PSUM_HOW = '맨 위 실현손익은 증권사 «일자별 실현손익» 값입니다([잔고] 오늘 실현손익과 같은 값). ' + '종목 줄 손익은 증권사 «체결별 실현손익» 값(수수료·세금 뺀 실제 손익)이고, 종목 합은 그 합입니다. ' + '둘 다 증권사 실현손익이라 보통 같고, 두 조회의 시각이 다르거나 증권사 두 조회의 셈이 다르면 차이가 날 수 있습니다. ' + '차이 = 종목 합 − 실현손익.';
 
+var TD_PSUM_PART = ' 증권사 손익을 아직 못 받았거나(«—») 못 받은(«손익 못 받음») 매도 종목이 있으면 그 종목을 뺀 합만 보입니다. ' + '맨 위 실현손익엔 그 종목 몫까지 들어 있어 차이는 셀 수 없습니다.';
+
 function tdPnlSumLine(ps, rzOk) {
   if (!ps || tdNum(ps.amount) === null) return null;
-  var diff = tdNum(ps.diff), parts;
-  if (rzOk && diff === 0) parts = [ '종목 합과 같음' ]; else {
+  var diff = tdNum(ps.diff), unk = tdNum(ps.unknown) || 0, parts, kind;
+  if (unk > 0) {
+    parts = [];
+    if ((tdNum(ps.n) || 0) > 0) parts.push('알 수 있는 것만 합 ' + tdSigned(ps.amount));
+    parts.push(unk + '종목 모름');
+    kind = 'part';
+  } else if (rzOk && diff === 0) {
+    parts = [ '종목 합과 같음' ];
+    kind = 'same';
+  } else {
     parts = [ '종목 합 ' + tdSigned(ps.amount) ];
     if (rzOk && diff !== null) parts.push('차이 ' + tdSigned(diff));
+    kind = 'diff';
   }
   var full = TD_PSUM_HOW;
+  if (unk > 0) {
+    var _nm = (ps.unknown_names || []).filter((function(x) {
+      return x;
+    }));
+    full += TD_PSUM_PART + (_nm.length ? ' 모르는 종목: ' + _nm.join(' · ') + '.' : '');
+  }
   var ln = el('div', 'psum');
   parts.forEach((function(p, i) {
     if (i) ln.appendChild(document.createTextNode(' · '));
@@ -2149,7 +2247,7 @@ function tdPnlSumLine(ps, rzOk) {
     if (i === parts.length - 1) sp.appendChild(infoBtn(full));
     ln.appendChild(sp);
   }));
-  ln.setAttribute('data-tdpsum', rzOk && diff === 0 ? 'same' : 'diff');
+  ln.setAttribute('data-tdpsum', kind);
   return ln;
 }
 
@@ -5352,6 +5450,8 @@ var AR_LATE_RECHECK = 35e3;
 
 var AR_SEQ = {};
 
+var EV_URL = '/api/eval_sellall_config';
+
 var AR_SW = {
   be: {
     name: '🛡 본전 자동상향',
@@ -5448,47 +5548,119 @@ var AR_SW = {
       }));
     }
   },
-  ev: {
-    name: '🧯 평가손익 전량 매도',
-    get: '/api/eval_sellall_config',
-    url: '/api/eval_sellall_config',
+  eh: evSw('hi'),
+  el: evSw('lo'),
+  os: {
+    name: '🌅 다음 거래일 시가 전량매도',
+    get: '/api/open_sellall',
+    url: '/api/open_sellall',
     ask: function(on) {
-      var c = JC['/api/eval_sellall_config'], th = c && c.data ? c.data.threshold : null;
-      return on ? '평가손익 전량 매도를 끕니다.\n평가손익이 그 금액 아래로 가도 팔지 않습니다.' : '평가손익 전량 매도를 켭니다.\n계좌 평가손익(증권사 값 · 실현손익 제외)이 ' + evManWon(th) + ' 이하가 되면 보유 전부를 시장가로 팔고 [매수] 스위치를 끕니다.\n발동하면 이 규칙도 꺼집니다 · 대기 매수는 그대로 둡니다.';
+      var c = JC['/api/open_sellall'], d = c && c.data || {};
+      return on ? '다음 거래일 시가 전량매도를 끕니다.\n' + (d.run_text ? d.run_text + '에 팔지 않습니다.' : '팔지 않습니다.') : d.ask_on || '다음 거래일 시가 전량매도를 켭니다 — 켤까요?';
+    },
+    pin: function(on) {
+      if (on) return null;
+      var c = JC['/api/open_sellall'], d = c && c.data || {};
+      return {
+        expect_run_date: d.next_run_date || ''
+      };
     },
     danger: function(on) {
       return !on;
     },
-    blocked: function(on) {
-      if (on) return '';
-      var c = JC['/api/eval_sellall_config'];
-      return c && c.data && c.data.threshold == null ? '금액이 비어 있어 켤 수 없습니다.\n아래 [✏️ 금액 수정] 으로 먼저 «평가손익 몇 만원 이하» 를 정해 주세요.' : '';
-    },
     body: function(to) {
-      return {
-        enabled: to
+      var c = JC['/api/open_sellall'], d = c && c.data || {};
+      return to ? {
+        enabled: true,
+        expect_run_date: d.next_run_date || ''
+      } : {
+        enabled: false
       };
     },
     cur: function(d) {
       return d && typeof d.enabled === 'boolean' ? d.enabled : null;
     },
     srv: function(j) {
-      return j && typeof j.enabled === 'boolean' && 'threshold' in j ? j.enabled : null;
+      return j && typeof j.enabled === 'boolean' && 'next_run_date' in j ? j.enabled : null;
     },
     put: function(j) {
-      jcPut('/api/eval_sellall_config', j);
+      jcPut('/api/open_sellall', j);
     },
     set: function(to) {
-      jcPatch('/api/eval_sellall_config', (function(d) {
+      jcPatch('/api/open_sellall', (function(d) {
         d.enabled = to;
       }));
     },
     okText: function(j) {
       return j && j.msg || '';
     },
-    okMs: 6e3
+    okMs: 6e3,
+    sayFail: true,
+    rerender: arRerender
   }
 };
+
+function arRerender() {
+  if (TAB === 'orders') renderOrders();
+}
+
+function evSw(cell) {
+  var key = cell + '_enabled', what = cell === 'hi' ? '«평가이익 X원 이상이면»' : '«평가이익 Y원 아래로 내려오면»';
+  return {
+    name: '🧯 평가이익 전량 매도 ' + what,
+    get: EV_URL,
+    url: EV_URL,
+    ask: function(on) {
+      var c = JC[EV_URL], v = c && c.data ? c.data[cell] : null;
+      return on ? '평가이익 전량 매도 ' + what + ' 칸을 끕니다.\n이 칸으로는 팔지 않습니다.' : '평가이익 전량 매도 ' + what + ' 칸을 켭니다.\n평가이익이 ' + evAmt(v) + (cell === 'hi' ? ' 이상이 되면' : ' 아래로 내려오면') + ' 보유 전부를 시장가로 팔고 [매수] 스위치를 끕니다.\n발동하면 두 칸 다 꺼집니다 · 대기 매수는 그대로 둡니다.\n지금 이미 그 조건이면 켜지지 않고 까닭을 알려 드립니다.';
+    },
+    danger: function(on) {
+      return !on;
+    },
+    blocked: function(on) {
+      if (on) return '';
+      var c = JC[EV_URL];
+      return c && c.data && c.data[cell] == null ? '금액이 비어 있어 켤 수 없습니다.\n아래 [✏️ ' + (cell === 'hi' ? 'X 금액(이상이면)' : 'Y 금액(아래로)') + '] 로 먼저 정해 주세요.' : '';
+    },
+    pin: function(on) {
+      if (on) return null;
+      var c = JC[EV_URL], f = c && c.data ? c.data.fired : null;
+      return {
+        seen_fire: f && f.at ? String(f.at) : ''
+      };
+    },
+    body: function(to) {
+      var b = {};
+      b[key] = to;
+      if (to) {
+        var c = JC[EV_URL], f = c && c.data ? c.data.fired : null;
+        b.seen_fire = f && f.at ? String(f.at) : '';
+      }
+      return b;
+    },
+    cur: function(d) {
+      return d && typeof d[key] === 'boolean' ? d[key] : null;
+    },
+    srv: function(j) {
+      return j && typeof j[key] === 'boolean' && cell in j ? j[key] : null;
+    },
+    put: function(j) {
+      jcPut(EV_URL, j);
+    },
+    set: function(to) {
+      jcPatch(EV_URL, (function(d) {
+        d[key] = to;
+        d.enabled = !!(d.hi_enabled || d.lo_enabled);
+      }));
+    },
+    okText: function(j) {
+      return j && j.msg || '';
+    },
+    okMs: 6e3,
+    sayFail: true,
+    rerender: arRerender
+  };
+}
 
 function jcPut(url, data) {
   var now = Date.now(), c = JC[url];
@@ -5539,8 +5711,9 @@ function arTap(key) {
     say(_blk);
     return;
   }
+  var _pin = sw.pin ? sw.pin(on) : null;
   ask(sw.ask(on), (function() {
-    arSave(key, !on, on);
+    arSave(key, !on, on, _pin);
   }), sw.danger(on));
 }
 
@@ -5572,20 +5745,26 @@ function arSave(key, to, was, extra) {
       arPaint(key, sv);
       var _okt = sw.okText ? sw.okText(j, to) : '';
       if (sv === to) toast(_okt || (j.msg && /이미/.test(j.msg) ? j.msg : sw.name + ' — ' + (to ? '켰습니다' : '껐습니다')), _okt ? sw.okMs || 4e3 : 2200, true); else toast('⚠ ' + sw.name + ' — 서버 값은 «' + (sv ? '켜짐' : '꺼짐') + '» 입니다' + (j.msg ? ' · ' + j.msg : ''), 6e3, true);
+      if (sw.rerender) sw.rerender();
       return;
     }
     if (sv === true || sv === false) sw.put(j);
     arPaint(key, sv === true || sv === false ? sv : was);
-    if (x && x.r.status === 409 && j && j.need_confirm && (!(extra && extra.confirm_below) || j.want_threshold != null && Number(j.want_threshold) !== Number(extra.confirm_threshold))) {
-      ask(j.msg || sw.name + ' — 지금 평가손익이 이미 그 금액 이하라 켜자마자 보유 전부를 시장가로 팝니다.\n계속할까요?', (function() {
+    if (x && x.r.status === 412 && j && j.stale_run_date && j.want_run_date && !(extra && extra.expect_run_date === j.want_run_date)) {
+      ask((j.msg || '') + '\n\n' + (j.ask_on || ''), (function() {
         arSave(key, to, was, {
-          confirm_below: true,
-          confirm_threshold: j.want_threshold
+          expect_run_date: j.want_run_date
         });
       }), true);
       return;
     }
     if (x) {
+      if (sw.sayFail) {
+        say(j.msg || j.error || sw.name + ' — 저장하지 않았습니다 (HTTP ' + x.r.status + ')', (function() {
+          if (sw.rerender) sw.rerender();
+        }));
+        return;
+      }
       toast('⚠ ' + sw.name + ' — 못 바꿨습니다: ' + (j.msg || j.error || 'HTTP ' + x.r.status) + ' · 원래대로 둡니다', 6e3, true);
       return;
     }
@@ -5823,10 +6002,15 @@ function evManWon(n) {
   return evMan(n) + ' (= ' + evWon(n) + ')';
 }
 
+function evAmt(n) {
+  if (n === null || n === undefined || n === '') return '(금액 없음)';
+  return evManWon(n).replace(/\+/g, '');
+}
+
 function evPost(body) {
   if (BOT.busy) return;
   BOT.busy = true;
-  fetch('/api/eval_sellall_config', {
+  fetch(EV_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -5848,16 +6032,6 @@ function evPost(body) {
   })).then((function(x) {
     BOT.busy = false;
     var j = x.j || {};
-    if (x.r.status === 409 && j.need_confirm && (!body.confirm_below || j.want_threshold != null && Number(j.want_threshold) !== Number(body.confirm_threshold))) {
-      ask(j.msg || '지금 평가손익이 이미 그 금액 이하라 바로 보유 전부를 시장가로 팝니다.\n계속할까요?', (function() {
-        var b2 = {}, k;
-        for (k in body) if (Object.prototype.hasOwnProperty.call(body, k)) b2[k] = body[k];
-        b2.confirm_below = true;
-        b2.confirm_threshold = j.want_threshold;
-        evPost(b2);
-      }), true);
-      return;
-    }
     dropCache();
     try {
       jcRefetchAfterSave();
@@ -5877,33 +6051,21 @@ function evPost(body) {
   }));
 }
 
-function evEdit(cur) {
+function evEdit(cell, cur) {
   var has = cur !== null && cur !== undefined;
+  var what = cell === 'hi' ? '이상이 되면' : '아래로 내려오면';
   function unchanged() {
-    say('금액이 그대로입니다 — ' + evManWon(cur) + '\n저장하지 않았습니다.');
+    say('금액이 그대로입니다 — ' + evAmt(cur) + '\n저장하지 않았습니다.');
   }
-  function step2(sign, pre) {
-    if (sign === 0) {
-      if (cur === 0) {
-        unchanged();
-        return;
-      }
-      ask('평가손익 0원 이하(본전 아래)가 되면 보유 전부를 팝니다.\n이 금액으로 바꿀까요?', (function() {
-        evPost({
-          threshold: 0
-        });
-      }));
-      return;
-    }
-    var same = has && cur !== 0 && cur < 0 === sign < 0;
-    var preset = same ? evManNum(cur) : '';
-    askVal((sign < 0 ? '손실 — 평가손익이 몇 만원 «손실» 이 되면 팔까요?' : '이익 — 평가손익 «이익» 이 몇 만원까지 줄면 팔까요?') + '\n숫자만 넣으세요 (단위는 만원 — 예: 500 이면 오백만 원)' + (has ? '\n지금: ' + evManWon(cur) : ''), pre == null ? preset : pre, (function(txt) {
-      if (same && txt === preset) {
+  var preset = has ? evManNum(cur) : '';
+  function step(pre) {
+    askVal('🧯 평가이익이 몇 만원 ' + what + ' 보유 전부를 팔까요?' + '\n숫자만 넣으세요 (단위는 만원 — 예: 500 이면 오백만 원 · 0보다 큰 금액만)' + (has ? '\n지금: ' + evAmt(cur) : ''), pre == null ? preset : pre, (function(txt) {
+      if (has && txt === preset) {
         unchanged();
         return;
       }
       var again = function() {
-        step2(sign, txt);
+        step(txt);
       };
       var r = arParse(txt, true);
       if (r.why) {
@@ -5912,12 +6074,12 @@ function evEdit(cur) {
         return;
       }
       if (!(r.n > 0)) {
-        say('0 보다 큰 숫자를 넣어 주세요 (0원은 «0원» 을 고르세요).');
+        say('0 보다 큰 숫자를 넣어 주세요 (평가이익 기준이라 손실 금액은 없습니다).');
         dlgBackTo(again);
         return;
       }
-      var v = sign * r.n * 1e4;
-      if (Math.abs(v) > EV_MAX_WON) {
+      var v = r.n * 1e4;
+      if (v > EV_MAX_WON) {
         say('금액이 너무 큽니다 — 칸에 100000000 (1조 원)까지 넣을 수 있습니다.\n저장하지 않았습니다.');
         dlgBackTo(again);
         return;
@@ -5926,11 +6088,11 @@ function evEdit(cur) {
         unchanged();
         return;
       }
-      var big = Math.abs(v) >= EV_BIG_WON;
-      ask('평가손익 ' + evManWon(v) + ' 이하가 되면 보유 전부를 시장가로 팝니다.' + (big ? '\n⚠ 아주 큰 금액입니다 — 단위는 «만원» 입니다. 원으로 넣으셨으면 [취소] 하고 만원으로 다시 넣어 주세요.' : '') + '\n이 금액으로 바꿀까요?', (function() {
-        evPost({
-          threshold: v
-        });
+      var big = v >= EV_BIG_WON;
+      ask('평가이익이 ' + evAmt(v) + ' ' + what + ' 보유 전부를 시장가로 팝니다(이 칸이 켜져 있을 때).' + (big ? '\n⚠ 아주 큰 금액입니다 — 단위는 «만원» 입니다. 원으로 넣으셨으면 [취소] 하고 만원으로 다시 넣어 주세요.' : '') + '\n이 금액으로 바꿀까요?', (function() {
+        var b = {};
+        b[cell] = v;
+        evPost(b);
       }), big);
     }), true);
     var live = el('div', '');
@@ -5943,23 +6105,41 @@ function evEdit(cur) {
         return;
       }
       var t = String(DLG_IN.value).trim();
-      if (same && t === preset) {
-        live.textContent = '= ' + evWon(cur);
+      if (has && t === preset) {
+        live.textContent = '= ' + evWon(cur).replace('+', '');
         return;
       }
       var r = arParse(t, true);
-      live.textContent = r.why || !(r.n > 0) || Math.abs(r.n * 1e4) > EV_MAX_WON ? '' : '= ' + evWon(sign * r.n * 1e4);
+      live.textContent = r.why || !(r.n > 0) || r.n * 1e4 > EV_MAX_WON ? '' : '= ' + evWon(r.n * 1e4).replace('+', '');
     };
     DLG_IN.addEventListener('input', paintLive);
     paintLive();
   }
-  askPick('🧯 평가손익 몇 만원 이하에서 전부 팔까요?', [ [ '🔻 손실 (−) — 평가손실이 N만원이 되면', function() {
-    step2(-1);
-  } ], [ '🔺 이익 (+) — 평가이익이 N만원까지 줄면', function() {
-    step2(1);
-  } ], [ '⚖️ 0원 — 평가손익이 0원 이하가 되면', function() {
-    step2(0);
-  } ] ]);
+  step(null);
+}
+
+function evStatusEl(ev, cls) {
+  if (ev && ev.__pend) return el('div', 'evst off ' + (cls || ''), '🧯 평가이익 전량매도: 읽는 중…');
+  if (!ev || ev.__err || typeof ev.hi_enabled !== 'boolean') {
+    var m = String(ev && ev.__err && ev.__err.message || '');
+    return el('div', 'evst err ' + (cls || ''), '🧯 평가이익 전량매도: ' + (/404/.test(m) ? '서버를 다시 켜면 나옵니다' : '상태를 못 읽었습니다' + (m ? ' — ' + m : '')));
+  }
+  var d = el('div', 'evst ' + (ev.enabled ? 'on' : 'off') + ' ' + (cls || ''), '🧯 ' + (ev.status || '평가이익 전량매도'));
+  d.setAttribute('data-evst', '1');
+  return d;
+}
+
+function osaTopEl(o, cls) {
+  if (!o || o.__pend) return null;
+  if (o.__err || typeof o.enabled !== 'boolean') {
+    var m = String(o && o.__err && o.__err.message || '');
+    if (/404/.test(m)) return null;
+    return el('div', 'evst err ' + (cls || ''), '🌅 시가 전량매도: 상태를 못 읽었습니다');
+  }
+  if (!o.enabled) return null;
+  var d = el('div', 'evst osa ' + (cls || ''), o.top || '🌅 시가 전량매도 켜짐 — ' + (o.run_text || '다음 거래일'));
+  d.setAttribute('data-osatop', '1');
+  return d;
 }
 
 function renderAutoRules() {
@@ -5970,12 +6150,26 @@ function renderAutoRules() {
       };
     }));
   }
-  Promise.all([ getJSONc('/api/bot/edit_targets'), soft('/api/ma_switch_config'), soft('/api/bvc_config'), soft('/api/distday_config'), soft('/api/eval_sellall_config') ]).then((function(res) {
+  Promise.all([ getJSONc('/api/bot/edit_targets'), soft('/api/ma_switch_config'), soft('/api/bvc_config'), soft('/api/distday_config'), soft(EV_URL), soft('/api/open_sellall') ]).then((function(res) {
     var box = document.getElementById('ar-box');
     if (!box || TAB !== 'orders' || BOT.pick !== 'auto') return;
     var ed = res[0] || {}, ms = res[1] || {}, bv = res[2] || {}, dd = res[3] || {}, ev = res[4] || {};
     var f = document.createDocumentFragment();
     f.appendChild(infoLine('mut', '산 종목에 저절로 걸리는 규칙 6가지', '산 종목에 저절로 걸리는 규칙 6가지 — 컴퓨터 주문총괄 [⚙ 기본 매도 규칙] 탭과 같은 설정입니다.'));
+    var os = res[5] || {}, og = el('div', 'grp osagrp');
+    f.appendChild(og);
+    var oh = el('div', 'osahd');
+    oh.appendChild(el('span', 'art', '🌅 다음 거래일 시가 전량매도'));
+    og.appendChild(oh);
+    if (os.__err || typeof os.enabled !== 'boolean') {
+      arErr(og, '시가 전량매도', os.__err || '설정이 비어 왔습니다');
+    } else {
+      oh.appendChild(arPill(!!os.enabled, null, 'os'));
+      var _osl = [ '<span class="' + (os.enabled ? 'osaon' : '') + '">' + arEsc(os.line || '') + '</span>', '<span class="armut">장 시작 동시호가' + (os.auction ? '(' + arEsc(os.auction) + ')' : '') + '에 보유 전부 시장가 → 시가 체결 · 증권사 미체결 매도는 먼저 취소 · [매수] 끔(대기 매수는 그대로) · 한 번 하면 저절로 꺼짐' + (os.on_rule ? ' · ' + arEsc(os.on_rule) : '') + '</span>' ];
+      if (os.broken) _osl.unshift('<span class="osaon">⚠ 설정이 깨져 «꺼짐» 으로 봅니다 — 필요하면 다시 켜 주세요</span>');
+      if (os.run_text_last) _osl.push('<span class="armut">마지막 실행: ' + arEsc(os.run_text_last) + '</span>');
+      arBody(og, _osl);
+    }
     var g = el('div', 'grp argrp');
     f.appendChild(g);
     var bal = ed.balance || [];
@@ -6102,16 +6296,37 @@ function renderAutoRules() {
       } ] ]);
     }
     arSep(g);
-    if (ev.__err || typeof ev.enabled !== 'boolean') {
-      arHead(g, 6, '🧯 평가손익 전량 매도');
-      arErr(g, '평가손익 전량 매도', ev.__err || '설정이 비어 왔습니다');
+    if (ev.__err || typeof ev.hi_enabled !== 'boolean') {
+      arHead(g, 6, '🧯 평가이익 전량 매도');
+      arErr(g, '평가이익 전량 매도', ev.__err || '설정이 비어 왔습니다');
     } else {
-      arHead(g, 6, '🧯 평가손익 전량 매도', arPill(!!ev.enabled, null, 'ev'));
-      var _evl = [ ev.threshold == null ? '금액이 비어 있습니다 — <b>[✏️ 금액 수정]</b> 으로 정하면 켤 수 있습니다' : '계좌 평가손익 <b>' + arEsc(evMan(ev.threshold)) + '</b>' + (ev.threshold ? ' (= ' + arEsc(evWon(ev.threshold)) + ')' : '') + ' 이하 → 보유 전부 시장가 매도 + [매수] 끔', '<span class="armut">증권사 평가손익 합계(실현손익 제외) · 발동하면 이 규칙도 꺼짐 · 대기 매수는 그대로</span>' ];
+      arHead(g, 6, '🧯 평가이익 전량 매도');
+      g.appendChild(evStatusEl(ev));
+      [ [ 'hi', 'eh', '이상이 되면' ], [ 'lo', 'el', '아래로 내려오면' ] ].forEach((function(t) {
+        var row = el('div', 'arevrow');
+        row.setAttribute('data-evcell', t[0]);
+        row.appendChild(arPill(!!ev[t[0] + '_enabled'], null, t[1]));
+        var tx = el('span', 'arevtx');
+        tx.innerHTML = '평가이익 <b>' + arEsc(evAmt(ev[t[0]])) + '</b> ' + t[2];
+        row.appendChild(tx);
+        g.appendChild(row);
+      }));
+      var _evl = [ '<span class="armut">→ 보유 전부 시장가 매도 + [매수] 끔 · 발동하면 두 칸 다 꺼짐(다시 켜기 전엔 안 켜짐) · 대기 매수는 그대로 · 증권사 평가손익 합계(실현손익 제외 · 매입가 모르는 종목 제외) · 이미 그 조건이면 켜지지 않음</span>' ];
+      var _nw = ev.now;
+      if (_nw && _nw.at) {
+        if (_nw.pl !== null && _nw.pl !== undefined) {
+          var _pl = Number(_nw.pl), _t = String(_nw.at);
+          _evl.push('지금 평가이익 <b style="color:' + (_pl < 0 ? '#D42020' : '#000000') + '">' + arEsc(evManWon(_pl)) + '</b>' + ' <span class="armut">· ' + arEsc(_nw.at_text || (_t.length >= 19 ? _t.slice(11, 19) : _t)) + ' 기준' + (_nw.excl && _nw.excl.length ? ' · ' + arEsc(_nw.excl_text || _nw.excl.length + '종목 제외(매입가 모름)') + ' — ' + arEsc(_nw.excl.join(', ')) : '') + '</span>');
+        } else if (ev.now_text) {
+          _evl.push('<span class="armut">' + arEsc(ev.now_text) + '</span>');
+        }
+      }
       if (ev.fired_text) _evl.push('<span class="armut">🧯 ' + arEsc(ev.fired_text) + '</span>');
       arBody(g, _evl);
-      arBtns(g, [ [ '✏️ 금액 수정', function() {
-        evEdit(ev.threshold);
+      arBtns(g, [ [ '✏️ X 금액(이상이면)', function() {
+        evEdit('hi', ev.hi);
+      } ], [ '✏️ Y 금액(아래로)', function() {
+        evEdit('lo', ev.lo);
       } ] ]);
     }
     box.textContent = '';
@@ -8256,6 +8471,16 @@ function swapBodyKeep(frag, id) {
   BD.scrollTop = top;
 }
 
+function lateOpenBox(md) {
+  var lo = md && !md.__err && !md.__pend ? md.late_open : null;
+  if (!lo) return null;
+  if (lo.error) return el('div', 'mut', '🕙 장 시간 표를 못 읽었습니다 — ' + lo.error);
+  if (!lo.text) return null;
+  var b = el('div', 'warnbox lateopen');
+  b.appendChild(el('div', 'wt', String(lo.text)));
+  return b;
+}
+
 function renderOrders(first) {
   TITLE.textContent = '주문';
   if (first && hasCache('/api/orders?active=1')) first = false;
@@ -8288,6 +8513,14 @@ function renderOrders(first) {
     return {
       __err: e
     };
+  })), getJSONc(EV_URL).catch((function(e) {
+    return {
+      __err: e
+    };
+  })), getJSONc('/api/open_sellall').catch((function(e) {
+    return {
+      __err: e
+    };
   })) ], [ 0 ]).then((function(res) {
     var _lr = lvRead(res[2]), lv = _lr.lv, _lvBad = _lr.bad, _lvPxBad = _lr.pxBad;
     tdBadgeSet(_lr);
@@ -8303,11 +8536,16 @@ function renderOrders(first) {
     var f = document.createDocumentFragment();
     live(true, '');
     var buyOn = !!(md && md.switch_mode === 'on');
+    var _lob = lateOpenBox(md);
+    if (_lob) f.appendChild(_lob);
     f.appendChild(md && !md.__pend && !md.__err && md.switch_mode ? switchRow('⏯ 매수', buyOn, '켬', '끔', (function() {
       setWatch('on');
     }), (function() {
       setWatch('off');
     }), true, '끄면 매수만 멈춤 · 손절·익절은 그대로') : switchRowWait('⏯ 매수', md, '끄면 매수만 멈춤 · 손절·익절은 그대로'));
+    f.appendChild(evStatusEl(res[8], 'evtop'));
+    var _osaTop = osaTopEl(res[9], 'evtop');
+    if (_osaTop) f.appendChild(_osaTop);
     var _tn = thmNote(res[4]);
     if (_tn) f.appendChild(_tn);
     thmDecorate(f);
@@ -9316,6 +9554,8 @@ function balActions(hh, back) {
 
 var SN_POLL_MS = 1e3, SN_WAIT_MS = 45e3;
 
+var SN_STUCK_MSG = '결과 모름 — 보내던 중 결과가 오지 않았습니다(접수됐을 수 있어 다시 보내지 않습니다)\n매매 알림과 증권사(HTS·MTS)에서 확인해 주세요';
+
 var SN_PX_REUSE_MS = 5e3;
 
 function sellNow(code, nm, back) {
@@ -9381,7 +9621,14 @@ function snBalQty(code) {
 
 function snOpenGuess() {
   var t = new Date, wd = t.getDay(), hm = t.getHours() * 60 + t.getMinutes();
-  return wd >= 1 && wd <= 5 && hm >= 9 * 60 && hm < 15 * 60 + 20;
+  var o = 9 * 60, c = 15 * 60 + 20, mc = JC['/api/market_day'], h = mc && mc.data && mc.data.hours;
+  var td = t.getFullYear() + '-' + ('0' + (t.getMonth() + 1)).slice(-2) + '-' + ('0' + t.getDate()).slice(-2);
+  var rx = /^\d\d:\d\d$/;
+  if (h && h.date === td && rx.test(String(h.sell_open || '')) && rx.test(String(h.sell_end || ''))) {
+    o = Number(h.sell_open.slice(0, 2)) * 60 + Number(h.sell_open.slice(3));
+    c = Number(h.sell_end.slice(0, 2)) * 60 + Number(h.sell_end.slice(3));
+  }
+  return wd >= 1 && wd <= 5 && hm >= o && hm < c;
 }
 
 function snQuickSo() {
@@ -9762,7 +10009,7 @@ function snManOf(v) {
 
 var SO_URL = '/api/sell/open';
 
-var SO_HOW = '그날 08:55 장 시작 동시호가에 시장가로 넣어 09:00 시가에 팝니다 · 그때 못 내면 09:00~15:20 동안 30초마다 다시 봐서 그때 시장가로 냅니다 (거부되면 한 번만 더)';
+var SO_HOW = '그날 08:55 장 시작 동시호가에 시장가로 넣어 09:00 시가에 팝니다 · 그때 못 내면 09:00~15:20 동안 30초마다 다시 봐서 그때 시장가로 냅니다 (거부되면 한 번만 더)' + ' · 그날 끝내 못 내면 15:20 뒤 매매 알림으로 알려 드리고 예약을 닫습니다 (다음 날 팔지 않습니다)';
 
 function soDay(iso) {
   var m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
@@ -10073,6 +10320,34 @@ function snUnsure(nm, why) {
   say('⚠ «' + nm + '» 답을 못 받았습니다 (' + why + ')\n보내졌을 수 있습니다 — 매매 알림과 [잔고] 를 확인해 주세요');
 }
 
+function snResult(msg, sold) {
+  if (DLG.classList.contains('on')) {
+    if (sold) toast(String(msg).replace(/\s*\n+\s*/g, ' '), 6e3, true); else snStick(msg);
+    return;
+  }
+  say(msg, (function() {
+    go(TAB);
+  }));
+}
+
+function snStick(msg) {
+  var box = document.getElementById('sn-stick');
+  if (!box) {
+    box = el('div', '');
+    box.id = 'sn-stick';
+    document.body.appendChild(box);
+  }
+  var ln = el('div', 'snstick', String(msg).replace(/\s*\n+\s*/g, ' '));
+  ln.appendChild(el('span', 'snx', '✕'));
+  ln.title = '누르면 닫힙니다';
+  maskOut(ln);
+  ln.onclick = function(e) {
+    if (e && e.stopPropagation) e.stopPropagation();
+    if (ln.parentNode) ln.parentNode.removeChild(ln);
+  };
+  box.appendChild(ln);
+}
+
 function sellNowSend(code, nm, pct, qty) {
   if (BOT.busy) return;
   BOT.busy = true;
@@ -10123,26 +10398,35 @@ function sellNowSend(code, nm, pct, qty) {
     }
     toast('📤 매도 요청을 보냈습니다 — 주문 프로그램이 곧 냅니다', 3e3, true);
     var t0 = Date.now();
+    var seenFiring = false;
     (function poll() {
       cutGet('/api/bot/sell_now/' + encodeURIComponent(j.req_id), (function(r) {
         return r.json();
       })).then((function(s) {
         var st = s && s.status;
+        if (st === 'firing') seenFiring = true;
         if (st === 'done' || st === 'failed' || st === 'unknown' || st === 'expired') {
           dropCache();
-          say((st === 'done' ? '✅ ' : st === 'unknown' ? '⚠ ' : '❌ ') + '«' + nm + '» ' + (s.message || st), (function() {
-            go(TAB);
-          }));
+          snResult((st === 'done' ? '✅ ' : st === 'unknown' ? '⚠ ' : '❌ ') + '«' + nm + '» ' + (s.message || st), st === 'done');
           return;
         }
         if (Date.now() - t0 > SN_WAIT_MS) {
-          say('⚠ «' + nm + '» 결과를 아직 못 받았습니다 — 매매 알림을 확인해 주세요 (요청은 30초가 지나면 안 팔고 닫힙니다)');
+          if (st === 'firing' || seenFiring) {
+            dropCache();
+            snResult('⚠ «' + nm + '» ' + SN_STUCK_MSG);
+            return;
+          }
+          if (st === 'pending') {
+            snResult('⚠ «' + nm + '» 결과를 아직 못 받았습니다 — 매매 알림을 확인해 주세요 (요청은 30초가 지나면 안 팔고 닫힙니다)');
+            return;
+          }
+          snResult('⚠ «' + nm + '» 결과 모름 — 서버가 요청 상태를 못 읽었습니다(' + (s && (s.error || s.msg) || '상태 없음') + ')\n매매 알림과 증권사(HTS·MTS)에서 확인해 주세요');
           return;
         }
         setTimeout(poll, SN_POLL_MS);
       })).catch((function() {
         if (Date.now() - t0 > SN_WAIT_MS) {
-          say('⚠ «' + nm + '» 결과를 못 읽었습니다 — 매매 알림을 확인해 주세요');
+          snResult('⚠ «' + nm + '» ' + (seenFiring ? SN_STUCK_MSG : '결과를 못 읽었습니다 — 매매 알림과 증권사(HTS·MTS)에서 확인해 주세요'));
           return;
         }
         setTimeout(poll, SN_POLL_MS);
@@ -11570,13 +11854,13 @@ function mjTapEnd() {
   setTimeout((function() {
     if (!MJ_LATE || mjTapping()) return;
     MJ_LATE = false;
-    if (TAB === 'major') renderMajor(); else if (TAB === 'market' && MK.sel) renderMarketGroup(false);
+    if (TAB === 'major') renderMajor(); else if (TAB === 'market' && MK.sel) renderMarketGroup(false); else if (TAB === 'market' && MK.chip === 'stars') renderMarket(false);
   }), 0);
 }
 
 document.addEventListener('pointerdown', (function(e) {
   if (!e.target || !e.target.closest) return;
-  if (!(TAB === 'major' && e.target.closest('#bd [data-mj]')) && !(TAB === 'market' && MK.sel && e.target.closest('#bd [data-mks]'))) return;
+  if (!(TAB === 'major' && e.target.closest('#bd [data-mj]')) && !(TAB === 'market' && (MK.sel || MK.chip === 'stars') && e.target.closest('#bd [data-mks]'))) return;
   MJ_TAP = Date.now();
   clearTimeout(MJ_TAP_T);
   MJ_TAP_T = setTimeout(mjTapEnd, MJ_TAP_MAX);
@@ -11589,6 +11873,23 @@ document.addEventListener('pointercancel', mjTapEnd, true);
 document.addEventListener('pointerup', (function() {
   if (MJ_TAP) setTimeout(mjTapEnd, 400);
 }), true);
+
+function mjSortChg(list) {
+  return (list || []).map((function(x, i) {
+    return [ x, i ];
+  })).sort((function(p, q) {
+    var a = p[0].chg, b = q[0].chg;
+    a = a == null || a === '' || isNaN(Number(a)) ? null : Number(a);
+    b = b == null || b === '' || isNaN(Number(b)) ? null : Number(b);
+    if (a === null || b === null) {
+      if (a !== b) return a === null ? 1 : -1;
+      return p[1] - q[1];
+    }
+    return b - a || p[1] - q[1];
+  })).map((function(p) {
+    return p[0];
+  }));
+}
 
 function renderMajor(first) {
   TITLE.textContent = '주요종목';
@@ -11631,20 +11932,7 @@ function renderMajor(first) {
       swapBody(f);
       return;
     }
-    var items = (d.items || []).map((function(x, i) {
-      return [ x, i ];
-    })).sort((function(p, q) {
-      var a = p[0].chg, b = q[0].chg;
-      a = a == null || a === '' || isNaN(Number(a)) ? null : Number(a);
-      b = b == null || b === '' || isNaN(Number(b)) ? null : Number(b);
-      if (a === null || b === null) {
-        if (a !== b) return a === null ? 1 : -1;
-        return p[1] - q[1];
-      }
-      return b - a || p[1] - q[1];
-    })).map((function(p) {
-      return p[0];
-    }));
+    var items = mjSortChg(d.items || []);
     var _chLive = Number(d.chg_live) || 0;
     f.appendChild(el('div', 'mut', '★ 주요종목 ' + items.length + '개 · ' + (_chLive ? '등락률 = 오늘 실시간 (' + (d.at || '') + ' 기준)' : '등락률 = 최종거래일 종가')));
     (d.errors || []).slice(0, 3).forEach((function(m) {
@@ -11753,7 +12041,7 @@ var FX = {
   cur: '',
   dirty: false,
   busy: false,
-  enabled: true,
+  running: false,
   updated_at: '',
   last_done_at: '',
   images: {},
@@ -11814,14 +12102,14 @@ function fxTabsPaint() {
     return;
   }
   var sig = FX.tab + '|' + JSON.stringify(FX.tabs.map((function(t) {
-    return [ t.id, t.name, !!t.enabled, t.lines || 0 ];
+    return [ t.id, t.name, t.lines || 0 ];
   })));
   if (box._sig === sig) return;
   box._sig = sig;
   box.textContent = '';
   box.style.display = '';
   FX.tabs.forEach((function(t) {
-    var b = el('button', 'fxtab' + (t.id === FX.tab ? ' on' : ''), t.name + (t.lines > 0 ? t.enabled ? ' ●' : ' ○' : ''));
+    var b = el('button', 'fxtab' + (t.id === FX.tab ? ' on' : ''), t.name + (t.lines > 0 ? ' ●' : ''));
     b.setAttribute('data-tab', t.id);
     b.onclick = function() {
       fxTabGo(t.id);
@@ -11903,7 +12191,6 @@ function fxStatus(msg) {
     t = '불러오는 중…';
   } else {
     t = FX.updated_at ? '마지막 저장 ' + fxWhen(FX.updated_at) : '아직 적은 것이 없습니다';
-    if (FX.last_done_at) t += ' · 새벽 작업이 마지막으로 읽은 때 ' + fxWhen(FX.last_done_at);
     if (FX.note) t += ' · ' + FX.note;
   }
   if (st.textContent !== t) st.textContent = t;
@@ -11933,86 +12220,40 @@ function fxSetDirty() {
   }
 }
 
-var SCH_URL = '/api/nightly_schedule', SCH_AR_URL = '/api/fix_after_reset';
+var FX_RUN_URL = '/api/fix_notes/run';
 
-var SCH = {
-  known: false,
-  time: '',
-  nextRun: null,
-  taskOk: true,
-  armed: false,
-  runAt: null,
-  busy: false,
-  loadedAt: 0
-};
-
-function fxTimeWords(t) {
-  var p = String(t || '').split(':'), h = +p[0], m = +p[1];
-  if (!(h >= 0 && h <= 23) || !(m >= 0 && m <= 59)) return String(t || '');
-  var part = h < 6 ? '새벽' : h < 12 ? '오전' : h < 18 ? '오후' : '밤';
-  var hh = h < 6 ? h === 0 ? 12 : h : h % 12 === 0 ? 12 : h % 12;
-  return part + ' ' + hh + '시' + (m ? ' ' + m + '분' : '');
+function fxSwitch() {
+  var box = fxEl('fx-sw');
+  if (!box) return;
+  box.textContent = '';
+  var row = el('div', 'fxrun');
+  var b = el('button', 'btn p', FX.running ? '⏳ 여는 중…' : '▶ 실행');
+  b.id = 'fx-run';
+  b.disabled = !!FX.running || !!FX.busy || !FX.loaded;
+  b.onclick = fxRun;
+  row.appendChild(b);
+  row.appendChild(infoLine('why', fxIsStock() ? '저장된 글로 컴퓨터에 Claude 창을 열어 바로 고칩니다' : '[' + fxTabName() + '] 폴더에서 Claude 창을 열어 바로 고칩니다', '누르면 컴퓨터에 Claude 창이 열려(주식 아이콘과 같은 설정) 이 탭 글을 처리합니다. 배포까지 끝난 줄만 지우고, 못 한 줄·질문 남은 줄·그 사이 새로 쓴 줄은 그대로 둡니다. 이미 수정 창이 열려 있으면 새로 열지 않습니다.'));
+  box.appendChild(row);
 }
 
-function fxTimeTo(t) {
-  var w = fxTimeWords(t);
-  return w + (/분$/.test(w) ? '으로' : '로');
-}
-
-function fxRunAt(s) {
-  if (!s) return '';
-  var d = new Date(String(s).replace(' ', 'T'));
-  if (isNaN(d.getTime())) return String(s);
-  return d.getMonth() + 1 + '/' + d.getDate() + '(' + '일월화수목금토'.charAt(d.getDay()) + ') ' + ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
-}
-
-function schApply(j) {
-  if (!j || !j.ok) return false;
-  SCH.known = true;
-  if (j.time) SCH.time = j.time;
-  SCH.nextRun = j.next_run || null;
-  SCH.taskOk = j.task_ok !== false;
-  var ar = j.after_reset || {};
-  SCH.armed = !!ar.armed;
-  SCH.runAt = ar.run_at || null;
-  return true;
-}
-
-function schLoad(force) {
-  if (SCH.busy) return Promise.resolve(false);
-  if (!force && Date.now() - SCH.loadedAt < 3e4) return Promise.resolve(false);
-  SCH.loadedAt = Date.now();
-  return fetch(SCH_URL, {
-    headers: {
-      Accept: 'application/json'
-    },
-    cache: 'no-store'
-  }).then((function(r) {
-    if (r.status === 404) {
-      SCH.known = false;
-      return null;
-    }
-    return r.ok ? r.json().catch((function() {
-      return null;
-    })) : null;
-  })).then((function(j) {
-    if (SCH.busy || TAB !== 'fixnotes') return false;
-    if (j) schApply(j);
-    fxSwitch();
-    return true;
-  })).catch((function() {
-    return false;
-  }));
-}
-
-function schPost(url, body, busyMsg, okMsg) {
-  if (SCH.busy || FX.busy) {
-    fxSwitch();
+function fxRun() {
+  if (FX.busy || FX.running) return;
+  if (fxNotLoaded('실행해 주세요')) return;
+  if (FX.dirty) {
+    toast('📝 먼저 💾 저장해 주세요 — 실행은 저장된 글로 합니다', 2800, true);
     return;
   }
-  SCH.busy = true;
-  fxStatus(busyMsg);
-  fetch(url, {
+  if (!fxIsStock() && !FX.tabsKnown) {
+    say('컴퓨터 서버가 탭을 몰라 실행하지 않았습니다 — 서버를 다시 켠 뒤 눌러 주세요');
+    return;
+  }
+  FX.running = true;
+  fxSwitch();
+  fxStatus('▶ 컴퓨터에 Claude 창을 여는 중…');
+  var body = FX.tabsKnown ? {
+    tab: FX.tab
+  } : {};
+  fetch(FX_RUN_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -12029,129 +12270,34 @@ function schPost(url, body, busyMsg, okMsg) {
       };
     }));
   })).then((function(x) {
-    SCH.busy = false;
-    if (!x.r.ok || !x.j.ok) {
-      fxSwitch();
-      fxStatus();
-      say('바꾸지 못했습니다 — ' + (x.j.error || x.j.msg || 'HTTP ' + x.r.status));
+    FX.running = false;
+    fxSwitch();
+    fxStatus();
+    var j = x.j;
+    if (fxTabGone(x.r, j, body.tab || 'stock')) return;
+    if (j.running) {
+      toast('⏳ 이미 컴퓨터에 수정 창이 열려 있습니다' + (j.name ? ' ([' + j.name + '] 탭)' : '') + ' — 새로 열지 않았습니다. 그 창을 닫으면 다시 열 수 있습니다', 4200, true);
       return;
     }
-    schApply(x.j);
-    okMsg(x.j);
-    fxSwitch();
-    fxStatus();
+    if (j.empty) {
+      toast('적힌 글이 없어 실행하지 않았습니다', 2600, true);
+      return;
+    }
+    if (x.r.status === 404) {
+      say('컴퓨터 서버가 아직 «실행» 을 모릅니다 — 서버를 다시 켠 뒤 눌러 주세요');
+      return;
+    }
+    if (!x.r.ok || !j.ok) {
+      say('실행하지 못했습니다 — ' + (j.msg || j.error || 'HTTP ' + x.r.status));
+      return;
+    }
+    toast(j.verify_skip ? '▶ (검증) 실행 요청을 보냈습니다' : '▶ 컴퓨터에 Claude 창을 열었습니다 — [' + (j.name || fxTabName()) + '] 탭 글을 처리합니다', 3200, true);
   })).catch((function(e) {
-    SCH.busy = false;
+    FX.running = false;
     fxSwitch();
     fxStatus();
-    say('바꾸지 못했습니다 — ' + (e && e.message || e));
+    say('실행하지 못했습니다 — ' + (e && e.message || e));
   }));
-}
-
-function fxResync() {
-  fetch(fxUrl(), {
-    headers: {
-      Accept: 'application/json'
-    },
-    cache: 'no-store'
-  }).then((function(r) {
-    return r.ok ? r.json() : null;
-  })).then((function(d) {
-    if (!d || TAB !== 'fixnotes' || fxStale(d)) return;
-    if (!FX.dirty) {
-      fxApply(d);
-      fxThumbs();
-    } else {
-      FX.enabled = d.enabled !== false;
-      if (String(d.text || '') === FX.baseText && d.rev !== undefined && d.rev !== null) FX.rev = d.rev;
-    }
-    fxSwitch();
-    fxStatus();
-  })).catch((function() {}));
-}
-
-function schSetArmed(on) {
-  schPost(SCH_AR_URL, {
-    on: !!on
-  }, on ? '⏳ 리셋 뒤 자동 시작을 켜는 중…' : '⏳ 리셋 뒤 자동 시작을 끄는 중…', (function(j) {
-    if (on) {
-      if (!j.note) FX.enabled = false;
-      toast('⏳ 다음 주간 한도 리셋 뒤 ' + fxRunAt((j.after_reset || {}).run_at) + ' 에 자동으로 시작합니다 — 그 전까지는 수정을 안 합니다' + (j.note ? '' : ' ([자동수정 활성화] 는 껐습니다)'), 3600, true);
-      if (j.note) say('⏳ ' + j.note);
-      fxResync();
-    } else {
-      toast('⏳ 주간 한도 리셋 뒤 자동 시작을 껐습니다', 2600, true);
-    }
-  }));
-}
-
-function schSetTime(want) {
-  if (!/^\d{1,2}:\d{2}$/.test(want || '') || want === SCH.time) {
-    fxSwitch();
-    return;
-  }
-  schPost(SCH_URL, {
-    time: want
-  }, '⏰ 새벽 작업 시각을 바꾸는 중…', (function(j) {
-    toast('⏰ 새벽 작업 시각을 ' + fxTimeTo(j.time) + ' 바꿨습니다' + (j.next_run ? ' — 다음 실행 ' + fxRunAt(j.next_run) : ''), 3200, true);
-  }));
-}
-
-function fxSwitch() {
-  var box = fxEl('fx-sw');
-  if (!box) return;
-  var ti = fxEl('fx-time');
-  if (ti && document.activeElement === ti) return;
-  box.textContent = '';
-  var when = SCH.known && SCH.time ? fxTimeWords(SCH.time) : '';
-  var enWhy = '켜 두면 ' + (when ? when + '에' : '새벽 작업이') + ' 이 글부터 처리합니다(코드리뷰는 따로 켜 둔 밤에만 그 뒤에 합니다). ' + '꺼 두면 글은 그대로 두고 그 밤만 건너뜁니다. 컴퓨터 메인 «📝 수정사항 모음» 과 같은 글입니다.';
-  var enShort = '켜면 ' + (when ? when + '에' : '새벽 작업이') + ' 이 글부터 처리';
-  if (!fxIsStock()) {
-    enShort = '켜면 ' + (when ? when + '에' : '새벽 작업이') + ' [' + fxTabName() + '] 폴더에서 처리';
-    enWhy = '켜 두면 ' + (when ? when + '에' : '새벽 작업이') + ' [' + fxTabName() + '] 폴더에서 Claude 를 켜서 이 글을 처리합니다(그 폴더의 규칙을 따릅니다). ' + '꺼 두면 글은 그대로 두고 그 밤만 건너뜁니다. 컴퓨터 «📝 수정사항 모음» 의 같은 탭과 같은 글입니다.';
-  }
-  if (fxIsStock() && SCH.known && SCH.armed && !FX.enabled) {
-    enWhy = '⏳ 주간 한도 리셋 뒤 자동 시작 대기 — ' + fxRunAt(SCH.runAt) + ' 에 시작합니다. 그 전까지 새벽 작업은 수정사항을 안 합니다. ' + enWhy;
-    enShort = '⏳ 리셋 뒤 자동 시작 대기 — ' + fxRunAt(SCH.runAt) + ' 시작';
-  }
-  var en = switchRow('📝 자동수정 활성화', !!FX.enabled, '켬', '끔', (function() {
-    fxSetEnabled(true);
-  }), (function() {
-    fxSetEnabled(false);
-  }), false, [ enShort, enWhy ], true);
-  en.setAttribute('data-fx', 'enabled');
-  box.appendChild(en);
-  if (!SCH.known) return;
-  if (fxIsStock()) {
-    var ar = switchRow('⏳ 주간 한도 리셋 뒤 자동 시작', !!SCH.armed, '켬', '끔', (function() {
-      schSetArmed(true);
-    }), (function() {
-      schSetArmed(false);
-    }), false, SCH.armed ? [ '켜짐 — ' + fxRunAt(SCH.runAt) + ' 시작', '켜짐 — ' + fxRunAt(SCH.runAt) + ' 에 주간 한도가 풀린 것을 확인하고 수정사항을 시작합니다. 그 전까지 새벽 작업은 수정사항을 안 합니다. ' + '시작하면 [자동수정 활성화] 로 넘어가 남은 것을 이어서 합니다.' ] : [ '켜면 다음 한도 리셋 직후 자동 시작', '켜면 다음 주간 한도 리셋 시각을 찾아 그 직후에 수정사항을 자동으로 시작합니다. [자동수정 활성화] 와 함께 켤 수 없습니다(켜면 그쪽이 꺼집니다).' ], true);
-    ar.setAttribute('data-fx', 'after_reset');
-    box.appendChild(ar);
-  }
-  var tw = el('div', 'topsw');
-  tw.setAttribute('data-fx', 'time');
-  var top = el('div', 'top');
-  top.appendChild(el('span', 'lb', '⏰ 새벽 작업 시각'));
-  var inp = document.createElement('input');
-  inp.type = 'time';
-  inp.id = 'fx-time';
-  inp.className = 'fxtime';
-  inp.value = SCH.time || '';
-  inp.disabled = !!SCH.busy;
-  inp.addEventListener('change', (function() {
-    var v = inp.value;
-    inp.blur();
-    schSetTime(v);
-  }));
-  top.appendChild(inp);
-  tw.appendChild(top);
-  var twLn = infoLine('why', '지금 ' + fxTimeWords(SCH.time) + (SCH.nextRun ? ' · 다음 실행 ' + fxRunAt(SCH.nextRun) : ''), '코드리뷰도 이 시각에 수정사항 다음으로 합니다. 바꾸면 컴퓨터의 윈도우 예약 시각도 같이 바뀝니다.');
-  if (!SCH.taskOk) twLn.appendChild(document.createTextNode(' ⚠ 윈도우 예약을 못 읽었습니다'));
-  tw.appendChild(twLn);
-  box.appendChild(tw);
 }
 
 var _fxThumbT = 0;
@@ -12209,7 +12355,6 @@ function fxApply(d, force) {
   FX.last_done_at = d.last_done_at || '';
   if (FX.dirty && !force) return false;
   FX.rev = FX.hasRev ? d.rev : null;
-  FX.enabled = d.enabled !== false;
   FX.updated_at = d.updated_at || '';
   FX.baseText = FX.cur = String(d.text || '');
   FX.dirty = false;
@@ -12256,7 +12401,6 @@ function fxLoad() {
 
 function fxPoll() {
   if (TAB !== 'fixnotes' || FX.busy) return;
-  schLoad();
   if (!FX.loaded) {
     fxLoad();
     return;
@@ -12280,7 +12424,7 @@ function fxPoll() {
   })).then((function(d) {
     if (d && Array.isArray(d.tabs) && TAB === 'fixnotes') fxTabsApply(d);
     if (!d || TAB !== 'fixnotes' || FX.dirty || document.activeElement === ta || fxStale(d)) return;
-    var changed = FX.hasRev ? d.rev !== FX.rev : String(d.text || '') !== FX.baseText || d.enabled !== false !== FX.enabled;
+    var changed = FX.hasRev ? d.rev !== FX.rev : String(d.text || '') !== FX.baseText;
     if (!changed) return;
     fxApply(d);
     FX.note = '다른 곳에서 바뀐 글을 불러왔습니다';
@@ -12359,14 +12503,10 @@ function fxSave() {
     FX.note = '';
     FX.cur = ta.value;
     FX.dirty = FX.cur !== FX.baseText;
-    var autoOff = !!j.auto_off;
-    if (autoOff) {
-      FX.enabled = false;
-      fxSwitch();
-    }
+    fxSwitch();
     fxPicShow();
     fxStatus();
-    toast(autoOff ? '💾 저장했습니다 — 적은 것이 없어 자동수정 활성화도 껐습니다' : '💾 저장했습니다 — 컴퓨터 «수정사항 모음» 에도 같은 글입니다', autoOff ? 3600 : 2600, true);
+    toast('💾 저장했습니다 — 컴퓨터 «수정사항 모음» 에도 같은 글입니다', 2600, true);
   })).catch((function(e) {
     FX.busy = false;
     fxStatus();
@@ -12379,7 +12519,6 @@ function fxConflict(cur) {
     FX.dirty = false;
     fxApply({
       text: cur.text,
-      enabled: cur.enabled,
       rev: cur.rev,
       updated_at: cur.updated_at,
       last_done_at: cur.last_done_at || FX.last_done_at,
@@ -12402,52 +12541,6 @@ function fxConflict(cur) {
   }, true, {
     sub: '다른 곳에서 고친 글은 없어지고 지금 쓰던 글이 남습니다'
   } ] ]);
-}
-
-function fxSetEnabled(on) {
-  if (FX.busy || SCH.busy) return;
-  FX.busy = true;
-  fxStatus(on ? '자동수정 활성화를 켜는 중…' : '자동수정 활성화를 끄는 중…');
-  fxPost({
-    enabled: !!on
-  }).then((function(x) {
-    FX.busy = false;
-    if (!x.r.ok || x.j.ok === false) {
-      fxStatus();
-      say('바꾸지 못했습니다 — ' + (x.j.msg || x.j.error || 'HTTP ' + x.r.status));
-      return;
-    }
-    FX.enabled = !!on;
-    var arNote = x.j.after_reset_note || '';
-    if (arNote) {
-      SCH.armed = false;
-      FX.note = '⏳ ' + arNote;
-      schLoad(true);
-    }
-    fxSwitch();
-    fxStatus();
-    toast(on ? '📝 자동수정 활성화 켰습니다 — ' + (SCH.known && SCH.time ? fxTimeWords(SCH.time) + '에' : '새벽 작업 때') + ' 이 글부터 합니다' + (arNote ? ' · ⏳ ' + arNote : '') : '📝 자동수정 활성화 껐습니다 — 그 밤은 건너뜁니다', arNote ? 4200 : 2600, true);
-    fetch(fxUrl(), {
-      headers: {
-        Accept: 'application/json'
-      },
-      cache: 'no-store'
-    }).then((function(r) {
-      return r.ok ? r.json() : null;
-    })).then((function(d) {
-      if (!d || TAB !== 'fixnotes' || fxStale(d)) return;
-      if (Array.isArray(d.tabs)) fxTabsApply(d);
-      if (!FX.dirty) {
-        fxApply(d);
-        fxThumbs();
-        fxStatus();
-      } else if (String(d.text || '') === FX.baseText && d.rev !== undefined && d.rev !== null) FX.rev = d.rev;
-    })).catch((function() {}));
-  })).catch((function(e) {
-    FX.busy = false;
-    fxStatus();
-    say('바꾸지 못했습니다 — ' + (e && e.message || e));
-  }));
 }
 
 function fxLeaveAsk(cb) {
@@ -12641,7 +12734,6 @@ function renderFix(first) {
   fxThumbs();
   fxStatus();
   fxLoad();
-  schLoad(true);
 }
 
 var BOT = {
